@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/chrislyonsKY/abovepy/main/assets/banner.png" alt="abovepy banner" width="100%">
-</p>
 
 <p align="center">
   <a href="https://pypi.org/project/abovepy/"><img src="https://img.shields.io/pypi/v/abovepy?color=8B5CF6&style=flat-square" alt="PyPI version"></a>
