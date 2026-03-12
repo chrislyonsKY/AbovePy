@@ -1,0 +1,78 @@
+/* abovepy docs — custom styles */
+
+:root {
+  --md-primary-fg-color: #7c3aed;
+  --md-primary-fg-color--light: #a78bfa;
+  --md-primary-fg-color--dark: #5b21b6;
+  --md-accent-fg-color: #8b5cf6;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #a78bfa;
+  --md-primary-fg-color--light: #c4b5fd;
+  --md-primary-fg-color--dark: #7c3aed;
+  --md-accent-fg-color: #a78bfa;
+}
+
+/* Hero section on landing page */
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 0 1rem;
+}
+
+.md-typeset .hero h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.md-typeset .hero p {
+  font-size: 1.15rem;
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Badges row */
+.md-typeset .badges {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.md-typeset .badges a {
+  margin: 0 0.15rem;
+}
+
+/* Feature grid */
+.md-typeset .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.md-typeset .grid .card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.4rem;
+  padding: 1.2rem;
+  transition: box-shadow 0.2s;
+}
+
+.md-typeset .grid .card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.md-typeset .grid .card h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+/* CTA buttons */
+.md-typeset .cta {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.md-typeset .cta .md-button {
+  margin: 0.3rem;
+}

@@ -1,0 +1,81 @@
+site_name: abovepy
+site_description: KyFromAbove LiDAR, DEM, and orthoimagery access for Python
+site_author: Chris Lyons
+site_url: https://chrislyonsKY.github.io/abovepy/
+repo_url: https://github.com/chrislyonsKY/abovepy
+repo_name: chrislyonsKY/abovepy
+
+theme:
+  name: material
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.instant
+    - navigation.sections
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: false
+            docstring_style: numpy
+            show_root_heading: true
+            show_root_full_path: false
+            heading_level: 3
+            members_order: source
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Tutorials:
+    - DEM + Hillshade: tutorials/dem-hillshade.md
+    - LiDAR Access: tutorials/lidar-access.md
+    - Web Maps (TiTiler): tutorials/titiler-maps.md
+    - ArcGIS Pro Toolbox: tutorials/arcgis-pro.md
+  - KyFromAbove Collections: stac-collections.md
+  - Architecture: architecture.md
+  - API Reference: api/reference.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
