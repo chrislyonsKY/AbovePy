@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  titiler:
+    image: ghcr.io/developmentseed/titiler:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKERS_PER_CORE=1
+      - MAX_WORKERS=2
