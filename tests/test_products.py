@@ -1,11 +1,12 @@
 """Tests for the product registry."""
 import pytest
-from abovepy.products import get_product, list_products, ProductType, PRODUCTS
+
+from abovepy.products import PRODUCTS, ProductType, get_product, list_products
 
 
 def test_all_products_have_collection_ids():
     for key, prod in PRODUCTS.items():
-        assert prod.collection_id, "Product {} missing collection_id".format(key)
+        assert prod.collection_id, f"Product {key} missing collection_id"
 
 
 def test_nine_products_total():

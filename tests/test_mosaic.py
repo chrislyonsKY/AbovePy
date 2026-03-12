@@ -14,7 +14,6 @@ def test_resolve_paths_from_list():
 
 def test_resolve_paths_from_geodataframe():
     import geopandas as gpd
-    import pandas as pd
     from shapely.geometry import Point
 
     gdf = gpd.GeoDataFrame(

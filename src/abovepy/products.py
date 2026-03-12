@@ -166,7 +166,7 @@ def get_product(key: str) -> Product:
     """
     if key not in PRODUCTS:
         valid = ", ".join(sorted(VALID_PRODUCTS))
-        raise ValueError("Unknown product '{}'. Valid products: {}".format(key, valid))
+        raise ValueError(f"Unknown product '{key}'. Valid products: {valid}")
     return PRODUCTS[key]
 
 

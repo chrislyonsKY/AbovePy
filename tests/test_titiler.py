@@ -1,6 +1,6 @@
 """Tests for TiTiler URL helpers."""
 
-from abovepy.titiler import cog_tile_url, cog_preview_url, cog_stats_url
+from abovepy.titiler import cog_preview_url, cog_stats_url, cog_tile_url
 
 
 def test_cog_tile_url_default_endpoint():

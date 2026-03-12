@@ -1,6 +1,5 @@
 """Tests for the KyFromAboveClient class."""
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -60,5 +59,5 @@ class TestClientInfo:
         client = KyFromAboveClient()
         # This would fail since it's not a real URL, but it should
         # attempt inspect_cog rather than raising ValueError
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             client.info("https://not-a-real-url.tif")

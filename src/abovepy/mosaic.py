@@ -117,7 +117,7 @@ def _build_vrt(
 
     vrt_ds = gdal.BuildVRT(str(output), str_paths, options=vrt_options)
     if vrt_ds is None:
-        raise RuntimeError("GDAL BuildVRT failed for {}".format(output))
+        raise RuntimeError(f"GDAL BuildVRT failed for {output}")
     vrt_ds.FlushCache()
     vrt_ds = None  # Close dataset
 
@@ -178,7 +178,7 @@ def _merge_tiles(
         )
 
         if crs is not None:
-            from rasterio.warp import calculate_default_transform, reproject, Resampling
+            from rasterio.warp import Resampling, calculate_default_transform, reproject
 
             dst_crs = rasterio.crs.CRS.from_user_input(crs)
             dst_transform, dst_width, dst_height = calculate_default_transform(

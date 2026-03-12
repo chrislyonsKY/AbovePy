@@ -148,7 +148,7 @@ def _search_with_retry(
                 )
 
     raise RuntimeError(
-        "STAC search failed after {} attempts: {}".format(MAX_RETRIES, last_error)
+        f"STAC search failed after {MAX_RETRIES} attempts: {last_error}"
     )
 
 

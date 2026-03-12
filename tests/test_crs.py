@@ -1,6 +1,5 @@
 """Tests for CRS conversion utilities."""
 
-import pytest
 from abovepy.utils.crs import transform_bbox
 
 
@@ -21,7 +20,7 @@ def test_transform_bbox_roundtrip():
     intermediate = transform_bbox(original, "EPSG:4326", "EPSG:3089")
     result = transform_bbox(intermediate, "EPSG:3089", "EPSG:4326")
 
-    for orig, res in zip(original, result):
+    for orig, res in zip(original, result, strict=True):
         assert abs(orig - res) < 0.001
 
 
@@ -29,5 +28,5 @@ def test_transform_bbox_identity():
     """Same CRS -> same coords."""
     bbox = (-84.9, 38.15, -84.8, 38.25)
     result = transform_bbox(bbox, "EPSG:4326", "EPSG:4326")
-    for orig, res in zip(bbox, result):
+    for orig, res in zip(bbox, result, strict=True):
         assert abs(orig - res) < 1e-8

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     import geopandas as gpd
     import numpy as np
 
-from abovepy._constants import DEFAULT_INPUT_CRS, NATIVE_CRS, STAC_URL
+from abovepy._constants import DEFAULT_INPUT_CRS, STAC_URL
 from abovepy.products import PRODUCTS, VALID_PRODUCTS, get_product
 
 logger = logging.getLogger(__name__)
@@ -88,13 +88,12 @@ class KyFromAboveClient:
         geopandas.GeoDataFrame
             Tile index with metadata and asset URLs.
         """
-        from abovepy.stac import search_stac, items_to_geodataframe
+        from abovepy.stac import items_to_geodataframe, search_stac
         from abovepy.utils.bbox import get_county_bbox, validate_bbox
 
         # Resolve bbox from county or validate provided bbox
         if county is not None:
             bbox = get_county_bbox(county)
-            crs = DEFAULT_INPUT_CRS  # county bboxes are always 4326
             logger.info("Using bbox for %s County: %s", county, bbox)
         elif bbox is not None:
             validate_bbox(bbox)

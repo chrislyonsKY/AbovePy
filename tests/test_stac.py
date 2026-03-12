@@ -7,8 +7,8 @@ import pytest
 from abovepy.stac import (
     _extract_primary_asset_url,
     _search_with_retry,
-    items_to_geodataframe,
     clear_cache,
+    items_to_geodataframe,
 )
 
 

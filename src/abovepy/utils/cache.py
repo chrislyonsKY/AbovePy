@@ -85,10 +85,10 @@ class TTLCache:
     def _evict(self, key: str) -> None:
         """Remove a single entry."""
         self._cache.pop(key, None)
-        try:
+        import contextlib
+
+        with contextlib.suppress(ValueError):
             self._order.remove(key)
-        except ValueError:
-            pass
 
     def clear(self) -> None:
         """Clear all cached entries."""
@@ -125,7 +125,7 @@ def make_cache_key(
     """
     raw = "{}|{}|{}|{}".format(
         collection_id,
-        ",".join("{:.6f}".format(v) for v in bbox),
+        ",".join(f"{v:.6f}" for v in bbox),
         datetime or "",
         max_items,
     )

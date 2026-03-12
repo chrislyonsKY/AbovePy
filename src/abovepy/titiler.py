@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from urllib.parse import quote_plus
 
-
 DEFAULT_TITILER_ENDPOINT = "https://titiler.xyz"
 
 
@@ -31,7 +30,7 @@ def cog_tile_url(
         TileJSON URL for use with MapLibre/Leaflet.
     """
     encoded = quote_plus(cog_url)
-    return "{}/cog/tilejson.json?url={}".format(titiler_endpoint, encoded)
+    return f"{titiler_endpoint}/cog/tilejson.json?url={encoded}"
 
 
 def cog_preview_url(
@@ -56,9 +55,7 @@ def cog_preview_url(
         Preview PNG URL.
     """
     encoded = quote_plus(cog_url)
-    return "{}/cog/preview.png?url={}&max_size={}".format(
-        titiler_endpoint, encoded, max_size
-    )
+    return f"{titiler_endpoint}/cog/preview.png?url={encoded}&max_size={max_size}"
 
 
 def cog_stats_url(
@@ -80,4 +77,4 @@ def cog_stats_url(
         Statistics JSON URL.
     """
     encoded = quote_plus(cog_url)
-    return "{}/cog/statistics?url={}".format(titiler_endpoint, encoded)
+    return f"{titiler_endpoint}/cog/statistics?url={encoded}"

@@ -1,6 +1,6 @@
 """Tests for COG read operations."""
 
-from abovepy.io.cog import _to_vsi_path, _reproject_bbox
+from abovepy.io.cog import _reproject_bbox, _to_vsi_path
 
 
 class TestToVsiPath:
@@ -35,5 +35,5 @@ class TestReprojectBbox:
     def test_identity_transform(self):
         bbox = (-84.9, 38.15, -84.8, 38.25)
         result = _reproject_bbox(bbox, "EPSG:4326", "EPSG:4326")
-        for orig, res in zip(bbox, result):
+        for orig, res in zip(bbox, result, strict=True):
             assert abs(orig - res) < 1e-6

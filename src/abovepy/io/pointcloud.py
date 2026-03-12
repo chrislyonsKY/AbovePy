@@ -48,8 +48,8 @@ def read_pointcloud(
     """
     try:
         import laspy
-    except ImportError:
-        raise ImportError(_INSTALL_MSG)
+    except ImportError as err:
+        raise ImportError(_INSTALL_MSG) from err
 
     source_str = str(source)
 
@@ -81,7 +81,7 @@ def read_pointcloud(
         "path": str(source),
         "point_count": len(las.points),
         "point_format": las.header.point_format.id,
-        "version": "{}.{}".format(las.header.version.major, las.header.version.minor),
+        "version": f"{las.header.version.major}.{las.header.version.minor}",
         "scales": tuple(las.header.scales),
         "offsets": tuple(las.header.offsets),
         "mins": (las.header.x_min, las.header.y_min, las.header.z_min),
@@ -111,8 +111,8 @@ def inspect_pointcloud(source: str | Path) -> dict:
     """
     try:
         import laspy
-    except ImportError:
-        raise ImportError(_INSTALL_MSG)
+    except ImportError as err:
+        raise ImportError(_INSTALL_MSG) from err
 
     with laspy.open(str(source)) as reader:
         header = reader.header
@@ -120,7 +120,7 @@ def inspect_pointcloud(source: str | Path) -> dict:
             "path": str(source),
             "point_count": header.point_count,
             "point_format": header.point_format.id,
-            "version": "{}.{}".format(header.version.major, header.version.minor),
+            "version": f"{header.version.major}.{header.version.minor}",
             "scales": tuple(header.scales),
             "offsets": tuple(header.offsets),
             "mins": (header.x_min, header.y_min, header.z_min),
@@ -142,7 +142,6 @@ def _read_remote(url: str):
     laspy.LasData
     """
     import io
-    import tempfile
 
     import httpx
     import laspy
@@ -153,7 +152,7 @@ def _read_remote(url: str):
         # Convert to HTTPS for public bucket
         parts = url.replace("s3://", "").split("/", 1)
         bucket, key = parts[0], parts[1]
-        url = "https://{}.s3.amazonaws.com/{}".format(bucket, key)
+        url = f"https://{bucket}.s3.amazonaws.com/{key}"
 
     logger.info("Downloading point cloud: %s", url)
     with httpx.Client(timeout=DOWNLOAD_TIMEOUT) as client:

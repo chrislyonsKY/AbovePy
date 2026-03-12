@@ -164,7 +164,7 @@ def get_county_bbox(county: str) -> tuple[float, float, float, float]:
         if len(matches) == 1:
             return KY_COUNTIES[matches[0]]
         raise ValueError(
-            "Unknown county '{}'. Use list_counties() to see valid names.".format(county)
+            f"Unknown county '{county}'. Use list_counties() to see valid names."
         )
     return KY_COUNTIES[normalized]
 
@@ -197,6 +197,6 @@ def validate_bbox(bbox: tuple[float, float, float, float]) -> None:
         raise ValueError("Bbox must have 4 elements: (xmin, ymin, xmax, ymax)")
     xmin, ymin, xmax, ymax = bbox
     if xmin >= xmax:
-        raise ValueError("xmin ({}) must be less than xmax ({})".format(xmin, xmax))
+        raise ValueError(f"xmin ({xmin}) must be less than xmax ({xmax})")
     if ymin >= ymax:
-        raise ValueError("ymin ({}) must be less than ymax ({})".format(ymin, ymax))
+        raise ValueError(f"ymin ({ymin}) must be less than ymax ({ymax})")
