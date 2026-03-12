@@ -1,18 +1,5 @@
 /* abovepy docs — custom styles */
-
-:root {
-  --md-primary-fg-color: #7c3aed;
-  --md-primary-fg-color--light: #a78bfa;
-  --md-primary-fg-color--dark: #5b21b6;
-  --md-accent-fg-color: #8b5cf6;
-}
-
-[data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #a78bfa;
-  --md-primary-fg-color--light: #c4b5fd;
-  --md-primary-fg-color--dark: #7c3aed;
-  --md-accent-fg-color: #a78bfa;
-}
+/* Only layout helpers — colors come from Material's built-in deep purple palette */
 
 /* Hero section on landing page */
 .md-typeset .hero {
