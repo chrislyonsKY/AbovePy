@@ -40,6 +40,7 @@ from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.products import Product, ProductType, list_products
 from abovepy.stac import clear_cache
+from abovepy.utils.bbox import list_counties
 
 if TYPE_CHECKING:
     import geopandas as gpd
@@ -206,6 +207,7 @@ __all__ = [
     "clear_cache",
     "download",
     "info",
+    "list_counties",
     "list_products",
     "mosaic",
     "read",
