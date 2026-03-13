@@ -4,6 +4,28 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.0] — 2026-03-13
+
+### Added
+
+- Custom exception hierarchy: `AbovepyError`, `SearchError`, `DownloadError`, `ReadError`, `MosaicError`, `ProductError`, `CountyError`, `BboxError`
+- `py.typed` PEP 561 marker for typed package support
+- Integration tests against the live STAC API (gated by `@pytest.mark.integration`)
+- `mypy --strict` passes across all 17 source files
+- mypy type checking added to CI workflow
+- Full API reference docs: Client, Products, I/O, TiTiler, Utilities, Exceptions
+
+### Changed
+
+- Renamed internal modules `download.py` → `_download.py`, `mosaic.py` → `_mosaic.py` to fix import shadowing
+- All custom exceptions replace raw `ValueError`/`RuntimeError` raises throughout the codebase
+- `ProductError`, `CountyError`, `BboxError` inherit both `AbovepyError` and `ValueError` for backward compatibility
+- Development status upgraded from Alpha to Production/Stable
+
+### Fixed
+
+- `abovepy.download` and `abovepy.mosaic` were module objects instead of callable functions due to import shadowing
+
 ## [0.1.0] — 2026-03-12
 
 ### Added

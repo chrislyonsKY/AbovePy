@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from abovepy.mosaic import _resolve_paths
+from abovepy._mosaic import _resolve_paths
 
 
 def test_resolve_paths_from_list():
@@ -53,6 +53,8 @@ def test_resolve_paths_empty_list():
 
 
 def test_mosaic_tiles_empty_raises():
-    from abovepy.mosaic import mosaic_tiles
-    with pytest.raises(ValueError, match="No tile paths"):
+    from abovepy._exceptions import MosaicError
+    from abovepy._mosaic import mosaic_tiles
+
+    with pytest.raises(MosaicError, match="No tile paths"):
         mosaic_tiles([])

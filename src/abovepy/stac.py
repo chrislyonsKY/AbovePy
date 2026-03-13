@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import geopandas as gpd
@@ -50,7 +50,7 @@ def search_stac(
     bbox: tuple[float, float, float, float],
     datetime: str | None = None,
     max_items: int = 500,
-) -> list:
+) -> list[Any]:
     """Query the KyFromAbove STAC API for matching items.
 
     Includes automatic retry with exponential backoff for transient
@@ -79,7 +79,7 @@ def search_stac(
     cached = _stac_cache.get(cache_key)
     if cached is not None:
         logger.debug("STAC cache hit for %s (%d items)", collection_id, len(cached))
-        return cached
+        return list(cached)
 
     items = _search_with_retry(
         client, collection_id, bbox, datetime, max_items
@@ -96,7 +96,7 @@ def _search_with_retry(
     bbox: tuple[float, float, float, float],
     datetime: str | None,
     max_items: int,
-) -> list:
+) -> list[Any]:
     """Execute a STAC search with retry on transient failures.
 
     Parameters
@@ -147,13 +147,15 @@ def _search_with_retry(
                     MAX_RETRIES, exc,
                 )
 
-    raise RuntimeError(
+    from abovepy._exceptions import SearchError
+
+    raise SearchError(
         f"STAC search failed after {MAX_RETRIES} attempts: {last_error}"
     )
 
 
 def items_to_geodataframe(
-    items: list,
+    items: list[Any],
     product_key: str,
 ) -> gpd.GeoDataFrame:
     """Convert STAC items to a GeoDataFrame with asset URLs.
@@ -198,7 +200,7 @@ def items_to_geodataframe(
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
 
 
-def _extract_primary_asset_url(item) -> str | None:
+def _extract_primary_asset_url(item: Any) -> str | None:
     """Extract the primary data asset URL from a STAC item.
 
     Looks for common asset keys in priority order:
@@ -219,13 +221,13 @@ def _extract_primary_asset_url(item) -> str | None:
     priority_keys = ["data", "default", "visual", "image"]
     for key in priority_keys:
         if key in item.assets:
-            return item.assets[key].href
+            return str(item.assets[key].href)
 
     for key, asset in item.assets.items():
         if "thumbnail" not in key.lower():
-            return asset.href
+            return str(asset.href)
 
-    return next(iter(item.assets.values())).href
+    return str(next(iter(item.assets.values())).href)
 
 
 def clear_cache() -> None:

@@ -21,10 +21,30 @@ Quick start:
     data, profile = abovepy.read(tiles.iloc[0].asset_url, bbox=(-84.85, 38.18, -84.82, 38.21))
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from abovepy._exceptions import (
+    AbovepyError,
+    BboxError,
+    CountyError,
+    DownloadError,
+    MosaicError,
+    ProductError,
+    ReadError,
+    SearchError,
+)
 from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.products import Product, ProductType, list_products
 from abovepy.stac import clear_cache
+
+if TYPE_CHECKING:
+    import geopandas as gpd
+    import numpy as np
+    import pandas as pd
 
 _default_client: KyFromAboveClient | None = None
 
@@ -44,7 +64,7 @@ def search(
     crs: str = "EPSG:4326",
     datetime: str | None = None,
     max_items: int = 500,
-):
+) -> gpd.GeoDataFrame:
     """Find KyFromAbove tiles intersecting an area of interest.
 
     Provide either ``bbox`` or ``county``, not both.
@@ -78,7 +98,11 @@ def search(
     )
 
 
-def download(tiles, output_dir, overwrite=False):
+def download(
+    tiles: gpd.GeoDataFrame,
+    output_dir: str | Path,
+    overwrite: bool = False,
+) -> list[Path]:
     """Download tiles to a local directory.
 
     Parameters
@@ -98,7 +122,11 @@ def download(tiles, output_dir, overwrite=False):
     return _get_client().download(tiles=tiles, output_dir=output_dir, overwrite=overwrite)
 
 
-def read(source, bbox=None, crs=None):
+def read(
+    source: str | Path,
+    bbox: tuple[float, float, float, float] | None = None,
+    crs: str | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
     """Read a tile or remote source, optionally windowed to a bbox.
 
     Parameters
@@ -118,7 +146,12 @@ def read(source, bbox=None, crs=None):
     return _get_client().read(source=source, bbox=bbox, crs=crs)
 
 
-def mosaic(tiles_or_paths, bbox=None, output=None, crs=None):
+def mosaic(
+    tiles_or_paths: Any,
+    bbox: tuple[float, float, float, float] | None = None,
+    output: str | Path | None = None,
+    crs: str | None = None,
+) -> Any:
     """Mosaic tiles into a single raster or VRT.
 
     Defaults to VRT (zero-copy) unless output has a .tif extension.
@@ -143,7 +176,7 @@ def mosaic(tiles_or_paths, bbox=None, output=None, crs=None):
     )
 
 
-def info(source=None):
+def info(source: str | None = None) -> pd.DataFrame | dict[str, Any]:
     """Inspect products or a specific remote tile.
 
     Parameters
@@ -159,10 +192,18 @@ def info(source=None):
 
 
 __all__ = [
-    "__version__",
+    "AbovepyError",
+    "BboxError",
+    "CountyError",
+    "DownloadError",
     "KyFromAboveClient",
+    "MosaicError",
     "Product",
+    "ProductError",
     "ProductType",
+    "ReadError",
+    "SearchError",
+    "__version__",
     "clear_cache",
     "download",
     "info",
