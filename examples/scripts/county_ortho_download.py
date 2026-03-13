@@ -16,8 +16,14 @@ import abovepy
 def main():
     parser = argparse.ArgumentParser(description="Download KyFromAbove orthoimagery by county")
     parser.add_argument("--county", required=True, help="Kentucky county name (e.g., Pike)")
-    parser.add_argument("--product", default="ortho_phase3", help="Product key (default: ortho_phase3)")
-    parser.add_argument("--output", default=None, help="Output directory (default: ./output/<county>_ortho)")
+    parser.add_argument(
+        "--product", default="ortho_phase3",
+        help="Product key (default: ortho_phase3)",
+    )
+    parser.add_argument(
+        "--output", default=None,
+        help="Output directory (default: ./output/<county>_ortho)",
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output) if args.output else Path(f"./output/{args.county.lower()}_ortho")

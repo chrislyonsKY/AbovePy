@@ -60,6 +60,7 @@ nav:
     - LiDAR Access: tutorials/lidar-access.md
     - Web Maps (TiTiler): tutorials/titiler-maps.md
     - ArcGIS Pro Toolbox: tutorials/arcgis-pro.md
+    - Troubleshooting: tutorials/troubleshooting.md
   - KyFromAbove Collections: stac-collections.md
   - Architecture: architecture.md
   - API Reference: api/reference.md
