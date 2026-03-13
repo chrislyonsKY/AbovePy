@@ -35,3 +35,34 @@ def transform_bbox(
     xmin, ymin = transformer.transform(bbox[0], bbox[1])
     xmax, ymax = transformer.transform(bbox[2], bbox[3])
     return (xmin, ymin, xmax, ymax)
+
+
+# Kentucky approximate extent in EPSG:4326
+_KY_BBOX = (-89.6, 36.49, -81.96, 39.15)
+
+
+def bbox_intersects_kentucky(
+    bbox: tuple[float, float, float, float],
+    crs: str = "EPSG:4326",
+) -> bool:
+    """Check if a bounding box intersects Kentucky's extent.
+
+    Parameters
+    ----------
+    bbox : tuple
+        (xmin, ymin, xmax, ymax).
+    crs : str
+        CRS of the bbox. Default "EPSG:4326".
+
+    Returns
+    -------
+    bool
+        True if the bbox overlaps Kentucky.
+    """
+    if crs != "EPSG:4326":
+        bbox = transform_bbox(bbox, crs, "EPSG:4326")
+
+    xmin, ymin, xmax, ymax = bbox
+    ky_xmin, ky_ymin, ky_xmax, ky_ymax = _KY_BBOX
+
+    return not (xmin > ky_xmax or xmax < ky_xmin or ymin > ky_ymax or ymax < ky_ymin)

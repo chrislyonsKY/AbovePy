@@ -40,10 +40,10 @@ from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.products import Product, ProductType, list_products
 from abovepy.stac import clear_cache
+from abovepy.utils.bbox import list_counties
 
 if TYPE_CHECKING:
     import geopandas as gpd
-    import numpy as np
     import pandas as pd
 
 _default_client: KyFromAboveClient | None = None
@@ -93,8 +93,12 @@ def search(
         asset_url, file_size, datetime, collection_id.
     """
     return _get_client().search(
-        bbox=bbox, product=product, county=county,
-        crs=crs, datetime=datetime, max_items=max_items,
+        bbox=bbox,
+        product=product,
+        county=county,
+        crs=crs,
+        datetime=datetime,
+        max_items=max_items,
     )
 
 
@@ -126,7 +130,7 @@ def read(
     source: str | Path,
     bbox: tuple[float, float, float, float] | None = None,
     crs: str | None = None,
-) -> tuple[np.ndarray, dict[str, Any]]:
+) -> tuple[Any, dict[str, Any]]:
     """Read a tile or remote source, optionally windowed to a bbox.
 
     Parameters
@@ -172,7 +176,10 @@ def mosaic(
     Path or tuple[numpy.ndarray, dict]
     """
     return _get_client().mosaic(
-        tiles_or_paths=tiles_or_paths, bbox=bbox, output=output, crs=crs,
+        tiles_or_paths=tiles_or_paths,
+        bbox=bbox,
+        output=output,
+        crs=crs,
     )
 
 
@@ -207,6 +214,7 @@ __all__ = [
     "clear_cache",
     "download",
     "info",
+    "list_counties",
     "list_products",
     "mosaic",
     "read",

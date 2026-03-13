@@ -1,6 +1,5 @@
 """Tests for the KyFromAboveClient class."""
 
-
 import pytest
 
 from abovepy.client import KyFromAboveClient
@@ -23,6 +22,17 @@ class TestClientInit:
         assert client.cache_dir == cache
         assert cache.exists()
 
+    def test_repr_default(self):
+        client = KyFromAboveClient()
+        r = repr(client)
+        assert "KyFromAboveClient(" in r
+        assert "not connected" in r
+
+    def test_repr_with_cache_dir(self, tmp_path):
+        client = KyFromAboveClient(cache_dir=tmp_path)
+        r = repr(client)
+        assert "cache_dir=" in r
+
 
 class TestClientSearch:
     def test_requires_bbox_or_county(self):
@@ -39,6 +49,16 @@ class TestClientSearch:
         client = KyFromAboveClient()
         with pytest.raises(ValueError, match="xmin"):
             client.search(bbox=(-84.3, 38.15, -84.9, 38.25), product="dem_phase3")
+
+    def test_bbox_outside_ky_warns(self, caplog):
+        """Bbox outside Kentucky should log a warning but not raise."""
+        import contextlib
+        import logging
+
+        client = KyFromAboveClient()
+        with caplog.at_level(logging.WARNING), contextlib.suppress(Exception):
+            client.search(bbox=(-70.0, 40.0, -69.9, 40.1), product="dem_phase3")
+        assert any("does not intersect Kentucky" in r.message for r in caplog.records)
 
 
 class TestClientInfo:

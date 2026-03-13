@@ -51,6 +51,7 @@ def download_tiles(
         return []
 
     downloaded = []
+    failed = []
     with httpx.Client(timeout=DOWNLOAD_TIMEOUT) as client:
         for url in tqdm(urls, desc="Downloading tiles", unit="tile"):
             filename = Path(url).name
@@ -66,7 +67,13 @@ def download_tiles(
                 downloaded.append(dest)
             except Exception:
                 logger.exception("Failed to download %s", url)
+                failed.append(url)
+                # Clean up partial file
+                if dest.exists():
+                    dest.unlink()
 
+    if failed:
+        logger.warning("Failed to download %d tile(s): %s", len(failed), failed)
     logger.info("Downloaded %d of %d tiles to %s", len(downloaded), len(urls), output_dir)
     return downloaded
 
@@ -83,6 +90,8 @@ def _download_file(client: Any, url: str, dest: Path) -> None:
     dest : Path
         Destination file path.
     """
+    from abovepy._exceptions import DownloadError
+
     for attempt in range(MAX_RETRIES):
         try:
             with client.stream("GET", url) as response:
@@ -91,7 +100,9 @@ def _download_file(client: Any, url: str, dest: Path) -> None:
                     for chunk in response.iter_bytes(chunk_size=8192):
                         f.write(chunk)
             return
-        except Exception:
+        except Exception as exc:
             if attempt == MAX_RETRIES - 1:
-                raise
+                raise DownloadError(
+                    f"Failed to download {url} after {MAX_RETRIES} attempts: {exc}"
+                ) from exc
             logger.warning("Retry %d/%d for %s", attempt + 1, MAX_RETRIES, url)

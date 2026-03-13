@@ -1,0 +1,35 @@
+name: Feature Request
+description: Suggest an enhancement or new feature
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Describe the use case below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to accomplish?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like the API to work?
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Related product(s)
+      multiple: true
+      options:
+        - DEM (dem_phase1/2/3)
+        - Orthoimagery (ortho_phase1/2/3)
+        - LiDAR (laz_phase1/2/3)
+        - All products
+        - Not product-specific

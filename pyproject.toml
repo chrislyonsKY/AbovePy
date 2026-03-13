@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "abovepy"
-version = "1.0.0"
+version = "1.0.1"
 description = "KyFromAbove LiDAR, DEM, and orthoimagery data access for Python"
 readme = "README.md"
 license = "GPL-3.0-or-later"

@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import geopandas as gpd
-    import numpy as np
     import pandas as pd
 
 from abovepy._constants import DEFAULT_INPUT_CRS, STAC_URL
@@ -51,10 +50,16 @@ class KyFromAboveClient:
         if self.cache_dir:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
+    def __repr__(self) -> str:
+        cache = f", cache_dir={self.cache_dir!r}" if self.cache_dir else ""
+        connected = "connected" if self._stac_client is not None else "not connected"
+        return f"KyFromAboveClient(stac_url={self.stac_url!r}{cache}, {connected})"
+
     def _get_stac_client(self) -> Any:
         """Lazy-initialize the pystac-client connection."""
         if self._stac_client is None:
             from abovepy.stac import create_client
+
             self._stac_client = create_client(self.stac_url)
         return self._stac_client
 
@@ -91,6 +96,7 @@ class KyFromAboveClient:
         """
         from abovepy.stac import items_to_geodataframe, search_stac
         from abovepy.utils.bbox import get_county_bbox, validate_bbox
+        from abovepy.utils.crs import bbox_intersects_kentucky
 
         # Resolve bbox from county or validate provided bbox
         if county is not None:
@@ -98,6 +104,11 @@ class KyFromAboveClient:
             logger.info("Using bbox for %s County: %s", county, bbox)
         elif bbox is not None:
             validate_bbox(bbox)
+            if not bbox_intersects_kentucky(bbox, crs=crs):
+                logger.warning(
+                    "Bbox %s does not intersect Kentucky — search will likely return no results.",
+                    bbox,
+                )
         else:
             from abovepy._exceptions import BboxError
 
@@ -146,6 +157,7 @@ class KyFromAboveClient:
             Paths to downloaded files.
         """
         from abovepy._download import download_tiles
+
         return download_tiles(tiles, output_dir=output_dir, overwrite=overwrite)
 
     def read(
@@ -153,7 +165,7 @@ class KyFromAboveClient:
         source: str | Path,
         bbox: tuple[float, float, float, float] | None = None,
         crs: str | None = None,
-    ) -> tuple[np.ndarray, dict[str, Any]]:
+    ) -> tuple[Any, dict[str, Any]]:
         """Read a raster tile, optionally windowed.
 
         Parameters
@@ -171,6 +183,7 @@ class KyFromAboveClient:
             (data, profile).
         """
         from abovepy.io.cog import read_cog
+
         return read_cog(source, bbox=bbox, crs=crs)
 
     def mosaic(
@@ -198,6 +211,7 @@ class KyFromAboveClient:
         Path or tuple[numpy.ndarray, dict]
         """
         from abovepy._mosaic import mosaic_tiles
+
         return mosaic_tiles(tiles_or_paths, bbox=bbox, output=output, crs=crs)
 
     def info(self, source: str | None = None) -> pd.DataFrame | dict[str, Any]:
@@ -217,15 +231,17 @@ class KyFromAboveClient:
         if source is None:
             rows = []
             for prod in PRODUCTS.values():
-                rows.append({
-                    "product": prod.key,
-                    "display_name": prod.display_name,
-                    "collection_id": prod.collection_id,
-                    "format": prod.format,
-                    "resolution": prod.resolution,
-                    "phase": prod.phase,
-                    "crs": prod.native_crs,
-                })
+                rows.append(
+                    {
+                        "product": prod.key,
+                        "display_name": prod.display_name,
+                        "collection_id": prod.collection_id,
+                        "format": prod.format,
+                        "resolution": prod.resolution,
+                        "phase": prod.phase,
+                        "crs": prod.native_crs,
+                    }
+                )
             return pd.DataFrame(rows)
 
         if source in VALID_PRODUCTS:
@@ -242,6 +258,7 @@ class KyFromAboveClient:
 
         # Remote tile inspection
         from abovepy.io.cog import inspect_cog
+
         return inspect_cog(source)
 
     def get_stac_client(self) -> Any:

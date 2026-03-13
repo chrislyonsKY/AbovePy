@@ -1,0 +1,60 @@
+name: Bug Report
+description: Report a bug in abovepy
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the sections below.
+
+  - type: input
+    id: version
+    attributes:
+      label: abovepy version
+      description: "Run: python -c \"import abovepy; print(abovepy.__version__)\""
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: "Run: python --version"
+      placeholder: "3.12.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code to reproduce
+      description: Minimal code snippet that reproduces the issue
+      render: python
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback
+      description: Full error traceback if applicable
+      render: text

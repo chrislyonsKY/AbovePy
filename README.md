@@ -125,6 +125,62 @@ Visualize tile coverage for Franklin County:
 
 ![Search Results](examples/output/search_results_map.png)
 
+### DEM Change Detection
+
+Compare Phase 1 vs Phase 3 DEM over a Pike County mining area to detect terrain change:
+
+![DEM Change Detection](examples/output/dem_change_detection.png)
+
+### Flood Inundation Simulation
+
+Simulate rising water levels on a DEM — watch the Kentucky River floodplain fill:
+
+![Flood Inundation](examples/output/flood_inundation.png)
+
+![Flood Simulation GIF](examples/output/flood_simulation.gif)
+
+### Slope & Aspect Analysis
+
+Compute slope and aspect from DEM for terrain analysis:
+
+![Slope & Aspect](examples/output/slope_aspect.png)
+
+### Elevation Contours over Hillshade
+
+Overlay 10ft/50ft contour lines on a shaded relief map:
+
+![Contour Map](examples/output/contour_map.png)
+
+### Elevation Profile
+
+Extract a cross-valley transect showing the Kentucky River valley profile:
+
+![Elevation Profile](examples/output/elevation_profile.png)
+
+### Land Use Change
+
+Side-by-side ortho imagery across phases showing development over time:
+
+![Land Use Change](examples/output/land_use_change.png)
+
+### Multi-County Tile Coverage
+
+Map DEM tile coverage across five Central Kentucky counties:
+
+![Multi-County Coverage](examples/output/multi_county_coverage.png)
+
+### Multi-Product Site Assessment
+
+Combine ortho, DEM, hillshade, and slope for a single area:
+
+![Site Assessment](examples/output/site_assessment.png)
+
+### Product Gallery
+
+One tile from each product type — DEM Phase 1/2/3 and Ortho Phase 3:
+
+![Product Gallery](examples/output/product_gallery.png)
+
 See [examples/scripts/](examples/scripts/) for the full source code behind each image.
 
 ## Available Products

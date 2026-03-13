@@ -1,6 +1,13 @@
 """Tests for TiTiler URL helpers."""
 
-from abovepy.titiler import cog_preview_url, cog_stats_url, cog_tile_url
+from abovepy.titiler import (
+    cog_bounds_url,
+    cog_info_url,
+    cog_preview_url,
+    cog_stats_url,
+    cog_tile_url,
+    mosaic_tile_url,
+)
 
 
 def test_cog_tile_url_default_endpoint():
@@ -27,6 +34,39 @@ def test_cog_preview_url():
 def test_cog_stats_url():
     url = cog_stats_url("https://example.com/tile.tif")
     assert "statistics" in url
+
+
+def test_cog_info_url():
+    url = cog_info_url("https://example.com/tile.tif")
+    assert "/cog/info" in url
+    assert "url=" in url
+
+
+def test_cog_bounds_url():
+    url = cog_bounds_url("https://example.com/tile.tif")
+    assert "/cog/bounds" in url
+    assert "url=" in url
+
+
+def test_mosaic_tile_url_single():
+    url = mosaic_tile_url(["https://example.com/a.tif"])
+    assert "/mosaic/tilejson.json" in url
+    assert "url=" in url
+
+
+def test_mosaic_tile_url_multiple():
+    urls = ["https://example.com/a.tif", "https://example.com/b.tif"]
+    url = mosaic_tile_url(urls)
+    assert url.count("url=") == 2
+    assert "/mosaic/tilejson.json" in url
+
+
+def test_mosaic_tile_url_custom_endpoint():
+    url = mosaic_tile_url(
+        ["https://example.com/a.tif"],
+        titiler_endpoint="http://localhost:8000",
+    )
+    assert url.startswith("http://localhost:8000/")
 
 
 def test_url_encoding():

@@ -15,10 +15,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-_INSTALL_MSG = (
-    "Point cloud support requires laspy. "
-    "Install with: pip install abovepy[lidar]"
-)
+_INSTALL_MSG = "Point cloud support requires laspy. Install with: pip install abovepy[lidar]"
 
 
 def read_pointcloud(
@@ -63,14 +60,12 @@ def read_pointcloud(
     # Apply spatial filter
     if bbox is not None:
         xmin, ymin, xmax, ymax = bbox
-        mask = (
-            (las.x >= xmin) & (las.x <= xmax)
-            & (las.y >= ymin) & (las.y <= ymax)
-        )
+        mask = (las.x >= xmin) & (las.x <= xmax) & (las.y >= ymin) & (las.y <= ymax)
         las.points = las.points[mask]
         logger.info(
             "Spatial filter kept %d of %d points",
-            mask.sum(), len(mask),
+            mask.sum(),
+            len(mask),
         )
 
     # Apply classification filter

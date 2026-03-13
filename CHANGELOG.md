@@ -4,6 +4,37 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.1] — 2026-03-13
+
+### Added
+
+- `list_counties()` exposed in top-level API for discoverability
+- `Product.__repr__()` for cleaner REPL output
+- `python -m abovepy` CLI entrypoint — prints version, products, and STAC API URL
+- `bbox_intersects_kentucky()` CRS utility for early out-of-bounds warnings
+- `cog_info_url()` and `cog_bounds_url()` TiTiler URL helpers
+- CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md community health files
+- GitHub issue templates (bug report + feature request forms)
+- Pull request template
+- Dependabot for pip and GitHub Actions updates
+- Stale issue/PR bot workflow
+
+### Changed
+
+- CI: separated lint into dedicated job (runs once, not 12x across matrix)
+- CI: added `ruff format --check` and `workflow_dispatch` trigger
+- CI: `fail-fast: false` so all matrix jobs complete
+- PyPI publish workflow upgraded to OIDC trusted publishing
+- TTLCache uses `collections.deque` for O(1) eviction (was O(n) with list)
+- Removed `ai-dev/` and `CLAUDE.md` from version control
+
+### Fixed
+
+- Download: raises `DownloadError` instead of bare exception after retry exhaustion
+- Download: cleans up partial files on failure
+- STAC retry: docstring now says `SearchError` (was `RuntimeError`)
+- STAC retry: exception chaining with `raise ... from` for better tracebacks
+
 ## [1.0.0] — 2026-03-13
 
 ### Added
