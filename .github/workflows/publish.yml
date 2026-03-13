@@ -4,9 +4,6 @@ on:
     types: [published]
   workflow_dispatch:
 
-permissions:
-  id-token: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,3 +28,5 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PIPY_API_TOKEN }}
