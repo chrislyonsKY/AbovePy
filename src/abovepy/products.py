@@ -51,6 +51,9 @@ class Product:
     phase: int
     native_crs: str = "EPSG:3089"
 
+    def __repr__(self) -> str:
+        return f"Product({self.key!r}, {self.display_name!r}, {self.format}, {self.resolution})"
+
 
 # fmt: off
 PRODUCTS: dict[str, Product] = {
