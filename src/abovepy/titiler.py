@@ -78,3 +78,47 @@ def cog_stats_url(
     """
     encoded = quote_plus(cog_url)
     return f"{titiler_endpoint}/cog/statistics?url={encoded}"
+
+
+def cog_info_url(
+    cog_url: str,
+    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
+) -> str:
+    """Generate a TiTiler info URL for a COG.
+
+    Parameters
+    ----------
+    cog_url : str
+        URL to the COG.
+    titiler_endpoint : str
+        TiTiler service URL.
+
+    Returns
+    -------
+    str
+        Info JSON URL (bounds, CRS, band info).
+    """
+    encoded = quote_plus(cog_url)
+    return f"{titiler_endpoint}/cog/info?url={encoded}"
+
+
+def cog_bounds_url(
+    cog_url: str,
+    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
+) -> str:
+    """Generate a TiTiler bounds URL for a COG.
+
+    Parameters
+    ----------
+    cog_url : str
+        URL to the COG.
+    titiler_endpoint : str
+        TiTiler service URL.
+
+    Returns
+    -------
+    str
+        Bounds JSON URL.
+    """
+    encoded = quote_plus(cog_url)
+    return f"{titiler_endpoint}/cog/bounds?url={encoded}"
