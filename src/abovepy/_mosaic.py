@@ -9,16 +9,17 @@ from __future__ import annotations
 import logging
 import tempfile
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 def mosaic_tiles(
-    tiles_or_paths,
+    tiles_or_paths: Any,
     bbox: tuple[float, float, float, float] | None = None,
     output: str | Path | None = None,
     crs: str | None = None,
-):
+) -> Any:
     """Mosaic tiles into a VRT or GeoTIFF.
 
     Parameters
@@ -42,7 +43,9 @@ def mosaic_tiles(
     paths = _resolve_paths(tiles_or_paths)
 
     if not paths:
-        raise ValueError("No tile paths provided for mosaicking.")
+        from abovepy._exceptions import MosaicError
+
+        raise MosaicError("No tile paths provided for mosaicking.")
 
     if output is not None:
         output = Path(output)
@@ -55,7 +58,7 @@ def mosaic_tiles(
         return _build_vrt(paths, vrt_path, bbox=bbox)
 
 
-def _resolve_paths(tiles_or_paths) -> list[Path]:
+def _resolve_paths(tiles_or_paths: Any) -> list[Path]:
     """Extract file paths from a list or GeoDataFrame.
 
     Parameters
@@ -117,7 +120,9 @@ def _build_vrt(
 
     vrt_ds = gdal.BuildVRT(str(output), str_paths, options=vrt_options)
     if vrt_ds is None:
-        raise RuntimeError(f"GDAL BuildVRT failed for {output}")
+        from abovepy._exceptions import MosaicError
+
+        raise MosaicError(f"GDAL BuildVRT failed for {output}")
     vrt_ds.FlushCache()
     vrt_ds = None  # Close dataset
 

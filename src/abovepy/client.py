@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import geopandas as gpd
     import numpy as np
+    import pandas as pd
 
 from abovepy._constants import DEFAULT_INPUT_CRS, STAC_URL
 from abovepy.products import PRODUCTS, VALID_PRODUCTS, get_product
@@ -45,12 +46,12 @@ class KyFromAboveClient:
     ) -> None:
         self.stac_url = stac_url or STAC_URL
         self.cache_dir = Path(cache_dir) if cache_dir else None
-        self._stac_client = None
+        self._stac_client: Any = None
 
         if self.cache_dir:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def _get_stac_client(self):
+    def _get_stac_client(self) -> Any:
         """Lazy-initialize the pystac-client connection."""
         if self._stac_client is None:
             from abovepy.stac import create_client
@@ -98,7 +99,9 @@ class KyFromAboveClient:
         elif bbox is not None:
             validate_bbox(bbox)
         else:
-            raise ValueError("Provide either bbox= or county=")
+            from abovepy._exceptions import BboxError
+
+            raise BboxError("Provide either bbox= or county=")
 
         # Look up the product
         prod = get_product(product)
@@ -142,7 +145,7 @@ class KyFromAboveClient:
         list[Path]
             Paths to downloaded files.
         """
-        from abovepy.download import download_tiles
+        from abovepy._download import download_tiles
         return download_tiles(tiles, output_dir=output_dir, overwrite=overwrite)
 
     def read(
@@ -150,7 +153,7 @@ class KyFromAboveClient:
         source: str | Path,
         bbox: tuple[float, float, float, float] | None = None,
         crs: str | None = None,
-    ) -> tuple[np.ndarray, dict]:
+    ) -> tuple[np.ndarray, dict[str, Any]]:
         """Read a raster tile, optionally windowed.
 
         Parameters
@@ -172,11 +175,11 @@ class KyFromAboveClient:
 
     def mosaic(
         self,
-        tiles_or_paths,
+        tiles_or_paths: list[Path] | gpd.GeoDataFrame,
         bbox: tuple[float, float, float, float] | None = None,
         output: str | Path | None = None,
         crs: str | None = None,
-    ):
+    ) -> Any:
         """Mosaic tiles into a single raster or VRT.
 
         Parameters
@@ -194,10 +197,10 @@ class KyFromAboveClient:
         -------
         Path or tuple[numpy.ndarray, dict]
         """
-        from abovepy.mosaic import mosaic_tiles
+        from abovepy._mosaic import mosaic_tiles
         return mosaic_tiles(tiles_or_paths, bbox=bbox, output=output, crs=crs)
 
-    def info(self, source: str | None = None):
+    def info(self, source: str | None = None) -> pd.DataFrame | dict[str, Any]:
         """Inspect products or a remote tile.
 
         Parameters
@@ -241,7 +244,7 @@ class KyFromAboveClient:
         from abovepy.io.cog import inspect_cog
         return inspect_cog(source)
 
-    def get_stac_client(self):
+    def get_stac_client(self) -> Any:
         """Get the underlying pystac-client Client for advanced queries.
 
         Returns

@@ -165,8 +165,10 @@ def get_product(key: str) -> Product:
         If key is not a valid product.
     """
     if key not in PRODUCTS:
+        from abovepy._exceptions import ProductError
+
         valid = ", ".join(sorted(VALID_PRODUCTS))
-        raise ValueError(f"Unknown product '{key}'. Valid products: {valid}")
+        raise ProductError(f"Unknown product '{key}'. Valid products: {valid}")
     return PRODUCTS[key]
 
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def read_pointcloud(
     source: str | Path,
     bbox: tuple[float, float, float, float] | None = None,
     classifications: list[int] | None = None,
-) -> tuple:
+) -> tuple[Any, dict[str, Any]]:
     """Read a COPC or LAZ point cloud file.
 
     Parameters
@@ -91,7 +92,7 @@ def read_pointcloud(
     return las, metadata
 
 
-def inspect_pointcloud(source: str | Path) -> dict:
+def inspect_pointcloud(source: str | Path) -> dict[str, Any]:
     """Inspect a point cloud file header without reading all points.
 
     Parameters
@@ -129,7 +130,7 @@ def inspect_pointcloud(source: str | Path) -> dict:
         }
 
 
-def _read_remote(url: str):
+def _read_remote(url: str) -> Any:
     """Download a remote LAZ/COPC file and read it with laspy.
 
     Parameters

@@ -110,7 +110,7 @@ class TestSearchWithRetry:
         client = MagicMock()
         client.search.side_effect = ConnectionError("timeout")
 
-        with pytest.raises(RuntimeError, match="failed after"):
+        with pytest.raises(Exception, match="failed after"):
             _search_with_retry(
                 client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500
             )

@@ -2,9 +2,9 @@
 <p align="center">
   <a href="https://pypi.org/project/abovepy/"><img src="https://img.shields.io/pypi/v/abovepy?color=8B5CF6&style=flat-square" alt="PyPI version"></a>
   <a href="https://pypi.org/project/abovepy/"><img src="https://img.shields.io/pypi/pyversions/abovepy?style=flat-square" alt="Python versions"></a>
-  <a href="https://github.com/chrislyonsKY/abovepy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/chrislyonsKY/abovepy/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
-  <a href="https://github.com/chrislyonsKY/abovepy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
-  <a href="https://chrislyonsKY.github.io/abovepy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
+  <a href="https://github.com/chrislyonsKY/AbovePy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/chrislyonsKY/AbovePy/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://github.com/chrislyonsKY/AbovePy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
+  <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
 </p>
 
 # abovepy
@@ -81,6 +81,52 @@ print(abovepy.info())
 #   ...
 ```
 
+## Examples
+
+### DEM Phase Comparison
+
+Compare 5ft Phase 1 vs 2ft Phase 3 resolution from the same tile in Frankfort:
+
+![DEM Phase Comparison](examples/output/compare_dem_phases.png)
+
+### Hillshade from Streamed DEM
+
+Compute a hillshade directly from a cloud-hosted DEM tile — no download required:
+
+![Hillshade](examples/output/hillshade.png)
+
+### Streamed DEM Window
+
+Read just the pixels you need with a bounding box:
+
+![Stream Window](examples/output/stream_window.png)
+
+### Ortho RGB Extract
+
+Pull 3-inch true-color imagery of the Kentucky State Capitol:
+
+![Ortho RGB](examples/output/ortho_rgb.png)
+
+### Kentucky River REM
+
+Relative Elevation Model showing height above the Kentucky River in Frankfort:
+
+![Kentucky River REM](examples/output/kentucky_river_rem.png)
+
+### Mine Volume Estimate
+
+Estimate cut volume for an active mine permit in Perry County using DEM differencing:
+
+![Mine Volume](examples/output/mine_volume.png)
+
+### Search Results Map
+
+Visualize tile coverage for Franklin County:
+
+![Search Results](examples/output/search_results_map.png)
+
+See [examples/scripts/](examples/scripts/) for the full source code behind each image.
+
 ## Available Products
 
 | Product | Resolution | Format | Collection ID |
@@ -141,20 +187,21 @@ results = stac_client.search(
 ).item_collection()
 ```
 
-## Data Source
+## Related Resources
 
-All data is provided by the [KyFromAbove](https://kyfromabove.ky.gov/) program, managed by the Kentucky Division of Geographic Information.
+- **[kyfromabove-on-aws-examples](https://github.com/ianhorn/kyfromabove-on-aws-examples)** — Foundational examples for accessing KyFromAbove data on AWS using tile index GeoPackages and boto3. Great reference for understanding the raw S3 data structure that abovepy wraps.
+- **[kyfromabove-gisconference2025-workshop](https://github.com/ianhorn/kyfromabove-gisconference2025-workshop)** — 2025 KY GIS Conference workshop covering STAC API access from Python, ArcGIS Pro, and QGIS. Includes building height estimation from COPC LiDAR, DEM change detection, and MosaicJSON workflows.
+- **[KyFromAbove](https://kyfromabove.ky.gov/)** — Official program site from the Kentucky Division of Geographic Information.
+- **[STAC Browser](https://kygeonet.ky.gov/stac/)** — Browse the KyFromAbove STAC catalog interactively.
+
+## Data Source
 
 - **STAC API:** `https://spved5ihrl.execute-api.us-west-2.amazonaws.com/`
 - **S3 Bucket:** `s3://kyfromabove/` (public, us-west-2)
-- **STAC Browser:** [kygeonet.ky.gov/stac](https://kygeonet.ky.gov/stac/)
+- **AWS Open Data Registry:** [KyFromAbove](https://registry.opendata.aws/kyfromabove/)
 
 ## License
 
 GPL-3.0 — see [LICENSE](LICENSE).
 
 ---
-
-<p align="center">
-  <sub>Developed at the Kentucky Energy &amp; Environment Cabinet</sub>
-</p>

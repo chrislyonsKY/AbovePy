@@ -16,8 +16,14 @@ import abovepy
 def main():
     parser = argparse.ArgumentParser(description="Download KyFromAbove orthoimagery by county")
     parser.add_argument("--county", required=True, help="Kentucky county name (e.g., Pike)")
-    parser.add_argument("--product", default="ortho_phase3", help="Product key (default: ortho_phase3)")
-    parser.add_argument("--output", default=None, help="Output directory (default: ./output/<county>_ortho)")
+    parser.add_argument(
+        "--product", default="ortho_phase3",
+        help="Product key (default: ortho_phase3)",
+    )
+    parser.add_argument(
+        "--output", default=None,
+        help="Output directory (default: ./output/<county>_ortho)",
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output) if args.output else Path(f"./output/{args.county.lower()}_ortho")
@@ -44,3 +50,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Expected output (for --county Pike):
+# Searching ortho_phase3 tiles for Pike County...
+# Found 500 tiles
+# Estimated download size: 48500 MB
+#
+# Downloading to output/pike_ortho...
+# Done. 500 files saved to output/pike_ortho

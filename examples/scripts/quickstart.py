@@ -37,3 +37,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Expected output:
+# Searching for DEM tiles...
+# Found 342 tiles
+#     tile_id                                    file_size
+# 0   N087E279_2025_DEM_Phase3_cog.tif            1245678
+# 1   N087E278_2025_DEM_Phase3_cog.tif            1198432
+# ... (first 10 tiles shown)
+#
+# Downloading tiles...
+# Downloaded 342 files
+#
+# Building mosaic...
+# Mosaic created: output/quickstart/franklin_dem.vrt

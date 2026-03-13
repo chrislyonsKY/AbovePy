@@ -1,30 +1,23 @@
 site_name: abovepy
 site_description: KyFromAbove LiDAR, DEM, and orthoimagery access for Python
 site_author: Chris Lyons
-site_url: https://chrislyonsKY.github.io/abovepy/
-repo_url: https://github.com/chrislyonsKY/abovepy
-repo_name: chrislyonsKY/abovepy
+site_url: https://chrislyonsKY.github.io/AbovePy/
+repo_url: https://github.com/chrislyonsKY/AbovePy
+repo_name: chrislyonsKY/AbovePy
 edit_uri: edit/main/docs/
 
 theme:
   name: material
-  font:
-    text: Roboto
-    code: Roboto Mono
-  icon:
-    repo: fontawesome/brands/github
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: deep purple
-      accent: deep purple
+    - scheme: default
+      primary: teal
+      accent: teal
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: deep purple
-      accent: purple
+    - scheme: slate
+      primary: teal
+      accent: light green
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -37,14 +30,13 @@ theme:
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/chrislyonsKY/abovepy
-
-extra_css:
-  - stylesheets/extra.css
+      link: https://github.com/chrislyonsKY/AbovePy
 
 plugins:
   - search
@@ -68,9 +60,17 @@ nav:
     - LiDAR Access: tutorials/lidar-access.md
     - Web Maps (TiTiler): tutorials/titiler-maps.md
     - ArcGIS Pro Toolbox: tutorials/arcgis-pro.md
+    - Troubleshooting: tutorials/troubleshooting.md
   - KyFromAbove Collections: stac-collections.md
   - Architecture: architecture.md
-  - API Reference: api/reference.md
+  - API Reference:
+    - Overview: api/reference.md
+    - Client: api/client.md
+    - Products: api/products.md
+    - I/O (Raster & Point Cloud): api/io.md
+    - TiTiler URL Helpers: api/titiler.md
+    - Utilities: api/utils.md
+    - Exceptions: api/exceptions.md
 
 markdown_extensions:
   - admonition
