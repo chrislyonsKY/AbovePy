@@ -69,3 +69,55 @@ class TestBackwardCompatibility:
                 raise cls("test")
             except AbovepyError:
                 pass  # All should be caught
+
+
+class TestExceptionMessages:
+    """Exceptions preserve messages and support string formatting."""
+
+    def test_search_error_message(self):
+        exc = SearchError("STAC API unreachable")
+        assert str(exc) == "STAC API unreachable"
+
+    def test_download_error_message(self):
+        exc = DownloadError("HTTP 403 for tile.tif")
+        assert "403" in str(exc)
+
+    def test_product_error_includes_key(self):
+        exc = ProductError("Unknown product 'bad_key'")
+        assert "bad_key" in str(exc)
+
+    def test_county_error_includes_name(self):
+        exc = CountyError("Unknown county 'Atlantis'")
+        assert "Atlantis" in str(exc)
+
+    def test_bbox_error_includes_values(self):
+        exc = BboxError("xmin (5.0) must be less than xmax (3.0)")
+        assert "5.0" in str(exc)
+
+    def test_exception_chaining(self):
+        """Exceptions support __cause__ for chaining."""
+        original = ConnectionError("timeout")
+        exc = SearchError("STAC failed")
+        exc.__cause__ = original
+        assert exc.__cause__ is original
+
+
+class TestExceptionPickle:
+    """Exceptions can be pickled (important for multiprocessing)."""
+
+    def test_pickle_roundtrip(self):
+        import pickle
+
+        for cls in [
+            SearchError,
+            DownloadError,
+            ReadError,
+            MosaicError,
+            ProductError,
+            CountyError,
+            BboxError,
+        ]:
+            exc = cls("test message")
+            restored = pickle.loads(pickle.dumps(exc))
+            assert str(restored) == "test message"
+            assert type(restored) is cls
