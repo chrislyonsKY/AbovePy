@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import geopandas as gpd
-    import numpy as np
     import pandas as pd
 
 from abovepy._constants import DEFAULT_INPUT_CRS, STAC_URL
@@ -153,7 +152,7 @@ class KyFromAboveClient:
         source: str | Path,
         bbox: tuple[float, float, float, float] | None = None,
         crs: str | None = None,
-    ) -> tuple[np.ndarray, dict[str, Any]]:
+    ) -> tuple[Any, dict[str, Any]]:
         """Read a raster tile, optionally windowed.
 
         Parameters

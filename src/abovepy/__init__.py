@@ -43,7 +43,6 @@ from abovepy.stac import clear_cache
 
 if TYPE_CHECKING:
     import geopandas as gpd
-    import numpy as np
     import pandas as pd
 
 _default_client: KyFromAboveClient | None = None
@@ -126,7 +125,7 @@ def read(
     source: str | Path,
     bbox: tuple[float, float, float, float] | None = None,
     crs: str | None = None,
-) -> tuple[np.ndarray, dict[str, Any]]:
+) -> tuple[Any, dict[str, Any]]:
     """Read a tile or remote source, optionally windowed to a bbox.
 
     Parameters
