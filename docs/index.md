@@ -1,27 +1,9 @@
----
-hide:
-  - navigation
-  - toc
----
-
-<div class="hero" markdown>
-
 # abovepy
 
 **KyFromAbove LiDAR, DEM, and orthoimagery data access for Python.**
 
 Kentucky's statewide elevation, imagery, and point cloud data — Pythonic access, zero credentials.
-
-</div>
-
-<div class="badges" markdown>
-
-[![PyPI](https://img.shields.io/pypi/v/abovepy?color=8B5CF6&style=flat-square)](https://pypi.org/project/abovepy/)
-[![Python](https://img.shields.io/pypi/pyversions/abovepy?style=flat-square)](https://pypi.org/project/abovepy/)
-[![CI](https://img.shields.io/github/actions/workflow/status/chrislyonsKY/abovepy/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/chrislyonsKY/abovepy/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](https://github.com/chrislyonsKY/abovepy/blob/main/LICENSE)
-
-</div>
+No API keys, no authentication. Just `pip install` and go.
 
 ---
 
@@ -37,12 +19,6 @@ Kentucky's statewide elevation, imagery, and point cloud data — Pythonic acces
 
     ```bash
     pip install abovepy[lidar]
-    ```
-
-=== "With visualization"
-
-    ```bash
-    pip install abovepy[viz]
     ```
 
 === "Everything"
@@ -76,62 +52,10 @@ data, profile = abovepy.read(
 
 ---
 
-## Features
-
-<div class="grid" markdown>
-
-<div class="card" markdown>
-
-### County-Based Search
-
-Search by any of Kentucky's 120 counties. No bounding box required.
-
-```python
-abovepy.search(county="Pike", product="dem_phase3")
-```
-
-</div>
-
-<div class="card" markdown>
-
-### Cloud-Native Reads
-
-Stream COGs directly from S3 — read only the pixels you need.
-
-```python
-abovepy.read(url, bbox=extent)
-```
-
-</div>
-
-<div class="card" markdown>
-
-### 9 Data Products
-
-DEMs, orthoimagery, and LiDAR point clouds across three acquisition phases.
-
-```python
-abovepy.info()  # list all products
-```
-
-</div>
-
-<div class="card" markdown>
-
-### ArcGIS Pro Toolbox
-
-Native geoprocessing tools for domain-specific workflows — hillshade, county download, and more.
-
-</div>
-
-</div>
-
----
-
 ## Supported Products
 
 | Product | Resolution | Format |
-|---|---|---|
+|---------|-----------|--------|
 | DEM Phase 1 | 5 ft | Cloud-Optimized GeoTIFF |
 | DEM Phase 2 | 2 ft | Cloud-Optimized GeoTIFF |
 | DEM Phase 3 | 2 ft | Cloud-Optimized GeoTIFF |
@@ -146,25 +70,16 @@ All data is natively in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy a
 
 ---
 
-## What abovepy is NOT
+## What abovepy Is Not
 
-- **Not a general STAC client** — use [pystac-client](https://pystac-client.readthedocs.io/) for that
-- **Not a tile server** — use [TiTiler](https://developmentseed.org/titiler/) for web map tiles
-- **Not a point cloud processor** — use [PDAL](https://pdal.io/) for heavy LiDAR workflows
+abovepy is **not** a general STAC client, tile server, or point cloud processor.
 
+If you need a general STAC client, use [pystac-client](https://pystac-client.readthedocs.io/).
+If you need a tile server, use [TiTiler](https://developmentseed.org/titiler/).
+If you need heavy LiDAR workflows, use [PDAL](https://pdal.io/).
 abovepy is a sharp-focus library for one dataset: KyFromAbove.
 
 ---
 
-<div class="cta" markdown>
-
 [Get Started :material-arrow-right:](getting-started.md){ .md-button .md-button--primary }
 [View on GitHub :material-github:](https://github.com/chrislyonsKY/abovepy){ .md-button }
-
-</div>
-
----
-
-<p style="text-align: center; opacity: 0.6;">
-Data provided by <a href="https://kyfromabove.ky.gov/">KyFromAbove</a>, managed by the Kentucky Division of Geographic Information.
-</p>
