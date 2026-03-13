@@ -26,8 +26,8 @@ def read_cog(
     bbox : tuple, optional
         Bounding box (xmin, ymin, xmax, ymax) for windowed read.
     crs : str, optional
-        CRS of the bbox. If different from the source CRS, the bbox
-        is reprojected before windowing. Default None (use source CRS).
+        CRS of the bbox. Defaults to EPSG:4326 per project convention.
+        If different from the source CRS, the bbox is reprojected.
 
     Returns
     -------
@@ -42,8 +42,12 @@ def read_cog(
     with rasterio.open(vsi_path) as src:
         if bbox is not None:
             read_bbox = bbox
-            if crs is not None and str(src.crs) != crs:
-                read_bbox = _reproject_bbox(bbox, crs, str(src.crs))
+            # Default to EPSG:4326 per project convention
+            bbox_crs = crs or "EPSG:4326"
+            if str(src.crs) != bbox_crs:
+                read_bbox = _reproject_bbox(
+                    bbox, bbox_crs, str(src.crs)
+                )
 
             window = from_bounds(*read_bbox, transform=src.transform)
             # Clamp window to dataset bounds
