@@ -37,6 +37,8 @@ class TTLCache:
         self._ttl = ttl
         self._cache: dict[str, tuple[float, Any]] = {}
         self._order: deque[str] = deque()
+        self._hits = 0
+        self._misses = 0
 
     def get(self, key: str) -> Any | None:
         """Get a cached value if it exists and hasn't expired.
@@ -52,14 +54,17 @@ class TTLCache:
             Cached value, or None if missing/expired.
         """
         if key not in self._cache:
+            self._misses += 1
             return None
 
         ts, value = self._cache[key]
         if time.monotonic() - ts > self._ttl:
             self._evict(key)
+            self._misses += 1
             logger.debug("Cache expired: %s", key[:32])
             return None
 
+        self._hits += 1
         return value
 
     def set(self, key: str, value: Any) -> None:
@@ -91,9 +96,27 @@ class TTLCache:
             self._order.remove(key)
 
     def clear(self) -> None:
-        """Clear all cached entries."""
+        """Clear all cached entries and reset stats."""
         self._cache.clear()
         self._order.clear()
+        self._hits = 0
+        self._misses = 0
+
+    @property
+    def stats(self) -> dict[str, int]:
+        """Return cache hit/miss statistics.
+
+        Returns
+        -------
+        dict
+            Keys: size, maxsize, hits, misses.
+        """
+        return {
+            "size": len(self._cache),
+            "maxsize": self._maxsize,
+            "hits": self._hits,
+            "misses": self._misses,
+        }
 
     def __len__(self) -> int:
         return len(self._cache)
