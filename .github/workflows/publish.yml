@@ -25,7 +25,6 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
-    environment: pypi
     steps:
       - uses: actions/download-artifact@v7
         with:
