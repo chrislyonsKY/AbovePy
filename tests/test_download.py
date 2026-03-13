@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from abovepy.download import download_tiles
+from abovepy._download import download_tiles
 
 
 def _make_mock_tiles(urls):
@@ -34,7 +34,7 @@ class TestDownloadTiles:
         (tmp_path / "tile.tif").write_bytes(b"data")
         tiles = _make_mock_tiles(["https://example.com/tile.tif"])
 
-        with patch("abovepy.download._download_file") as mock_dl:
+        with patch("abovepy._download._download_file") as mock_dl:
             result = download_tiles(tiles, output_dir=tmp_path, overwrite=False)
         assert len(result) == 1
         mock_dl.assert_not_called()

@@ -187,13 +187,18 @@ results = stac_client.search(
 ).item_collection()
 ```
 
-## Data Source
+## Related Resources
 
-All data is provided by the [KyFromAbove](https://kyfromabove.ky.gov/) program, managed by the Kentucky Division of Geographic Information.
+- **[kyfromabove-on-aws-examples](https://github.com/ianhorn/kyfromabove-on-aws-examples)** — Foundational examples for accessing KyFromAbove data on AWS using tile index GeoPackages and boto3. Great reference for understanding the raw S3 data structure that abovepy wraps.
+- **[kyfromabove-gisconference2025-workshop](https://github.com/ianhorn/kyfromabove-gisconference2025-workshop)** — 2025 KY GIS Conference workshop covering STAC API access from Python, ArcGIS Pro, and QGIS. Includes building height estimation from COPC LiDAR, DEM change detection, and MosaicJSON workflows.
+- **[KyFromAbove](https://kyfromabove.ky.gov/)** — Official program site from the Kentucky Division of Geographic Information.
+- **[STAC Browser](https://kygeonet.ky.gov/stac/)** — Browse the KyFromAbove STAC catalog interactively.
+
+## Data Source
 
 - **STAC API:** `https://spved5ihrl.execute-api.us-west-2.amazonaws.com/`
 - **S3 Bucket:** `s3://kyfromabove/` (public, us-west-2)
-- **STAC Browser:** [kygeonet.ky.gov/stac](https://kygeonet.ky.gov/stac/)
+- **AWS Open Data Registry:** [KyFromAbove](https://registry.opendata.aws/kyfromabove/)
 
 ## License
 

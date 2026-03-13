@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ def read_cog(
     source: str | Path,
     bbox: tuple[float, float, float, float] | None = None,
     crs: str | None = None,
-) -> tuple:
+) -> tuple[Any, dict[str, Any]]:
     """Read a COG, optionally windowed to a bbox.
 
     Parameters
@@ -69,7 +70,7 @@ def read_cog(
     return data, profile
 
 
-def inspect_cog(source: str | Path) -> dict:
+def inspect_cog(source: str | Path) -> dict[str, Any]:
     """Inspect a COG without reading pixel data.
 
     Parameters

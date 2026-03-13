@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import geopandas as gpd
@@ -71,7 +71,7 @@ def download_tiles(
     return downloaded
 
 
-def _download_file(client, url: str, dest: Path) -> None:
+def _download_file(client: Any, url: str, dest: Path) -> None:
     """Download a single file with retry logic.
 
     Parameters

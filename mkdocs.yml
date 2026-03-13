@@ -63,7 +63,14 @@ nav:
     - Troubleshooting: tutorials/troubleshooting.md
   - KyFromAbove Collections: stac-collections.md
   - Architecture: architecture.md
-  - API Reference: api/reference.md
+  - API Reference:
+    - Overview: api/reference.md
+    - Client: api/client.md
+    - Products: api/products.md
+    - I/O (Raster & Point Cloud): api/io.md
+    - TiTiler URL Helpers: api/titiler.md
+    - Utilities: api/utils.md
+    - Exceptions: api/exceptions.md
 
 markdown_extensions:
   - admonition

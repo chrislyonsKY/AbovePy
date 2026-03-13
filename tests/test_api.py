@@ -9,14 +9,28 @@ class TestPublicAPI:
     def test_search_is_callable(self):
         assert callable(abovepy.search)
 
-    def test_download_function_exists(self):
-        assert "download" in abovepy.__all__
+    def test_download_is_callable(self):
+        assert callable(abovepy.download)
 
     def test_read_is_callable(self):
         assert callable(abovepy.read)
 
-    def test_mosaic_function_exists(self):
-        assert "mosaic" in abovepy.__all__
+    def test_mosaic_is_callable(self):
+        assert callable(abovepy.mosaic)
+
+    def test_download_not_shadowed_by_module(self):
+        """Regression: module rename prevents shadowing."""
+        import importlib
+
+        importlib.import_module("abovepy._download")
+        assert callable(abovepy.download)
+
+    def test_mosaic_not_shadowed_by_module(self):
+        """Regression: module rename prevents shadowing."""
+        import importlib
+
+        importlib.import_module("abovepy._mosaic")
+        assert callable(abovepy.mosaic)
 
     def test_info_is_callable(self):
         assert callable(abovepy.info)
