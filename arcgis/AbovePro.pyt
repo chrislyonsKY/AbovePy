@@ -9,11 +9,11 @@ _toolbox_dir = os.path.dirname(os.path.abspath(__file__))
 if _toolbox_dir not in sys.path:
     sys.path.insert(0, _toolbox_dir)
 
-from tools.find_tiles import FindTiles
-from tools.download_tiles import DownloadTiles
-from tools.download_and_load import DownloadAndLoad
 from tools.county_download import CountyDownload
 from tools.dem_hillshade import DEMHillshade
+from tools.download_and_load import DownloadAndLoad
+from tools.download_tiles import DownloadTiles
+from tools.find_tiles import FindTiles
 
 
 class Toolbox:
