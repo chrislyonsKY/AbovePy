@@ -1,0 +1,2360 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KyFromAbove LiDAR, DEM, and orthoimagery access for Python">
+      
+      
+        <meta name="author" content="Chris Lyons">
+      
+      
+        <link rel="canonical" href="https://chrislyonsKY.github.io/AbovePy/tutorials/arcgis-pro/">
+      
+      
+        <link rel="prev" href="../titiler-maps/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>ArcGIS Pro Toolbox - abovepy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#arcgis-pro-toolbox" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="abovepy" class="md-header__button md-logo" aria-label="abovepy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            abovepy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ArcGIS Pro Toolbox
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/chrislyonsKY/AbovePy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chrislyonsKY/AbovePy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../dem-hillshade/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../stac-collections/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  KyFromAbove Collections
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="abovepy" class="md-nav__button md-logo" aria-label="abovepy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    abovepy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/chrislyonsKY/AbovePy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chrislyonsKY/AbovePy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dem-hillshade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DEM + Hillshade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lidar-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LiDAR Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../titiler-maps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Maps (TiTiler)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArcGIS Pro Toolbox
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArcGIS Pro Toolbox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-abovepy-in-pros-conda-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install abovepy in Pro's conda environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-verify-the-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Verify the installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-add-the-toolbox-to-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Add the toolbox to ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-1-find-kyfromabove-tiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 1: Find KyFromAbove Tiles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 1: Find KyFromAbove Tiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-2-download-tiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 2: Download Tiles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 2: Download Tiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-3-download-and-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 3: Download and Load
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 3: Download and Load">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-4-dem-hillshade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 4: DEM Hillshade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 4: DEM Hillshade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-5-county-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 5: County Download
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 5: County Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-and-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips and Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-abovepy-in-pros-python-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using abovepy in Pro's Python Window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stac-collections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    KyFromAbove Collections
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/products/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Products
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    I/O (Raster & Point Cloud)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/titiler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TiTiler URL Helpers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-abovepy-in-pros-conda-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install abovepy in Pro's conda environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-verify-the-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Verify the installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-add-the-toolbox-to-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Add the toolbox to ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-1-find-kyfromabove-tiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 1: Find KyFromAbove Tiles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 1: Find KyFromAbove Tiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-2-download-tiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 2: Download Tiles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 2: Download Tiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-3-download-and-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 3: Download and Load
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 3: Download and Load">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-4-dem-hillshade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 4: DEM Hillshade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 4: DEM Hillshade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-5-county-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool 5: County Download
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool 5: County Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-behavior_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messages-window-output_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages window output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-and-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips and Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-abovepy-in-pros-python-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using abovepy in Pro's Python Window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="arcgis-pro-toolbox">ArcGIS Pro Toolbox<a class="headerlink" href="#arcgis-pro-toolbox" title="Permanent link">&para;</a></h1>
+<p>Use abovepy inside ArcGIS Pro with the <strong>AbovePro</strong> Python Toolbox. This guide covers installation, adding the toolbox, and using each of the five tools with detailed parameter descriptions and expected behavior.</p>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ArcGIS Pro 3.2+</li>
+<li>abovepy installed in Pro's Python environment</li>
+</ul>
+<hr />
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-install-abovepy-in-pros-conda-environment">Step 1: Install abovepy in Pro's conda environment<a class="headerlink" href="#step-1-install-abovepy-in-pros-conda-environment" title="Permanent link">&para;</a></h3>
+<p>Open the <strong>Python Command Prompt</strong> from ArcGIS Pro (not a regular terminal) and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>abovepy
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Successfully installed abovepy-0.1.0 geopandas-0.14.4 httpx-0.27.0 ...
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Use Pro's Python environment</p>
+<p>ArcGIS Pro uses its own isolated conda environment. You must install abovepy there, not in a separate Python installation. If you install it in the wrong environment, the toolbox will fail with <code>ModuleNotFoundError</code>.</p>
+<p>To verify you are in the correct environment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>where<span class="w"> </span>python
+</code></pre></div>
+<p>You should see a path like <code>C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe</code>. If you see a different Python, you are in the wrong environment.</p>
+</div>
+<h3 id="step-2-verify-the-installation">Step 2: Verify the installation<a class="headerlink" href="#step-2-verify-the-installation" title="Permanent link">&para;</a></h3>
+<p>Still in Pro's Python Command Prompt:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import abovepy; print(abovepy.__version__)&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>0.1.0
+</code></pre></div>
+<h3 id="step-3-add-the-toolbox-to-arcgis-pro">Step 3: Add the toolbox to ArcGIS Pro<a class="headerlink" href="#step-3-add-the-toolbox-to-arcgis-pro" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Open ArcGIS Pro and create or open a project</li>
+<li>In the <strong>Catalog</strong> pane, right-click <strong>Toolboxes</strong></li>
+<li>Click <strong>Add Toolbox</strong></li>
+<li>Navigate to the <code>arcgis/AbovePro.pyt</code> file in the abovepy repository</li>
+<li>Click <strong>OK</strong></li>
+</ol>
+<p>The <strong>AbovePro</strong> toolbox appears in the Catalog pane with five tools.</p>
+<!-- Screenshot placeholder: Catalog pane showing AbovePro toolbox with five tools expanded -->
+<p><em>The AbovePro toolbox in the Catalog pane, showing all five tools.</em></p>
+<div class="admonition tip">
+<p class="admonition-title">Make AbovePro available in every project</p>
+<p>To avoid re-adding the toolbox each time:</p>
+<ol>
+<li>In the Catalog pane, right-click <strong>AbovePro.pyt</strong></li>
+<li>Click <strong>Add To Favorites</strong></li>
+</ol>
+<p>The toolbox will now appear under <strong>Favorites</strong> in every ArcGIS Pro project.</p>
+</div>
+<hr />
+<h2 id="tools-overview">Tools Overview<a class="headerlink" href="#tools-overview" title="Permanent link">&para;</a></h2>
+<p>The AbovePro toolbox provides five tools that cover the most common KyFromAbove workflows:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+<th>Typical use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Find KyFromAbove Tiles</strong></td>
+<td>Search for tiles by extent and product</td>
+<td>"What tiles cover my area?"</td>
+</tr>
+<tr>
+<td><strong>Download Tiles</strong></td>
+<td>Download tiles to a local folder</td>
+<td>"Get the files onto my machine"</td>
+</tr>
+<tr>
+<td><strong>Download and Load</strong></td>
+<td>Search + download + add to map in one step</td>
+<td>"I just want the data on my map"</td>
+</tr>
+<tr>
+<td><strong>DEM Hillshade</strong></td>
+<td>Full DEM-to-hillshade pipeline</td>
+<td>"Generate a hillshade for this area"</td>
+</tr>
+<tr>
+<td><strong>County Download</strong></td>
+<td>Download all tiles for a county</td>
+<td>"Give me everything for Pike County"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tool-1-find-kyfromabove-tiles">Tool 1: Find KyFromAbove Tiles<a class="headerlink" href="#tool-1-find-kyfromabove-tiles" title="Permanent link">&para;</a></h2>
+<p>Search for tiles by map extent, drawn rectangle, or county name. This tool queries the KyFromAbove STAC API and returns tile footprints as a feature layer.</p>
+<h3 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product</strong></td>
+<td>Dropdown</td>
+<td>Yes</td>
+<td>—</td>
+<td>Data product to search. Options: DEM Phase 1, DEM Phase 2, DEM Phase 3, Ortho Phase 1, Ortho Phase 2, Ortho Phase 3, LiDAR Phase 1, LiDAR Phase 2, LiDAR Phase 3</td>
+</tr>
+<tr>
+<td><strong>Extent</strong></td>
+<td>GPExtent</td>
+<td>Yes (unless County set)</td>
+<td>Current map extent</td>
+<td>The geographic area to search. Can be the current map extent, a drawn rectangle, or the extent of an existing layer</td>
+</tr>
+<tr>
+<td><strong>County</strong></td>
+<td>String (optional)</td>
+<td>No</td>
+<td>—</td>
+<td>A Kentucky county name. If provided, overrides the Extent parameter. Dropdown lists all 120 Kentucky counties</td>
+</tr>
+<tr>
+<td><strong>Max Tiles</strong></td>
+<td>Long</td>
+<td>No</td>
+<td>500</td>
+<td>Maximum number of tiles to return. Use this to prevent accidentally querying very large areas</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expected-behavior">Expected behavior<a class="headerlink" href="#expected-behavior" title="Permanent link">&para;</a></h3>
+<ol>
+<li>The tool queries the KyFromAbove STAC API for tiles matching your product and area</li>
+<li>A new <strong>feature layer</strong> is added to your active map showing tile footprint polygons</li>
+<li>Each polygon's attribute table contains: tile ID, asset URL, file size, and collection metadata</li>
+<li>The map zooms to the extent of the returned tiles</li>
+</ol>
+<!-- Screenshot placeholder: Map view showing tile footprint polygons overlaid on a basemap -->
+<p><em>Tile footprints displayed on the map after running Find KyFromAbove Tiles.</em></p>
+<h3 id="messages-window-output">Messages window output<a class="headerlink" href="#messages-window-output" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Running: Find KyFromAbove Tiles
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  Product: DEM Phase 3
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  Extent: -84.90, 38.17, -84.83, 38.22
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  Querying STAC API...
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  Found 6 tiles
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  Adding feature layer to map...
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  Complete.
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Use this tool first</p>
+<p>Run <strong>Find KyFromAbove Tiles</strong> before downloading to see how many tiles cover your area and estimate the total download size. The attribute table includes a <code>file_size</code> column you can sum.</p>
+</div>
+<hr />
+<h2 id="tool-2-download-tiles">Tool 2: Download Tiles<a class="headerlink" href="#tool-2-download-tiles" title="Permanent link">&para;</a></h2>
+<p>Download tiles from a previous search result to a local folder. Supports progress tracking and skip-existing behavior.</p>
+<h3 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tiles</strong></td>
+<td>Feature Layer</td>
+<td>Yes</td>
+<td>—</td>
+<td>The tile footprint layer from <strong>Find KyFromAbove Tiles</strong>, or any feature layer with an <code>asset_url</code> field</td>
+</tr>
+<tr>
+<td><strong>Output Directory</strong></td>
+<td>Folder</td>
+<td>Yes</td>
+<td>—</td>
+<td>Local folder where files will be saved. Created if it does not exist</td>
+</tr>
+<tr>
+<td><strong>Overwrite</strong></td>
+<td>Boolean</td>
+<td>No</td>
+<td>False</td>
+<td>If True, re-downloads files that already exist on disk. If False (default), existing files are skipped</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expected-behavior_1">Expected behavior<a class="headerlink" href="#expected-behavior_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>The tool reads the <code>asset_url</code> field from each feature in the input layer</li>
+<li>Files are downloaded with a progress bar in the Geoprocessing pane</li>
+<li>Existing files are skipped unless <strong>Overwrite</strong> is checked</li>
+<li>The tool reports the number of files downloaded and total size</li>
+</ol>
+<h3 id="messages-window-output_1">Messages window output<a class="headerlink" href="#messages-window-output_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Running: Download Tiles
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  Output directory: C:\Data\frankfort_dem
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  Downloading 6 tiles...
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    [1/6] N1234E5678.tif  (6.8 MB) — downloaded
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    [2/6] N1234E5679.tif  (7.0 MB) — downloaded
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    [3/6] N1235E5678.tif  (6.9 MB) — downloaded
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    [4/6] N1235E5679.tif  (7.2 MB) — downloaded
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    [5/6] N1236E5678.tif  (6.5 MB) — downloaded
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    [6/6] N1236E5679.tif  (7.1 MB) — downloaded
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>  Complete. Downloaded 6 files (41.5 MB total).
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Large downloads</p>
+<p>LiDAR tiles can be hundreds of megabytes each. Check the tile count and total file size with <strong>Find KyFromAbove Tiles</strong> before starting a large download. Consider downloading a subset by selecting specific features in the tile layer before running this tool.</p>
+</div>
+<hr />
+<h2 id="tool-3-download-and-load">Tool 3: Download and Load<a class="headerlink" href="#tool-3-download-and-load" title="Permanent link">&para;</a></h2>
+<p>Combines search, download, and add-to-map in one step. This is the most convenient tool for quickly getting data onto your map.</p>
+<h3 id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product</strong></td>
+<td>Dropdown</td>
+<td>Yes</td>
+<td>—</td>
+<td>Data product (same options as Find Tiles)</td>
+</tr>
+<tr>
+<td><strong>Extent</strong></td>
+<td>GPExtent</td>
+<td>Yes (unless County set)</td>
+<td>Current map extent</td>
+<td>Area to search</td>
+</tr>
+<tr>
+<td><strong>County</strong></td>
+<td>String (optional)</td>
+<td>No</td>
+<td>—</td>
+<td>Kentucky county name (overrides Extent)</td>
+</tr>
+<tr>
+<td><strong>Output Directory</strong></td>
+<td>Folder</td>
+<td>Yes</td>
+<td>—</td>
+<td>Local folder for downloaded files</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expected-behavior_2">Expected behavior<a class="headerlink" href="#expected-behavior_2" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Searches for tiles matching the product and area</li>
+<li>Downloads all matching tiles to the output directory</li>
+<li>Adds the downloaded rasters to the active map as a <strong>group layer</strong></li>
+<li>DEM tiles are added with an elevation color ramp; ortho tiles are added as RGB</li>
+</ol>
+<h3 id="messages-window-output_2">Messages window output<a class="headerlink" href="#messages-window-output_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Running: Download and Load
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  Product: Ortho Phase 3
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  County: Franklin
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  Searching for tiles...
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  Found 42 tiles
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  Downloading to C:\Data\franklin_ortho...
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    Downloading: 42/42 complete
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>  Adding rasters to map as group layer &quot;Ortho Phase 3 — Franklin&quot;...
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>  Complete. 42 rasters added to map.
+</code></pre></div>
+<!-- Screenshot placeholder: Map showing downloaded ortho tiles loaded as a group layer -->
+<p><em>Orthoimagery tiles loaded as a group layer after running Download and Load.</em></p>
+<hr />
+<h2 id="tool-4-dem-hillshade">Tool 4: DEM Hillshade<a class="headerlink" href="#tool-4-dem-hillshade" title="Permanent link">&para;</a></h2>
+<p>The signature tool. Runs the complete DEM-to-hillshade pipeline: search, download, mosaic, compute hillshade, and add to the map with appropriate symbology.</p>
+<h3 id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DEM Product</strong></td>
+<td>Dropdown</td>
+<td>Yes</td>
+<td>—</td>
+<td>DEM Phase 1 (5ft), DEM Phase 2 (2ft), or DEM Phase 3 (2ft)</td>
+</tr>
+<tr>
+<td><strong>Extent</strong></td>
+<td>GPExtent</td>
+<td>Yes (unless County set)</td>
+<td>Current map extent</td>
+<td>Area of interest</td>
+</tr>
+<tr>
+<td><strong>County</strong></td>
+<td>String (optional)</td>
+<td>No</td>
+<td>—</td>
+<td>Kentucky county name (overrides Extent)</td>
+</tr>
+<tr>
+<td><strong>Output Directory</strong></td>
+<td>Folder</td>
+<td>Yes</td>
+<td>—</td>
+<td>Folder for downloaded DEM tiles and output hillshade</td>
+</tr>
+<tr>
+<td><strong>Azimuth</strong></td>
+<td>Double</td>
+<td>No</td>
+<td>315</td>
+<td>Sun azimuth in degrees (0-360). 315 = northwest, which is the cartographic standard</td>
+</tr>
+<tr>
+<td><strong>Altitude</strong></td>
+<td>Double</td>
+<td>No</td>
+<td>45</td>
+<td>Sun altitude in degrees above the horizon (0-90). Lower values produce more dramatic shadows</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expected-behavior_3">Expected behavior<a class="headerlink" href="#expected-behavior_3" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Searches for DEM tiles covering the area</li>
+<li>Downloads all DEM tiles</li>
+<li>Mosaics tiles into a single raster (VRT)</li>
+<li>Computes a hillshade using the specified sun angle</li>
+<li>Saves the hillshade as a GeoTIFF in the output directory</li>
+<li>Adds both the DEM mosaic and the hillshade to the map</li>
+<li>The hillshade is rendered with grayscale symbology; the DEM with an elevation color ramp</li>
+</ol>
+<h3 id="messages-window-output_3">Messages window output<a class="headerlink" href="#messages-window-output_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Running: DEM Hillshade
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  DEM Product: DEM Phase 3
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  Area: Frankfort (bbox)
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  Azimuth: 315°, Altitude: 45°
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  Searching for DEM tiles...
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  Found 6 tiles
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  Downloading DEM tiles...
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    Downloading: 6/6 complete
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>  Creating mosaic (VRT)...
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  Computing hillshade...
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>  Saving hillshade to C:\Data\frankfort\hillshade.tif...
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>  Adding layers to map...
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>  Complete. DEM mosaic and hillshade added to map.
+</code></pre></div>
+<!-- Screenshot placeholder: Map showing hillshade rendering with DEM elevation overlay -->
+<p><em>Hillshade output from the DEM Hillshade tool, showing terrain near Frankfort.</em></p>
+<div class="admonition tip">
+<p class="admonition-title">Azimuth and altitude</p>
+<p>The default values (azimuth 315, altitude 45) produce a classic cartographic hillshade. To experiment:</p>
+<ul>
+<li><strong>Azimuth 90, altitude 25</strong>: Dramatic low-angle light from the east — highlights ridgelines</li>
+<li><strong>Azimuth 315, altitude 70</strong>: Flatter appearance, shows less terrain detail</li>
+<li><strong>Azimuth 180, altitude 35</strong>: Light from the south — unusual but useful for north-facing slopes</li>
+</ul>
+</div>
+<hr />
+<h2 id="tool-5-county-download">Tool 5: County Download<a class="headerlink" href="#tool-5-county-download" title="Permanent link">&para;</a></h2>
+<p>Download all tiles for a selected Kentucky county in one click. Useful for building a local data library.</p>
+<h3 id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>County</strong></td>
+<td>Dropdown</td>
+<td>Yes</td>
+<td>—</td>
+<td>Kentucky county name. All 120 counties are listed alphabetically</td>
+</tr>
+<tr>
+<td><strong>Product</strong></td>
+<td>Dropdown</td>
+<td>Yes</td>
+<td>—</td>
+<td>Data product to download</td>
+</tr>
+<tr>
+<td><strong>Output Directory</strong></td>
+<td>Folder</td>
+<td>Yes</td>
+<td>—</td>
+<td>Local folder for downloaded files</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expected-behavior_4">Expected behavior<a class="headerlink" href="#expected-behavior_4" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Looks up the county's bounding box from the built-in lookup table</li>
+<li>Searches for all tiles of the selected product within the county</li>
+<li>Downloads all tiles with progress tracking</li>
+<li>Reports the total number of files and download size</li>
+</ol>
+<h3 id="messages-window-output_4">Messages window output<a class="headerlink" href="#messages-window-output_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Running: County Download
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  County: Pike
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  Product: DEM Phase 3
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  Searching for tiles...
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  Found 187 tiles (estimated 4.8 GB)
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  Downloading to C:\Data\pike_dem...
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    Downloading: 187/187 complete
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  Complete. Downloaded 187 files (4.8 GB total).
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Large counties</p>
+<p>Some counties have hundreds of tiles, especially for orthoimagery and LiDAR products. Always check the tile count and estimated size before running County Download on large counties. Consider using <strong>Find KyFromAbove Tiles</strong> first to preview the count.</p>
+<p>Approximate tile counts for large counties:</p>
+<table>
+<thead>
+<tr>
+<th>County</th>
+<th>DEM Tiles</th>
+<th>Ortho Tiles</th>
+<th>LiDAR Tiles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pike</td>
+<td>~187</td>
+<td>~187</td>
+<td>~187</td>
+</tr>
+<tr>
+<td>Jefferson</td>
+<td>~312</td>
+<td>~312</td>
+<td>~312</td>
+</tr>
+<tr>
+<td>Fayette</td>
+<td>~68</td>
+<td>~68</td>
+<td>~68</td>
+</tr>
+<tr>
+<td>Franklin</td>
+<td>~42</td>
+<td>~42</td>
+<td>~42</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+<h2 id="tips-and-best-practices">Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Permanent link">&para;</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Check tile count first</p>
+<p>Always run <strong>Find KyFromAbove Tiles</strong> before a large download. This lets you see the footprints on the map, check the attribute table for file sizes, and select a subset if needed.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Use the correct coordinate system</p>
+<p>KyFromAbove data uses <strong>EPSG:3089</strong> (Kentucky Single Zone, US Survey Feet). When the tools add data to your map, Pro will reproject on-the-fly if your map uses a different coordinate system. For best performance, set your map's coordinate system to EPSG:3089.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Pro 3.4+ STAC support</p>
+<p>ArcGIS Pro 3.4+ has a built-in <strong>Explore STAC</strong> pane that can connect to the KyFromAbove STAC API directly. The AbovePro toolbox complements it by providing Kentucky-specific shortcuts (county lookup, one-click hillshade) that the generic STAC browser does not offer.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Troubleshooting in Pro</p>
+<p>If you encounter errors:</p>
+<ul>
+<li>Check the <strong>Messages</strong> window at the bottom of the Geoprocessing pane for detailed error messages</li>
+<li>Verify abovepy is installed in Pro's environment (see Installation above)</li>
+<li>Ensure you have internet access (the tools query the KyFromAbove STAC API)</li>
+<li>See the <a href="../troubleshooting/">Troubleshooting Guide</a> for common issues and solutions</li>
+</ul>
+</div>
+<hr />
+<h2 id="using-abovepy-in-pros-python-window">Using abovepy in Pro's Python Window<a class="headerlink" href="#using-abovepy-in-pros-python-window" title="Permanent link">&para;</a></h2>
+<p>You can also use abovepy directly in ArcGIS Pro's built-in Python window or Notebook:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">abovepy</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="c1"># Search for tiles</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">tiles</span> <span class="o">=</span> <span class="n">abovepy</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">county</span><span class="o">=</span><span class="s2">&quot;Fayette&quot;</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="s2">&quot;dem_phase3&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tiles</span><span class="p">)</span><span class="si">}</span><span class="s2"> tiles&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Download</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">paths</span> <span class="o">=</span> <span class="n">abovepy</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">tiles</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;C:\Data\fayette_dem&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># Add to map using arcpy</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">arcpy</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    <span class="n">arcpy</span><span class="o">.</span><span class="n">management</span><span class="o">.</span><span class="n">MakeRasterLayer</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">p</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Found 68 tiles
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Downloading: 100%|██████████| 68/68 [03:42&lt;00:00,  3.27s/file]
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Downloaded 68 files
+</code></pre></div>
+<p>This gives you full programmatic control while still working within Pro's environment.</p>
+<hr />
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../dem-hillshade/">DEM + Hillshade Tutorial</a> — The same workflow in pure Python</li>
+<li><a href="../../getting-started/">Getting Started</a> — abovepy basics</li>
+<li><a href="../troubleshooting/">Troubleshooting</a> — Solutions for common issues</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/chrislyonsKY/AbovePy" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.instant", "search.highlight", "search.suggest", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
