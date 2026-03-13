@@ -10,7 +10,7 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 requires-python = ">=3.10"
 authors = [
-    { name = "Chris Lyons", email = "chrislyons@nullislandlabs.dev" },
+    { name = "Chris Lyons", email = "chris.lyons@ky.gov" },
 ]
 keywords = [
     "geospatial", "gis", "lidar", "dem", "kentucky", "kyfromabove",

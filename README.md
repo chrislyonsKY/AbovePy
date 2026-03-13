@@ -81,6 +81,52 @@ print(abovepy.info())
 #   ...
 ```
 
+## Examples
+
+### DEM Phase Comparison
+
+Compare 5ft Phase 1 vs 2ft Phase 3 resolution from the same tile in Frankfort:
+
+![DEM Phase Comparison](examples/output/compare_dem_phases.png)
+
+### Hillshade from Streamed DEM
+
+Compute a hillshade directly from a cloud-hosted DEM tile — no download required:
+
+![Hillshade](examples/output/hillshade.png)
+
+### Streamed DEM Window
+
+Read just the pixels you need with a bounding box:
+
+![Stream Window](examples/output/stream_window.png)
+
+### Ortho RGB Extract
+
+Pull 3-inch true-color imagery of the Kentucky State Capitol:
+
+![Ortho RGB](examples/output/ortho_rgb.png)
+
+### Kentucky River REM
+
+Relative Elevation Model showing height above the Kentucky River in Frankfort:
+
+![Kentucky River REM](examples/output/kentucky_river_rem.png)
+
+### Mine Volume Estimate
+
+Estimate cut volume for an active mine permit in Perry County using DEM differencing:
+
+![Mine Volume](examples/output/mine_volume.png)
+
+### Search Results Map
+
+Visualize tile coverage for Franklin County:
+
+![Search Results](examples/output/search_results_map.png)
+
+See [examples/scripts/](examples/scripts/) for the full source code behind each image.
+
 ## Available Products
 
 | Product | Resolution | Format | Collection ID |
