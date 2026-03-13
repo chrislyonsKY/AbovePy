@@ -1,6 +1,6 @@
 """Tests for CRS conversion utilities."""
 
-from abovepy.utils.crs import transform_bbox
+from abovepy.utils.crs import bbox_intersects_kentucky, transform_bbox
 
 
 def test_transform_bbox_4326_to_3089():
@@ -30,3 +30,23 @@ def test_transform_bbox_identity():
     result = transform_bbox(bbox, "EPSG:4326", "EPSG:4326")
     for orig, res in zip(bbox, result, strict=True):
         assert abs(orig - res) < 1e-8
+
+
+def test_bbox_intersects_kentucky_inside():
+    """Frankfort area should intersect Kentucky."""
+    assert bbox_intersects_kentucky((-84.9, 38.15, -84.8, 38.25))
+
+
+def test_bbox_intersects_kentucky_outside():
+    """New York City should not intersect Kentucky."""
+    assert not bbox_intersects_kentucky((-74.1, 40.6, -73.9, 40.8))
+
+
+def test_bbox_intersects_kentucky_partial():
+    """Bbox straddling KY border should still intersect."""
+    assert bbox_intersects_kentucky((-85.0, 36.4, -84.5, 36.6))
+
+
+def test_bbox_intersects_kentucky_whole_us():
+    """Continental US bbox should intersect Kentucky."""
+    assert bbox_intersects_kentucky((-125.0, 24.0, -66.0, 50.0))
