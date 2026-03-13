@@ -2,7 +2,13 @@
 
 import pytest
 
-from abovepy.products import PRODUCTS, ProductType, get_product, list_products
+from abovepy.products import (
+    PRODUCTS,
+    ProductType,
+    get_product,
+    get_product_by_collection,
+    list_products,
+)
 
 
 def test_all_products_have_collection_ids():
@@ -43,3 +49,21 @@ def test_collection_id_format():
     assert get_product("dem_phase1").collection_id == "dem-phase1"
     assert get_product("ortho_phase3").collection_id == "orthos-phase3"
     assert get_product("laz_phase2").collection_id == "laz-phase2"
+
+
+def test_get_product_by_collection_valid():
+    prod = get_product_by_collection("dem-phase3")
+    assert prod is not None
+    assert prod.key == "dem_phase3"
+
+
+def test_get_product_by_collection_invalid():
+    assert get_product_by_collection("nonexistent") is None
+
+
+def test_get_product_by_collection_all_products():
+    """Every product should be findable by its collection ID."""
+    for key, prod in PRODUCTS.items():
+        found = get_product_by_collection(prod.collection_id)
+        assert found is not None
+        assert found.key == key
