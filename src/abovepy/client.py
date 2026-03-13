@@ -91,6 +91,7 @@ class KyFromAboveClient:
         """
         from abovepy.stac import items_to_geodataframe, search_stac
         from abovepy.utils.bbox import get_county_bbox, validate_bbox
+        from abovepy.utils.crs import bbox_intersects_kentucky
 
         # Resolve bbox from county or validate provided bbox
         if county is not None:
@@ -98,6 +99,11 @@ class KyFromAboveClient:
             logger.info("Using bbox for %s County: %s", county, bbox)
         elif bbox is not None:
             validate_bbox(bbox)
+            if not bbox_intersects_kentucky(bbox, crs=crs):
+                logger.warning(
+                    "Bbox %s does not intersect Kentucky — search will likely return no results.",
+                    bbox,
+                )
         else:
             from abovepy._exceptions import BboxError
 
