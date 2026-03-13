@@ -58,6 +58,28 @@ class TestPublicAPI:
     def test_product_type_enum_importable(self):
         assert abovepy.ProductType is not None
 
+    def test_list_counties_is_callable(self):
+        assert callable(abovepy.list_counties)
+
+
+class TestListCounties:
+    def test_returns_list(self):
+        counties = abovepy.list_counties()
+        assert isinstance(counties, list)
+
+    def test_returns_120_counties(self):
+        assert len(abovepy.list_counties()) == 120
+
+    def test_sorted_alphabetically(self):
+        counties = abovepy.list_counties()
+        assert counties == sorted(counties)
+
+    def test_contains_all_regions(self):
+        """Spot-check counties from different parts of Kentucky."""
+        counties = abovepy.list_counties()
+        for name in ["Adair", "Franklin", "Jefferson", "Pike", "Woodford"]:
+            assert name in counties
+
 
 class TestInfoConvenience:
     def test_info_returns_dataframe(self):
