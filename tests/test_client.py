@@ -22,6 +22,17 @@ class TestClientInit:
         assert client.cache_dir == cache
         assert cache.exists()
 
+    def test_repr_default(self):
+        client = KyFromAboveClient()
+        r = repr(client)
+        assert "KyFromAboveClient(" in r
+        assert "not connected" in r
+
+    def test_repr_with_cache_dir(self, tmp_path):
+        client = KyFromAboveClient(cache_dir=tmp_path)
+        r = repr(client)
+        assert "cache_dir=" in r
+
 
 class TestClientSearch:
     def test_requires_bbox_or_county(self):

@@ -50,6 +50,11 @@ class KyFromAboveClient:
         if self.cache_dir:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
+    def __repr__(self) -> str:
+        cache = f", cache_dir={self.cache_dir!r}" if self.cache_dir else ""
+        connected = "connected" if self._stac_client is not None else "not connected"
+        return f"KyFromAboveClient(stac_url={self.stac_url!r}{cache}, {connected})"
+
     def _get_stac_client(self) -> Any:
         """Lazy-initialize the pystac-client connection."""
         if self._stac_client is None:
