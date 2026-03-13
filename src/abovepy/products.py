@@ -191,3 +191,19 @@ def list_products(product_type: ProductType | None = None) -> list[Product]:
     if product_type is not None:
         products = [p for p in products if p.product_type == product_type]
     return products
+
+
+def get_product_by_collection(collection_id: str) -> Product | None:
+    """Look up a product by its STAC collection ID.
+
+    Parameters
+    ----------
+    collection_id : str
+        STAC collection ID (e.g., "dem-phase3").
+
+    Returns
+    -------
+    Product or None
+        The matching product, or None if not found.
+    """
+    return _COLLECTION_TO_PRODUCT.get(collection_id)
