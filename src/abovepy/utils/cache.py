@@ -7,9 +7,11 @@ a notebook workflow, short enough to pick up catalog updates.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import logging
 import time
+from collections import deque
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,7 @@ class TTLCache:
         self._maxsize = maxsize
         self._ttl = ttl
         self._cache: dict[str, tuple[float, Any]] = {}
-        self._order: list[str] = []
+        self._order: deque[str] = deque()
 
     def get(self, key: str) -> Any | None:
         """Get a cached value if it exists and hasn't expired.
@@ -75,7 +77,7 @@ class TTLCache:
             return
 
         while len(self._cache) >= self._maxsize:
-            oldest = self._order.pop(0)
+            oldest = self._order.popleft()
             self._cache.pop(oldest, None)
             logger.debug("Cache evicted: %s", oldest[:32])
 
@@ -85,8 +87,6 @@ class TTLCache:
     def _evict(self, key: str) -> None:
         """Remove a single entry."""
         self._cache.pop(key, None)
-        import contextlib
-
         with contextlib.suppress(ValueError):
             self._order.remove(key)
 
