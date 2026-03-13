@@ -122,3 +122,29 @@ def cog_bounds_url(
     """
     encoded = quote_plus(cog_url)
     return f"{titiler_endpoint}/cog/bounds?url={encoded}"
+
+
+def mosaic_tile_url(
+    cog_urls: list[str],
+    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
+) -> str:
+    """Generate a TiTiler mosaic TileJSON URL from multiple COGs.
+
+    This is the programmatic equivalent of the MosaicJSON approach used
+    in KyFromAbove GIS workshop materials — but constructed as a URL
+    rather than requiring a separate mosaic JSON file.
+
+    Parameters
+    ----------
+    cog_urls : list[str]
+        URLs to Cloud-Optimized GeoTIFFs.
+    titiler_endpoint : str
+        TiTiler service URL.
+
+    Returns
+    -------
+    str
+        TileJSON URL for the mosaic, usable with MapLibre/Leaflet.
+    """
+    params = "&".join(f"url={quote_plus(u)}" for u in cog_urls)
+    return f"{titiler_endpoint}/mosaic/tilejson.json?{params}"
