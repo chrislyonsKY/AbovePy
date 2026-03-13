@@ -26,6 +26,9 @@ site/
 # Claude Code
 .claude/
 
+# Output artifacts (keep examples/output/ tracked)
+/output/
+
 # OS
 Thumbs.db
 .DS_Store
