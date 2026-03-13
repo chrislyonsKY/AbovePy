@@ -46,15 +46,11 @@ def read_cog(
             # Default to EPSG:4326 per project convention
             bbox_crs = crs or "EPSG:4326"
             if str(src.crs) != bbox_crs:
-                read_bbox = _reproject_bbox(
-                    bbox, bbox_crs, str(src.crs)
-                )
+                read_bbox = _reproject_bbox(bbox, bbox_crs, str(src.crs))
 
             window = from_bounds(*read_bbox, transform=src.transform)
             # Clamp window to dataset bounds
-            window = window.intersection(
-                rasterio.windows.Window(0, 0, src.width, src.height)
-            )
+            window = window.intersection(rasterio.windows.Window(0, 0, src.width, src.height))
             data = src.read(window=window)
             win_transform = rasterio.windows.transform(window, src.transform)
             profile = src.profile.copy()

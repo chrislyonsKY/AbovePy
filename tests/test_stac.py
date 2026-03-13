@@ -20,11 +20,15 @@ def _make_mock_item(item_id="tile-001", asset_key="data", href="https://example.
     item.collection_id = "dem-phase3"
     item.geometry = {
         "type": "Polygon",
-        "coordinates": [[
-            [-84.9, 38.15], [-84.8, 38.15],
-            [-84.8, 38.25], [-84.9, 38.25],
-            [-84.9, 38.15],
-        ]],
+        "coordinates": [
+            [
+                [-84.9, 38.15],
+                [-84.8, 38.15],
+                [-84.8, 38.25],
+                [-84.9, 38.25],
+                [-84.9, 38.15],
+            ]
+        ],
     }
     asset = MagicMock()
     asset.href = href
@@ -84,9 +88,7 @@ class TestSearchWithRetry:
         mock_search.items.return_value = iter([_make_mock_item()])
         client.search.return_value = mock_search
 
-        items = _search_with_retry(
-            client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500
-        )
+        items = _search_with_retry(client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500)
         assert len(items) == 1
         client.search.assert_called_once()
 
@@ -99,9 +101,7 @@ class TestSearchWithRetry:
             MagicMock(items=MagicMock(return_value=iter([_make_mock_item()]))),
         ]
 
-        items = _search_with_retry(
-            client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500
-        )
+        items = _search_with_retry(client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500)
         assert len(items) == 1
         assert client.search.call_count == 3
 
@@ -111,9 +111,7 @@ class TestSearchWithRetry:
         client.search.side_effect = ConnectionError("timeout")
 
         with pytest.raises(Exception, match="failed after"):
-            _search_with_retry(
-                client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500
-            )
+            _search_with_retry(client, "dem-phase3", (-84.9, 38.15, -84.8, 38.25), None, 500)
 
 
 def test_clear_cache():

@@ -77,9 +77,7 @@ def _resolve_paths(tiles_or_paths: Any) -> list[Path]:
             return [Path(p) for p in tiles_or_paths["local_path"].dropna()]
         if "asset_url" in tiles_or_paths.columns:
             return [Path(u) for u in tiles_or_paths["asset_url"].dropna()]
-        raise ValueError(
-            "GeoDataFrame must have 'local_path' or 'asset_url' column."
-        )
+        raise ValueError("GeoDataFrame must have 'local_path' or 'asset_url' column.")
 
     return [Path(p) for p in tiles_or_paths]
 
@@ -187,15 +185,13 @@ def _merge_tiles(
 
             dst_crs = rasterio.crs.CRS.from_user_input(crs)
             dst_transform, dst_width, dst_height = calculate_default_transform(
-                profile["crs"], dst_crs,
-                profile["width"], profile["height"],
-                *rasterio.transform.array_bounds(
-                    profile["height"], profile["width"], transform
-                ),
+                profile["crs"],
+                dst_crs,
+                profile["width"],
+                profile["height"],
+                *rasterio.transform.array_bounds(profile["height"], profile["width"], transform),
             )
-            dst_data = np.zeros(
-                (merged.shape[0], dst_height, dst_width), dtype=merged.dtype
-            )
+            dst_data = np.zeros((merged.shape[0], dst_height, dst_width), dtype=merged.dtype)
             for i in range(merged.shape[0]):
                 reproject(
                     source=merged[i],

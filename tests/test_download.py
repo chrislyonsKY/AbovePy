@@ -8,6 +8,7 @@ from abovepy._download import download_tiles
 def _make_mock_tiles(urls):
     """Create a mock GeoDataFrame-like object with asset_url column."""
     import pandas as pd
+
     return pd.DataFrame({"asset_url": urls})
 
 
@@ -19,6 +20,7 @@ class TestDownloadTiles:
 
     def test_nan_urls_skipped(self, tmp_path):
         import numpy as np
+
         tiles = _make_mock_tiles([np.nan, None])
         result = download_tiles(tiles, output_dir=tmp_path)
         assert result == []

@@ -165,9 +165,7 @@ def get_county_bbox(county: str) -> tuple[float, float, float, float]:
             return KY_COUNTIES[matches[0]]
         from abovepy._exceptions import CountyError
 
-        raise CountyError(
-            f"Unknown county '{county}'. Use list_counties() to see valid names."
-        )
+        raise CountyError(f"Unknown county '{county}'. Use list_counties() to see valid names.")
     return KY_COUNTIES[normalized]
 
 

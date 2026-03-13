@@ -56,8 +56,15 @@ class TestBackwardCompatibility:
             pass  # Should be caught
 
     def test_catch_all_as_abovepy_error(self):
-        for cls in [SearchError, DownloadError, ReadError, MosaicError,
-                    ProductError, CountyError, BboxError]:
+        for cls in [
+            SearchError,
+            DownloadError,
+            ReadError,
+            MosaicError,
+            ProductError,
+            CountyError,
+            BboxError,
+        ]:
             try:
                 raise cls("test")
             except AbovepyError:

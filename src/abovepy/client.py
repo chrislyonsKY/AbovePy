@@ -54,6 +54,7 @@ class KyFromAboveClient:
         """Lazy-initialize the pystac-client connection."""
         if self._stac_client is None:
             from abovepy.stac import create_client
+
             self._stac_client = create_client(self.stac_url)
         return self._stac_client
 
@@ -145,6 +146,7 @@ class KyFromAboveClient:
             Paths to downloaded files.
         """
         from abovepy._download import download_tiles
+
         return download_tiles(tiles, output_dir=output_dir, overwrite=overwrite)
 
     def read(
@@ -170,6 +172,7 @@ class KyFromAboveClient:
             (data, profile).
         """
         from abovepy.io.cog import read_cog
+
         return read_cog(source, bbox=bbox, crs=crs)
 
     def mosaic(
@@ -197,6 +200,7 @@ class KyFromAboveClient:
         Path or tuple[numpy.ndarray, dict]
         """
         from abovepy._mosaic import mosaic_tiles
+
         return mosaic_tiles(tiles_or_paths, bbox=bbox, output=output, crs=crs)
 
     def info(self, source: str | None = None) -> pd.DataFrame | dict[str, Any]:
@@ -216,15 +220,17 @@ class KyFromAboveClient:
         if source is None:
             rows = []
             for prod in PRODUCTS.values():
-                rows.append({
-                    "product": prod.key,
-                    "display_name": prod.display_name,
-                    "collection_id": prod.collection_id,
-                    "format": prod.format,
-                    "resolution": prod.resolution,
-                    "phase": prod.phase,
-                    "crs": prod.native_crs,
-                })
+                rows.append(
+                    {
+                        "product": prod.key,
+                        "display_name": prod.display_name,
+                        "collection_id": prod.collection_id,
+                        "format": prod.format,
+                        "resolution": prod.resolution,
+                        "phase": prod.phase,
+                        "crs": prod.native_crs,
+                    }
+                )
             return pd.DataFrame(rows)
 
         if source in VALID_PRODUCTS:
@@ -241,6 +247,7 @@ class KyFromAboveClient:
 
         # Remote tile inspection
         from abovepy.io.cog import inspect_cog
+
         return inspect_cog(source)
 
     def get_stac_client(self) -> Any:

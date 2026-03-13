@@ -1,4 +1,5 @@
 """Tests for the product registry."""
+
 import pytest
 
 from abovepy.products import PRODUCTS, ProductType, get_product, list_products
