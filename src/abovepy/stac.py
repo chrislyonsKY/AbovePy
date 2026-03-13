@@ -118,10 +118,10 @@ def _search_with_retry(
 
     Raises
     ------
-    RuntimeError
+    SearchError
         If all retry attempts fail.
     """
-    last_error = None
+    last_error: Exception | None = None
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -151,7 +151,7 @@ def _search_with_retry(
 
     raise SearchError(
         f"STAC search failed after {MAX_RETRIES} attempts: {last_error}"
-    )
+    ) from last_error
 
 
 def items_to_geodataframe(
