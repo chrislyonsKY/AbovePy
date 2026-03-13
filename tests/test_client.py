@@ -1,6 +1,5 @@
 """Tests for the KyFromAboveClient class."""
 
-
 import pytest
 
 from abovepy.client import KyFromAboveClient

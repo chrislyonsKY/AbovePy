@@ -81,9 +81,7 @@ def search_stac(
         logger.debug("STAC cache hit for %s (%d items)", collection_id, len(cached))
         return list(cached)
 
-    items = _search_with_retry(
-        client, collection_id, bbox, datetime, max_items
-    )
+    items = _search_with_retry(client, collection_id, bbox, datetime, max_items)
 
     _stac_cache.set(cache_key, items)
     logger.info("STAC search returned %d items from %s", len(items), collection_id)
@@ -135,16 +133,20 @@ def _search_with_retry(
         except Exception as exc:
             last_error = exc
             if attempt < MAX_RETRIES - 1:
-                wait = RETRY_BACKOFF_FACTOR * (2 ** attempt)
+                wait = RETRY_BACKOFF_FACTOR * (2**attempt)
                 logger.warning(
                     "STAC search attempt %d/%d failed: %s. Retrying in %.1fs...",
-                    attempt + 1, MAX_RETRIES, exc, wait,
+                    attempt + 1,
+                    MAX_RETRIES,
+                    exc,
+                    wait,
                 )
                 time.sleep(wait)
             else:
                 logger.error(
                     "STAC search failed after %d attempts: %s",
-                    MAX_RETRIES, exc,
+                    MAX_RETRIES,
+                    exc,
                 )
 
     from abovepy._exceptions import SearchError
@@ -178,8 +180,7 @@ def items_to_geodataframe(
 
     if not items:
         return gpd.GeoDataFrame(
-            columns=["tile_id", "product", "datetime", "geometry",
-                      "asset_url", "collection_id"],
+            columns=["tile_id", "product", "datetime", "geometry", "asset_url", "collection_id"],
             geometry="geometry",
             crs="EPSG:4326",
         )
@@ -188,14 +189,16 @@ def items_to_geodataframe(
     for item in items:
         asset_url = _extract_primary_asset_url(item)
 
-        rows.append({
-            "tile_id": item.id,
-            "product": product_key,
-            "datetime": item.datetime,
-            "geometry": shape(item.geometry),
-            "asset_url": asset_url,
-            "collection_id": item.collection_id,
-        })
+        rows.append(
+            {
+                "tile_id": item.id,
+                "product": product_key,
+                "datetime": item.datetime,
+                "geometry": shape(item.geometry),
+                "asset_url": asset_url,
+                "collection_id": item.collection_id,
+            }
+        )
 
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
 

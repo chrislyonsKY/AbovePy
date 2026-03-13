@@ -93,8 +93,12 @@ def search(
         asset_url, file_size, datetime, collection_id.
     """
     return _get_client().search(
-        bbox=bbox, product=product, county=county,
-        crs=crs, datetime=datetime, max_items=max_items,
+        bbox=bbox,
+        product=product,
+        county=county,
+        crs=crs,
+        datetime=datetime,
+        max_items=max_items,
     )
 
 
@@ -172,7 +176,10 @@ def mosaic(
     Path or tuple[numpy.ndarray, dict]
     """
     return _get_client().mosaic(
-        tiles_or_paths=tiles_or_paths, bbox=bbox, output=output, crs=crs,
+        tiles_or_paths=tiles_or_paths,
+        bbox=bbox,
+        output=output,
+        crs=crs,
     )
 
 
