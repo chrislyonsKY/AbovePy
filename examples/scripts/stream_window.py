@@ -56,3 +56,16 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Expected output:
+# Searching for DEM tiles...
+# Found 2 tiles
+#
+# Streaming from: https://kyfromabove.s3.us-west-2...cog.tif
+# Reading window bbox=(-84.85, 38.18, -84.82, 38.21)...
+#
+# Array shape: (1, 362, 300)
+# Data type: float32
+# CRS: EPSG:3089
+# Resolution: 2.00 x 2.00
+# Value range: 501.3 - 812.7

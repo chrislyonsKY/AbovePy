@@ -50,3 +50,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Expected output (for --county Pike):
+# Searching ortho_phase3 tiles for Pike County...
+# Found 500 tiles
+# Estimated download size: 48500 MB
+#
+# Downloading to output/pike_ortho...
+# Done. 500 files saved to output/pike_ortho
