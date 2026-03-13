@@ -78,26 +78,41 @@ class TestLiveSTACConnection:
 
 
 class TestProductCoverage:
-    @pytest.mark.parametrize("product", [
-        "dem_phase1", "dem_phase2", "dem_phase3",
-    ])
+    @pytest.mark.parametrize(
+        "product",
+        [
+            "dem_phase1",
+            "dem_phase2",
+            "dem_phase3",
+        ],
+    )
     def test_dem_products(self, frankfort_bbox, product):
         """DEM products return tiles for Frankfort area."""
         tiles = abovepy.search(bbox=frankfort_bbox, product=product, max_items=3)
         assert len(tiles) > 0
         assert tiles.iloc[0]["product"] == product
 
-    @pytest.mark.parametrize("product", [
-        "ortho_phase1", "ortho_phase2", "ortho_phase3",
-    ])
+    @pytest.mark.parametrize(
+        "product",
+        [
+            "ortho_phase1",
+            "ortho_phase2",
+            "ortho_phase3",
+        ],
+    )
     def test_ortho_products(self, frankfort_bbox, product):
         """Ortho products return tiles for Frankfort area."""
         tiles = abovepy.search(bbox=frankfort_bbox, product=product, max_items=3)
         assert len(tiles) > 0
 
-    @pytest.mark.parametrize("product", [
-        "laz_phase1", "laz_phase2", "laz_phase3",
-    ])
+    @pytest.mark.parametrize(
+        "product",
+        [
+            "laz_phase1",
+            "laz_phase2",
+            "laz_phase3",
+        ],
+    )
     def test_laz_products(self, frankfort_bbox, product):
         """LiDAR products return tiles for Frankfort area."""
         tiles = abovepy.search(bbox=frankfort_bbox, product=product, max_items=3)
@@ -110,9 +125,15 @@ class TestProductCoverage:
 
 
 class TestCountySearch:
-    @pytest.mark.parametrize("county", [
-        "Franklin", "Fayette", "Pike", "Jefferson",
-    ])
+    @pytest.mark.parametrize(
+        "county",
+        [
+            "Franklin",
+            "Fayette",
+            "Pike",
+            "Jefferson",
+        ],
+    )
     def test_search_counties(self, county):
         """Multiple counties return DEM results."""
         tiles = abovepy.search(county=county, product="dem_phase3", max_items=5)
@@ -259,9 +280,17 @@ class TestLiveInfo:
         """info() includes all 9 known products."""
         df = abovepy.info()
         products = set(df["product"])
-        for p in ["dem_phase1", "dem_phase2", "dem_phase3",
-                   "ortho_phase1", "ortho_phase2", "ortho_phase3",
-                   "laz_phase1", "laz_phase2", "laz_phase3"]:
+        for p in [
+            "dem_phase1",
+            "dem_phase2",
+            "dem_phase3",
+            "ortho_phase1",
+            "ortho_phase2",
+            "ortho_phase3",
+            "laz_phase1",
+            "laz_phase2",
+            "laz_phase3",
+        ]:
             assert p in products, f"Missing product: {p}"
 
 
