@@ -42,14 +42,37 @@ PRODUCT_MAP = {
     "LiDAR Point Cloud Phase 1 (LAZ)": "laz_phase1",
     "LiDAR Point Cloud Phase 2 (COPC)": "laz_phase2",
     "LiDAR Point Cloud Phase 3 (COPC)": "laz_phase3",
+    "Oblique Phase 3 — Backward (3-inch)": "oblique_phase3_bwd",
+    "Oblique Phase 3 — Forward (3-inch)": "oblique_phase3_fwd",
+    "Oblique Phase 3 — Left (3-inch)": "oblique_phase3_left",
+    "Oblique Phase 3 — Right (3-inch)": "oblique_phase3_right",
 }
 
-# DEM-only subset for hillshade tool
+# DEM-only subset for hillshade/terrain tools
 DEM_PRODUCTS = [
     "DEM Phase 1 (5ft)",
     "DEM Phase 2 (2ft)",
     "DEM Phase 3 (2ft)",
 ]
+
+# Terrain algorithms available via TiTiler-pgSTAC
+TERRAIN_ALGORITHMS = [
+    "Hillshade",
+    "Slope",
+    "Contours",
+    "Terrain RGB",
+]
+
+# Oblique camera directions
+OBLIQUE_DIRECTIONS = ["Backward", "Forward", "Left", "Right"]
+
+# Map display names to abovepy direction keys
+OBLIQUE_DIRECTION_MAP = {
+    "Backward": "bwd",
+    "Forward": "fwd",
+    "Left": "left",
+    "Right": "right",
+}
 
 
 def make_county_param(required=True, default="Franklin"):

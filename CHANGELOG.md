@@ -4,6 +4,24 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.1] — 2026-03-16
+
+### Added
+
+- **ArcGIS Pro toolbox** — two new tools:
+  - *Terrain Tile Service* — server-side hillshade, slope, contour, and terrain RGB
+    via TiTiler (no download required)
+  - *Browse Oblique Imagery* — discover Phase 3 oblique frames by direction and season
+- Oblique products added to ArcGIS Pro product dropdown
+- Terrain algorithm and oblique direction constants in toolbox utilities
+
+### Fixed
+
+- Fixed UTF-8 mojibake in README (em-dashes and arrows rendered as garbage characters)
+- Fixed `ruff format` violations in new v1.1.0 modules
+- Fixed `mypy --strict` errors: `**kwargs` typing in titiler.py and viz.py,
+  leafmap import suppression in viz.py
+
 ## [1.1.0] — 2026-03-16
 
 ### Added
