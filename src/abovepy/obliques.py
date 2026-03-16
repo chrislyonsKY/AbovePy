@@ -106,9 +106,7 @@ def search_obliques(
     direction_lower = direction.lower()
     if direction_lower not in DIRECTIONS:
         valid = ", ".join(sorted(DIRECTIONS))
-        raise ValueError(
-            f"Invalid direction '{direction}'. Valid directions: {valid}"
-        )
+        raise ValueError(f"Invalid direction '{direction}'. Valid directions: {valid}")
 
     file_prefix = DIRECTIONS[direction_lower]
 
@@ -144,13 +142,15 @@ def search_obliques(
         tif_url = f"{S3_BASE_URL}/{key}"
         json_url = f"{S3_BASE_URL}/{key.replace('.tif', '.json')}"
 
-        results.append({
-            "frame_id": frame_id,
-            "tif_url": tif_url,
-            "json_url": json_url,
-            "season": season,
-            "direction": direction_lower,
-        })
+        results.append(
+            {
+                "frame_id": frame_id,
+                "tif_url": tif_url,
+                "json_url": json_url,
+                "season": season,
+                "direction": direction_lower,
+            }
+        )
 
         if len(results) >= max_items:
             break

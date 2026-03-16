@@ -59,9 +59,7 @@ def test_directions_mapping():
 
 @respx.mock
 def test_list_oblique_seasons():
-    respx.get(f"{S3_BASE_URL}/").mock(
-        return_value=httpx.Response(200, text=_SEASONS_XML)
-    )
+    respx.get(f"{S3_BASE_URL}/").mock(return_value=httpx.Response(200, text=_SEASONS_XML))
     seasons = list_oblique_seasons()
     assert "KY_KYAPED_2022_Season2_3IN" in seasons
     assert "KY_KYAPED_2023_Season1_3IN" in seasons
@@ -90,11 +88,10 @@ def test_search_obliques_basic():
 
 @respx.mock
 def test_search_obliques_explicit_season():
-    respx.get(f"{S3_BASE_URL}/").mock(
-        return_value=httpx.Response(200, text=_FRAMES_XML)
-    )
+    respx.get(f"{S3_BASE_URL}/").mock(return_value=httpx.Response(200, text=_FRAMES_XML))
     results = search_obliques(
-        direction="bwd", season="KY_KYAPED_2023_Season1_3IN",
+        direction="bwd",
+        season="KY_KYAPED_2023_Season1_3IN",
     )
     assert len(results) == 2
 

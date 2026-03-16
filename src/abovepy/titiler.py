@@ -167,6 +167,7 @@ def mosaic_tile_url(
 # pgSTAC helpers — collection-based (no individual COG URLs needed)
 # ---------------------------------------------------------------------------
 
+
 def _resolve_collection_id(product_or_collection: str) -> str:
     """Accept a product key (``dem_phase3``) or raw collection ID (``dem-phase3``)."""
     if product_or_collection in PRODUCTS:
@@ -541,9 +542,7 @@ def hillshade_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "hillshade"
-    extra["algorithm_params"] = (
-        f'{{"azimuth":{azimuth},"altitude":{altitude},"buffer":{buffer}}}'
-    )
+    extra["algorithm_params"] = f'{{"azimuth":{azimuth},"altitude":{altitude},"buffer":{buffer}}}'
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -590,9 +589,7 @@ def slope_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "slope"
-    extra["algorithm_params"] = (
-        f'{{"buffer":{buffer},"z_exaggeration":{z_exaggeration}}}'
-    )
+    extra["algorithm_params"] = f'{{"buffer":{buffer},"z_exaggeration":{z_exaggeration}}}'
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -644,8 +641,7 @@ def contour_tile_url(
     extra = dict(kwargs)
     extra["algorithm"] = "contours"
     extra["algorithm_params"] = (
-        f'{{"increment":{increment},"thickness":{thickness},'
-        f'"minz":{minz},"maxz":{maxz}}}'
+        f'{{"increment":{increment},"thickness":{thickness},"minz":{minz},"maxz":{maxz}}}'
     )
     return collection_tile_url(
         collection,

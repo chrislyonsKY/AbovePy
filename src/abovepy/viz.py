@@ -75,9 +75,7 @@ def tile_url(
         builder = _ALGORITHM_BUILDERS.get(algorithm)
         if builder is None:
             valid = ", ".join(sorted(_ALGORITHM_BUILDERS))
-            raise ValueError(
-                f"Unknown algorithm '{algorithm}'. Valid: {valid}"
-            )
+            raise ValueError(f"Unknown algorithm '{algorithm}'. Valid: {valid}")
         return builder(
             product,
             bbox=resolved_bbox,
@@ -200,8 +198,7 @@ def show(
         import leafmap  # type: ignore[import-untyped]
     except ImportError:
         raise ImportError(
-            "leafmap is required for show(). "
-            "Install it with: pip install abovepy[viz]"
+            "leafmap is required for show(). Install it with: pip install abovepy[viz]"
         ) from None
 
     resolved_bbox = _resolve_bbox(bbox, county)
@@ -229,6 +226,7 @@ def show(
         )
         if span > 0:
             import math
+
             default_zoom = int(math.log2(360 / span))
             default_zoom = max(5, min(default_zoom, 18))
 
@@ -257,5 +255,6 @@ def _resolve_bbox(
     """Resolve county name to bbox, or pass through bbox."""
     if county is not None:
         from abovepy.utils.bbox import get_county_bbox
+
         return get_county_bbox(county)
     return bbox
