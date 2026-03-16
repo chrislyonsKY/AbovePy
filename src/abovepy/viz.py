@@ -12,6 +12,8 @@ Two levels of functionality:
 
 from __future__ import annotations
 
+from typing import Any
+
 from abovepy._constants import TITILER_PGSTAC_ENDPOINT
 from abovepy.titiler import (
     DEFAULT_TILE_MATRIX_SET,
@@ -24,7 +26,7 @@ from abovepy.titiler import (
 )
 
 # Mapping from algorithm name to the terrain URL builder
-_ALGORITHM_BUILDERS = {
+_ALGORITHM_BUILDERS: dict[str, Any] = {
     "hillshade": hillshade_tile_url,
     "slope": slope_tile_url,
     "contours": contour_tile_url,
@@ -39,7 +41,7 @@ def tile_url(
     algorithm: str | None = None,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = TITILER_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a TileJSON URL for a product, with optional terrain algorithm.
 
@@ -76,13 +78,14 @@ def tile_url(
         if builder is None:
             valid = ", ".join(sorted(_ALGORITHM_BUILDERS))
             raise ValueError(f"Unknown algorithm '{algorithm}'. Valid: {valid}")
-        return builder(
+        result: str = builder(
             product,
             bbox=resolved_bbox,
             tile_matrix_set=tile_matrix_set,
             titiler_endpoint=titiler_endpoint,
             **kwargs,
         )
+        return result
 
     return collection_tile_url(
         product,
@@ -101,7 +104,7 @@ def preview_url(
     height: int = 512,
     fmt: str = "png",
     titiler_endpoint: str = TITILER_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a rendered preview image URL for a product + bbox.
 
@@ -158,7 +161,7 @@ def show(
     zoom: int | None = None,
     height: str = "600px",
     titiler_endpoint: str = TITILER_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> object:
     """Display an interactive tile map in a Jupyter notebook.
 
@@ -195,7 +198,7 @@ def show(
         If leafmap is not installed.
     """
     try:
-        import leafmap  # type: ignore[import-untyped]
+        import leafmap  # type: ignore[import-not-found]
     except ImportError:
         raise ImportError(
             "leafmap is required for show(). Install it with: pip install abovepy[viz]"

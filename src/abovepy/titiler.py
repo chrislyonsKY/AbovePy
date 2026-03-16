@@ -14,6 +14,7 @@ Two types of helpers are provided:
 
 from __future__ import annotations
 
+from typing import Any
 from urllib.parse import quote_plus, urlencode
 
 from abovepy._constants import TITILER_ENDPOINT, TITILER_PGSTAC_ENDPOINT
@@ -207,7 +208,7 @@ def collection_tile_url(
     bbox: tuple[float, float, float, float] | None = None,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a TileJSON URL for a STAC collection via TiTiler-pgSTAC.
 
@@ -249,7 +250,7 @@ def collection_map_url(
     bbox: tuple[float, float, float, float] | None = None,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate an interactive map viewer URL for a STAC collection.
 
@@ -306,7 +307,7 @@ def collection_bbox_url(
     height: int = 512,
     fmt: str = "png",
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a rendered image URL for a bbox from a STAC collection.
 
@@ -344,7 +345,7 @@ def collection_point_url(
     lon: float,
     lat: float,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a point query URL for a STAC collection.
 
@@ -382,7 +383,7 @@ def item_tile_url(
     item_id: str,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a TileJSON URL for a single STAC item.
 
@@ -415,7 +416,7 @@ def item_preview_url(
     item_id: str,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
     max_size: int = 1024,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a preview image URL for a single STAC item.
 
@@ -473,7 +474,7 @@ def item_statistics_url(
     collection: str,
     item_id: str,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a statistics URL for a single STAC item.
 
@@ -512,7 +513,7 @@ def hillshade_tile_url(
     buffer: int = 3,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a hillshade TileJSON URL using server-side DEM processing.
 
@@ -559,7 +560,7 @@ def slope_tile_url(
     z_exaggeration: float = 1.0,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a slope TileJSON URL using server-side DEM processing.
 
@@ -608,7 +609,7 @@ def contour_tile_url(
     maxz: int = 8000,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a contour-line TileJSON URL using server-side DEM processing.
 
@@ -657,7 +658,7 @@ def terrain_rgb_tile_url(
     bbox: tuple[float, float, float, float] | None = None,
     tile_matrix_set: str = DEFAULT_TILE_MATRIX_SET,
     titiler_endpoint: str = DEFAULT_PGSTAC_ENDPOINT,
-    **kwargs: str,
+    **kwargs: Any,
 ) -> str:
     """Generate a Mapbox Terrain-RGB encoded TileJSON URL.
 
