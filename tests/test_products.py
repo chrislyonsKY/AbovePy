@@ -16,8 +16,8 @@ def test_all_products_have_collection_ids():
         assert prod.collection_id, f"Product {key} missing collection_id"
 
 
-def test_nine_products_total():
-    assert len(PRODUCTS) == 9
+def test_thirteen_products_total():
+    assert len(PRODUCTS) == 13
 
 
 def test_get_product_valid():
@@ -43,6 +43,9 @@ def test_list_products_by_type():
     pcs = list_products(ProductType.POINTCLOUD)
     assert len(pcs) == 3
 
+    obliques = list_products(ProductType.OBLIQUE)
+    assert len(obliques) == 4
+
 
 def test_collection_id_format():
     """Verify collection IDs match the pattern from the AWS registry."""
@@ -62,8 +65,12 @@ def test_get_product_by_collection_invalid():
 
 
 def test_get_product_by_collection_all_products():
-    """Every product should be findable by its collection ID."""
-    for key, prod in PRODUCTS.items():
+    """Every product should be findable by its collection ID.
+
+    Oblique products share a collection ID (stub), so reverse lookup
+    returns one of the four — just verify we get a match.
+    """
+    for _key, prod in PRODUCTS.items():
         found = get_product_by_collection(prod.collection_id)
         assert found is not None
-        assert found.key == key
+        assert found.collection_id == prod.collection_id

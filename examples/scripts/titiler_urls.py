@@ -1,24 +1,43 @@
 """Generate TiTiler URLs for web map integration.
 
-Searches for a DEM tile, generates TiTiler tile/preview/stats URLs,
-and fetches raster statistics via httpx. Demonstrates how abovepy
-connects cloud-hosted tiles to web mapping frameworks.
+Demonstrates three tiers of tile URL generation:
+  1. COG URLs — standalone TiTiler (individual COG files)
+  2. pgSTAC collection URLs — collection-based (no individual URLs needed)
+  3. Terrain algorithm URLs — server-side hillshade, slope, contours
+  4. Registered search URLs — persistent virtual mosaics
 
 Usage:
     python titiler_urls.py
 
 Note:
-    This script generates valid TiTiler URLs for any TiTiler instance.
-    The stats fetch requires a running TiTiler (e.g., via docker-compose).
-    See examples/docker-compose.yml to run TiTiler locally.
+    All URL generation is local (no HTTP calls except the search registration
+    demo). The KyFromAbove TiTiler endpoints are used by default.
 """
 
 import abovepy
-from abovepy.titiler import cog_preview_url, cog_stats_url, cog_tile_url
+from abovepy.searches import (
+    search_info_url,
+    search_map_url,
+    search_tile_url,
+)
+from abovepy.titiler import (
+    cog_preview_url,
+    cog_stats_url,
+    cog_tile_url,
+    collection_map_url,
+    collection_tile_url,
+    contour_tile_url,
+    hillshade_tile_url,
+    slope_tile_url,
+    terrain_rgb_tile_url,
+)
+from abovepy.viz import tile_url, preview_url
 
 
 def main():
-    # Find a DEM tile near Frankfort
+    # ---------------------------------------------------------------
+    # 1. COG tile URLs (standalone TiTiler)
+    # ---------------------------------------------------------------
     print("=== Searching for a DEM tile ===")
     tiles = abovepy.search(
         bbox=(-84.88, 38.18, -84.86, 38.20),
@@ -35,83 +54,65 @@ def main():
     print(f"Using tile: {tile_id}")
     print(f"COG URL:    {cog_url}\n")
 
-    # Generate TiTiler URLs (default endpoint: https://titiler.xyz)
-    print("=== TiTiler URLs (default endpoint) ===")
-    tile_url = cog_tile_url(cog_url)
-    preview_url = cog_preview_url(cog_url, max_size=512)
-    stats_url = cog_stats_url(cog_url)
+    print("=== COG Tile URLs (standalone TiTiler) ===")
+    print(f"  TileJSON: {cog_tile_url(cog_url)}")
+    print(f"  Preview:  {cog_preview_url(cog_url, max_size=512)}")
+    print(f"  Stats:    {cog_stats_url(cog_url)}")
 
-    print(f"  TileJSON: {tile_url}")
-    print(f"  Preview:  {preview_url}")
-    print(f"  Stats:    {stats_url}")
+    # ---------------------------------------------------------------
+    # 2. pgSTAC collection URLs (no individual COG URLs needed)
+    # ---------------------------------------------------------------
+    print("\n=== pgSTAC Collection URLs ===")
+    print("  These only need a product name + optional bbox — no COG URLs!")
+    bbox = (-84.9, 38.15, -84.8, 38.25)
 
-    # Generate for a local TiTiler instance
-    local_endpoint = "http://localhost:8000"
-    print(f"\n=== TiTiler URLs (local: {local_endpoint}) ===")
-    local_tile_url = cog_tile_url(cog_url, titiler_endpoint=local_endpoint)
-    local_stats_url = cog_stats_url(cog_url, titiler_endpoint=local_endpoint)
+    print(f"  DEM tiles:   {collection_tile_url('dem_phase3', bbox=bbox)}")
+    print(f"  Ortho tiles: {collection_tile_url('ortho_phase3', bbox=bbox)}")
+    print(f"  Map viewer:  {collection_map_url('dem_phase3', bbox=bbox)}")
 
-    print(f"  TileJSON: {local_tile_url}")
-    print(f"  Stats:    {local_stats_url}")
+    # ---------------------------------------------------------------
+    # 3. Terrain analysis URLs (server-side algorithms)
+    # ---------------------------------------------------------------
+    print("\n=== Terrain Analysis URLs ===")
+    print(f"  Hillshade:   {hillshade_tile_url(bbox=bbox)}")
+    print(f"  Slope:       {slope_tile_url(bbox=bbox)}")
+    print(f"  Contours:    {contour_tile_url(bbox=bbox, increment=50)}")
+    print(f"  Terrain RGB: {terrain_rgb_tile_url(bbox=bbox)}")
 
-    # Fetch stats from a running TiTiler (optional — requires live server)
-    print("\n=== Fetching Stats (requires running TiTiler) ===")
+    # ---------------------------------------------------------------
+    # 4. Viz convenience helpers
+    # ---------------------------------------------------------------
+    print("\n=== Viz Convenience Helpers ===")
+    print(f"  tile_url (DEM):       {tile_url('dem_phase3', bbox=bbox)}")
+    print(f"  tile_url (hillshade): {tile_url('dem_phase3', bbox=bbox, algorithm='hillshade')}")
+    print(f"  tile_url (county):    {tile_url('dem_phase3', county='Franklin')}")
+    print(f"  preview_url:          {preview_url('dem_phase3', bbox=bbox)}")
+
+    # ---------------------------------------------------------------
+    # 5. Registered search (persistent virtual mosaic)
+    # ---------------------------------------------------------------
+    print("\n=== Registered Search (requires network) ===")
     try:
-        import httpx
-
-        resp = httpx.get(local_stats_url, timeout=10)
-        resp.raise_for_status()
-        stats = resp.json()
-
-        for band_name, band_stats in stats.items():
-            print(f"  {band_name}:")
-            print(f"    min:    {band_stats['min']:.2f}")
-            print(f"    max:    {band_stats['max']:.2f}")
-            print(f"    mean:   {band_stats['mean']:.2f}")
-            print(f"    stddev: {band_stats['std']:.2f}")
-    except httpx.ConnectError:
-        print("  TiTiler not running at localhost:8000.")
-        print("  Start it with: docker compose -f examples/docker-compose.yml up")
+        search_id = abovepy.register_search("dem_phase3", bbox=bbox)
+        print(f"  Search ID:  {search_id}")
+        print(f"  TileJSON:   {search_tile_url(search_id)}")
+        print(f"  Map viewer: {search_map_url(search_id)}")
+        print(f"  Info:       {search_info_url(search_id)}")
     except Exception as e:
-        print(f"  Could not fetch stats: {e}")
+        print(f"  Could not register search: {e}")
+        print("  (This requires the TiTiler-pgSTAC endpoint to be running)")
 
-    # Show how to use the TileJSON URL in a web map
+    # ---------------------------------------------------------------
+    # MapLibre GL JS usage example
+    # ---------------------------------------------------------------
     print("\n=== MapLibre GL JS Usage ===")
+    hs_url = hillshade_tile_url(bbox=bbox)
     print("  Add this source to your MapLibre map:")
-    print('  map.addSource("dem", {')
+    print('  map.addSource("hillshade", {')
     print('    type: "raster",')
-    print(f'    url: "{local_tile_url}"')
+    print(f'    url: "{hs_url}"')
     print("  });")
 
 
 if __name__ == "__main__":
     main()
-
-
-# Expected output:
-# =================================================================
-# === Searching for a DEM tile ===
-# Found 2 tiles
-# Using tile: N163E227
-# COG URL:    https://s3.us-west-2.amazonaws.com/kyfromabove/dem-phase3/N163E227.tif
-#
-# === TiTiler URLs (default endpoint) ===
-#   TileJSON: https://titiler.xyz/cog/tilejson.json?url=https%3A%2F%2Fs3.us-west-2...
-#   Preview:  https://titiler.xyz/cog/preview.png?url=https%3A%2F%2Fs3.us-west-2...&max_size=512
-#   Stats:    https://titiler.xyz/cog/statistics?url=https%3A%2F%2Fs3.us-west-2...
-#
-# === TiTiler URLs (local: http://localhost:8000) ===
-#   TileJSON: http://localhost:8000/cog/tilejson.json?url=https%3A%2F%2Fs3.us-west-2...
-#   Stats:    http://localhost:8000/cog/statistics?url=https%3A%2F%2Fs3.us-west-2...
-#
-# === Fetching Stats (requires running TiTiler) ===
-#   TiTiler not running at localhost:8000.
-#   Start it with: docker compose -f examples/docker-compose.yml up
-#
-# === MapLibre GL JS Usage ===
-#   Add this source to your MapLibre map:
-#   map.addSource("dem", {
-#     type: "raster",
-#     url: "http://localhost:8000/cog/tilejson.json?url=https%3A%2F%2Fs3.us-west-2..."
-#   });
-# =================================================================

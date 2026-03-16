@@ -1,17 +1,23 @@
 
 <p align="center">
+  <img src="docs/banner.png" alt="AbovePy — Python access to Kentucky From Above STAC imagery, LiDAR, and elevation data">
+</p>
+
+---
+<p align="center">
   <a href="https://pypi.org/project/abovepy/"><img src="https://img.shields.io/pypi/v/abovepy?color=8B5CF6&style=flat-square" alt="PyPI version"></a>
   <a href="https://pypi.org/project/abovepy/"><img src="https://img.shields.io/pypi/pyversions/abovepy?style=flat-square" alt="Python versions"></a>
   <a href="https://github.com/chrislyonsKY/AbovePy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/chrislyonsKY/AbovePy/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
   <a href="https://github.com/chrislyonsKY/AbovePy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
   <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
+  
 </p>
 
 # abovepy
 
-**KyFromAbove LiDAR, DEM, and orthoimagery data access for Python.**
+**KyFromAbove LiDAR, DEM, orthoimagery, and oblique imagery data access for Python.**
 
-Kentucky's [KyFromAbove](https://kyfromabove.ky.gov/) program provides statewide 2ft DEMs, 3-inch orthoimagery, and COPC LiDAR point clouds — all publicly available on S3 with a STAC API for discovery. `abovepy` gives you Pythonic access to all of it. No credentials required.
+Kentucky's [KyFromAbove](https://kyfromabove.ky.gov/) program provides statewide 2ft DEMs, 3-inch orthoimagery, 3-inch oblique imagery, and COPC LiDAR point clouds — all publicly available on S3 with a STAC API for discovery. `abovepy` gives you Pythonic access to all of it, plus server-side terrain analysis via TiTiler. No credentials required.
 
 ## Install
 
@@ -78,7 +84,54 @@ print(abovepy.info())
 #   dem_phase2     DEM Phase 2 (2ft)           COG     2ft         2      EPSG:3089
 #   dem_phase3     DEM Phase 3 (2ft)           COG     2ft         3      EPSG:3089
 #   ortho_phase1   Orthoimagery Phase 1 ...    COG     6in         1      EPSG:3089
-#   ...
+#   ...plus oblique products
+```
+
+### Terrain analysis (server-side)
+
+Generate hillshade, slope, and contour tiles directly from the TiTiler-pgSTAC server — no downloads needed:
+
+```python
+from abovepy.titiler import hillshade_tile_url, slope_tile_url, contour_tile_url
+
+# Hillshade TileJSON URL — use in MapLibre/Leaflet/leafmap
+url = hillshade_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25))
+
+# Slope in degrees
+url = slope_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25))
+
+# Contour lines every 50ft
+url = contour_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25), increment=50)
+```
+
+### Interactive notebook maps
+
+```python
+# Display a hillshade map in Jupyter (requires pip install abovepy[viz])
+m = abovepy.show("dem_phase3", county="Franklin", algorithm="hillshade")
+m  # renders interactive leafmap
+```
+
+### Persistent virtual mosaics
+
+Register a search with TiTiler-pgSTAC to get a shareable tile URL:
+
+```python
+search_id = abovepy.register_search("dem_phase3", bbox=(-84.9, 38.15, -84.8, 38.25))
+from abovepy.searches import search_tile_url
+url = search_tile_url(search_id)  # stable TileJSON URL
+```
+
+### Oblique imagery
+
+Access Phase 3 oblique imagery from 4 camera directions (backward, forward, left, right):
+
+```python
+from abovepy.obliques import list_oblique_seasons, search_obliques
+
+seasons = list_oblique_seasons()
+frames = search_obliques(direction="bwd", season=seasons[-1], max_items=10)
+# Each frame has: frame_id, tif_url, json_url, season, direction
 ```
 
 ## Examples
@@ -177,11 +230,23 @@ Combine ortho, DEM, hillshade, and slope for a single area:
 
 ### Product Gallery
 
-One tile from each product type — DEM Phase 1/2/3 and Ortho Phase 3:
+One tile from each product type - DEM Phase 1/2/3 and Ortho Phase 3:
 
 ![Product Gallery](examples/output/product_gallery.png)
 
-See [examples/scripts/](examples/scripts/) for the full source code behind each image.
+### pgSTAC Terrain Previews
+
+Server-side DEM elevation, hillshade, and ortho previews generated from TiTiler-pgSTAC:
+
+![pgSTAC Terrain Previews](examples/output/pgstac_terrain_previews.png)
+
+### Oblique Site Inspection
+
+Four-direction oblique frame coverage summarized for rapid site inspection:
+
+![Oblique Site Inspection](examples/output/oblique_site_inspection.png)
+
+See [examples/scripts/](examples/scripts/) for the full source code behind each image and demo.
 
 ## Available Products
 
@@ -196,6 +261,12 @@ See [examples/scripts/](examples/scripts/) for the full source code behind each 
 | `laz_phase1` | Varies | LAZ | `laz-phase1` |
 | `laz_phase2` | Varies | COPC | `laz-phase2` |
 | `laz_phase3` | Varies | COPC | `laz-phase3` |
+| `oblique_phase3_bwd` | 3 inch | COG | `obliques-phase3`* |
+| `oblique_phase3_fwd` | 3 inch | COG | `obliques-phase3`* |
+| `oblique_phase3_left` | 3 inch | COG | `obliques-phase3`* |
+| `oblique_phase3_right` | 3 inch | COG | `obliques-phase3`* |
+
+\* Oblique STAC collection pending — use `search_obliques()` for S3-based discovery.
 
 All data is natively in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy accepts bounding boxes in EPSG:4326 by default.
 
@@ -216,16 +287,21 @@ See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/abovepy/tutorials/
 abovepy generates TiTiler-compatible URLs for web map integration:
 
 ```python
-from abovepy.titiler import cog_tile_url
+from abovepy.titiler import cog_tile_url, collection_tile_url, hillshade_tile_url
 
-url = cog_tile_url(
-    cog_url=tiles.iloc[0].asset_url,
-    titiler_endpoint="http://localhost:8000"
-)
-# Use with MapLibre GL JS or Leaflet
+# Individual COG via standalone TiTiler
+url = cog_tile_url(tiles.iloc[0].asset_url)
+
+# Entire collection via TiTiler-pgSTAC (no individual URLs needed)
+url = collection_tile_url("dem_phase3", bbox=(-84.9, 38.15, -84.8, 38.25))
+
+# Server-side hillshade
+url = hillshade_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25))
+
+# Use any of these with MapLibre GL JS, Leaflet, or leafmap
 ```
 
-A `docker-compose.yml` for local TiTiler is in `examples/`.
+KyFromAbove TiTiler endpoints are used by default. A `docker-compose.yml` for local TiTiler is in `examples/`.
 
 ## Advanced: Direct STAC Access
 
