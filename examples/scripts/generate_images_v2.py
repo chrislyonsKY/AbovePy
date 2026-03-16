@@ -77,20 +77,21 @@ def generate_dem_change_detection():
     vmin = min(dem1.min(), dem3.min())
     vmax = max(dem1.max(), dem3.max())
 
-    axes[0].imshow(dem1, cmap="terrain", vmin=vmin, vmax=vmax)
+    axes[0].imshow(dem1, cmap="cividis", vmin=vmin, vmax=vmax)
     axes[0].set_title("DEM Phase 1 (5ft)")
     axes[0].axis("off")
 
-    axes[1].imshow(dem3, cmap="terrain", vmin=vmin, vmax=vmax)
+    axes[1].imshow(dem3, cmap="cividis", vmin=vmin, vmax=vmax)
     axes[1].set_title("DEM Phase 3 (2ft)")
     axes[1].axis("off")
 
     # Tighter color scale based on actual data percentiles
+    # Using PuOr (purple-orange) — colorblind-safe diverging palette
     clim = max(np.percentile(np.abs(change), 99), 5)
-    im = axes[2].imshow(change, cmap="RdBu", vmin=-clim, vmax=clim)
+    im = axes[2].imshow(change, cmap="PuOr", vmin=-clim, vmax=clim)
     axes[2].set_title("Elevation Change (ft)")
     axes[2].axis("off")
-    fig.colorbar(im, ax=axes[2], label="Change (ft)\nBlue=cut  Red=fill",
+    fig.colorbar(im, ax=axes[2], label="Change (ft)\nPurple=cut  Orange=fill",
                  shrink=0.8)
 
     plt.suptitle("DEM Change Detection — Pike County Mining Area",
@@ -136,7 +137,7 @@ def generate_flood_inundation():
         display = dem.copy()
         display[flooded] = np.nan
 
-        axes[i].imshow(dem, cmap="terrain", alpha=0.7)
+        axes[i].imshow(dem, cmap="cividis", alpha=0.7)
         axes[i].imshow(
             np.where(flooded, 1, np.nan),
             cmap="Blues", vmin=0, vmax=1.5, alpha=0.7,
@@ -187,7 +188,7 @@ def generate_flood_gif():
         water_level = river_level + rise
         flooded = (dem <= water_level) & (dem > 0)
 
-        ax.imshow(dem, cmap="terrain", alpha=0.8)
+        ax.imshow(dem, cmap="cividis", alpha=0.8)
         ax.imshow(
             np.where(flooded, 1.0, np.nan),
             cmap="Blues", vmin=0, vmax=1.5, alpha=0.7,
@@ -244,17 +245,19 @@ def generate_slope_aspect():
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
-    axes[0].imshow(dem, cmap="terrain")
+    axes[0].imshow(dem, cmap="cividis")
     axes[0].set_title("Elevation (ft)")
     axes[0].axis("off")
 
-    im1 = axes[1].imshow(slope_deg, cmap="YlOrRd",
+    im1 = axes[1].imshow(slope_deg, cmap="inferno",
                          norm=Normalize(vmin=0, vmax=45))
     axes[1].set_title("Slope (degrees)")
     axes[1].axis("off")
     fig.colorbar(im1, ax=axes[1], shrink=0.8, label="Degrees")
 
-    im2 = axes[2].imshow(aspect, cmap="hsv",
+    # twilight_shifted is a cyclic colormap suitable for aspect (0=360)
+    # and is perceptually uniform / colorblind-safe
+    im2 = axes[2].imshow(aspect, cmap="twilight_shifted",
                          norm=Normalize(vmin=0, vmax=360))
     axes[2].set_title("Aspect (compass bearing)")
     axes[2].axis("off")
@@ -355,11 +358,12 @@ def generate_contour_map():
     levels_major = np.arange(
         int(dem.min() / 50) * 50, dem.max(), 50,
     )
-    ax.contour(dem, levels=levels_minor, colors="sienna",
+    ax.contour(dem, levels=levels_minor, colors="#884422",
                linewidths=0.3, alpha=0.5)
-    cs = ax.contour(dem, levels=levels_major, colors="sienna",
+    cs = ax.contour(dem, levels=levels_major, colors="#663311",
                     linewidths=1.0)
-    ax.clabel(cs, inline=True, fontsize=7, fmt="%.0f ft")
+    ax.clabel(cs, inline=True, fontsize=7, fmt="%.0f ft",
+              colors=_TITLE_COLOR)
 
     ax.set_title("Elevation Contours over Hillshade — Frankfort, KY",
                  color=_TITLE_COLOR)
@@ -378,7 +382,8 @@ def generate_multi_county_coverage():
 
     print("=== Multi-County Coverage Map ===")
     counties = ["Franklin", "Woodford", "Anderson", "Scott", "Fayette"]
-    colors = ["#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63"]
+    # Paul Tol's colorblind-safe qualitative palette
+    colors = ["#0077BB", "#EE7733", "#009988", "#CC3311", "#33BBEE"]
 
     fig, ax = plt.subplots(figsize=(12, 10))
 
@@ -447,8 +452,8 @@ def generate_elevation_profile():
     ax1.axis("off")
 
     # Profile plot
-    ax2.fill_between(distances, elev_profile, alpha=0.3, color="teal")
-    ax2.plot(distances, elev_profile, color="teal", linewidth=1)
+    ax2.fill_between(distances, elev_profile, alpha=0.3, color="#0077BB")
+    ax2.plot(distances, elev_profile, color="#0077BB", linewidth=1)
     ax2.set_xlabel("Distance (ft)")
     ax2.set_ylabel("Elevation (ft)")
     ax2.set_title("Elevation Profile — Cross-Valley Transect")
@@ -510,7 +515,7 @@ def generate_multi_product_assessment():
     axes[0, 0].axis("off")
 
     # DEM
-    im1 = axes[0, 1].imshow(dem, cmap="terrain")
+    im1 = axes[0, 1].imshow(dem, cmap="cividis")
     axes[0, 1].set_title("Elevation (ft)")
     axes[0, 1].axis("off")
     fig.colorbar(im1, ax=axes[0, 1], shrink=0.8)
@@ -521,7 +526,7 @@ def generate_multi_product_assessment():
     axes[1, 0].axis("off")
 
     # Slope
-    im3 = axes[1, 1].imshow(slope_deg, cmap="YlOrRd", vmin=0, vmax=30)
+    im3 = axes[1, 1].imshow(slope_deg, cmap="inferno", vmin=0, vmax=30)
     axes[1, 1].set_title("Slope (degrees)")
     axes[1, 1].axis("off")
     fig.colorbar(im3, ax=axes[1, 1], shrink=0.8)
@@ -547,9 +552,9 @@ def generate_product_gallery():
     bbox = (-84.87, 38.19, -84.86, 38.20)
 
     products = [
-        ("dem_phase1", "DEM Phase 1 (5ft)", "terrain"),
-        ("dem_phase2", "DEM Phase 2 (2ft)", "terrain"),
-        ("dem_phase3", "DEM Phase 3 (2ft)", "terrain"),
+        ("dem_phase1", "DEM Phase 1 (5ft)", "cividis"),
+        ("dem_phase2", "DEM Phase 2 (2ft)", "cividis"),
+        ("dem_phase3", "DEM Phase 3 (2ft)", "cividis"),
         ("ortho_phase3", "Ortho Phase 3 (3in)", None),
     ]
 

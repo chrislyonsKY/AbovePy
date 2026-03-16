@@ -1,6 +1,6 @@
 # Examples
 
-Working examples for abovepy — KyFromAbove data access for Python.
+Working examples for abovepy - KyFromAbove data access for Python.
 
 ## Scripts
 
@@ -15,8 +15,12 @@ Working examples for abovepy — KyFromAbove data access for Python.
 | `scripts/batch_county_search.py` | Search multiple counties, aggregate results |
 | `scripts/inspect_remote_tile.py` | Inspect tile metadata without downloading |
 | `scripts/ortho_rgb_extract.py` | Extract RGB bands from orthoimagery |
-| `scripts/titiler_urls.py` | Generate TiTiler URLs for web maps |
+| `scripts/titiler_urls.py` | Generate TiTiler, pgSTAC, terrain, viz, and registered-search URLs |
+| `scripts/pgstac_collection_viewer.py` | Explore pgSTAC collection, bbox, point, and item endpoints |
+| `scripts/pgstac_terrain_tiles.py` | Preview terrain algorithms, viz helpers, and persistent search URLs |
 | `scripts/export_search_results.py` | Export search results to GeoJSON/GPKG/CSV |
+| `scripts/explore_obliques.py` | List oblique seasons, products, and sample frames from S3 |
+| `scripts/oblique_site_inspection.py` | Build a 4-direction oblique site-inspection summary image |
 | `scripts/kentucky_river_rem.py` | Relative Elevation Model of the Kentucky River |
 | `scripts/mine_volume_estimate.py` | Surface mine cut/fill volume estimation |
 
@@ -59,6 +63,13 @@ python scripts/kentucky_river_rem.py
 
 # Mine volume estimation (needs scipy, rasterio, geopandas)
 python scripts/mine_volume_estimate.py
+
+# pgSTAC terrain previews + registered search demo
+python scripts/pgstac_terrain_tiles.py
+
+# Oblique imagery discovery + site inspection summary
+python scripts/explore_obliques.py
+python scripts/oblique_site_inspection.py
 
 # County ortho download
 python scripts/county_ortho_download.py --county Pike

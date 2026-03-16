@@ -38,9 +38,12 @@ from abovepy._exceptions import (
 )
 from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
+from abovepy.obliques import list_oblique_seasons, search_obliques
 from abovepy.products import Product, ProductType, list_products
+from abovepy.searches import register_search
 from abovepy.stac import clear_cache
 from abovepy.utils.bbox import list_counties
+from abovepy.viz import preview_url, show, tile_url
 
 if TYPE_CHECKING:
     import geopandas as gpd
@@ -215,8 +218,14 @@ __all__ = [
     "download",
     "info",
     "list_counties",
+    "list_oblique_seasons",
     "list_products",
     "mosaic",
+    "preview_url",
     "read",
+    "register_search",
     "search",
+    "search_obliques",
+    "show",
+    "tile_url",
 ]
