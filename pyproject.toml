@@ -47,6 +47,7 @@ all = ["abovepy[lidar,viz,s3]"]
 dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
+    "pytest-timeout>=2.2",
     "respx>=0.20",
     "ruff>=0.3",
     "mypy>=1.8",
