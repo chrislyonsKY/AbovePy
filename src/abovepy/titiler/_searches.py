@@ -12,7 +12,7 @@ from __future__ import annotations
 from urllib.parse import urlencode
 
 from abovepy._constants import TITILER_PGSTAC_ENDPOINT
-from abovepy.titiler import DEFAULT_TILE_MATRIX_SET, _resolve_collection_id
+from abovepy.titiler._pgstac import DEFAULT_TILE_MATRIX_SET, _resolve_collection_id
 
 DEFAULT_PGSTAC_ENDPOINT = TITILER_PGSTAC_ENDPOINT
 
@@ -66,7 +66,6 @@ def register_search(
     resp.raise_for_status()
 
     data = resp.json()
-    # The response contains an "id" field with the search hash
     return str(data["id"])
 
 

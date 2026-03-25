@@ -40,8 +40,8 @@ from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.obliques import list_oblique_seasons, search_obliques
 from abovepy.products import Product, ProductType, list_products
-from abovepy.searches import register_search
 from abovepy.stac import clear_cache
+from abovepy.titiler import register_search
 from abovepy.utils.bbox import list_counties
 from abovepy.viz import preview_url, show, tile_url
 

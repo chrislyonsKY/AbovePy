@@ -1,171 +1,19 @@
-"""TiTiler URL helpers — generates tile URLs for web map integration.
+"""TiTiler-pgSTAC URL helpers — collection-based and item-based.
 
-This module does NOT depend on or import TiTiler. It constructs URLs
-that a running TiTiler instance can serve. TiTiler itself is external.
-
-Two types of helpers are provided:
-
-* **COG / Mosaic** — for standalone TiTiler (``/cog/...``, ``/mosaic/...``).
-  These require individual COG URLs as parameters.
-* **pgSTAC** — for TiTiler-pgSTAC (``/collections/...``, ``/searches/...``).
-  These work against the STAC database directly so you only need a
-  collection ID and optional bbox — no individual asset URLs required.
+These work against the STAC database directly so you only need a
+collection ID and optional bbox — no individual asset URLs required.
 """
 
 from __future__ import annotations
 
-from urllib.parse import quote_plus, urlencode
+from urllib.parse import urlencode
 
-from abovepy._constants import TITILER_ENDPOINT, TITILER_PGSTAC_ENDPOINT
+from abovepy._constants import TITILER_PGSTAC_ENDPOINT
 from abovepy.products import PRODUCTS
 
-DEFAULT_TITILER_ENDPOINT = TITILER_ENDPOINT
 DEFAULT_PGSTAC_ENDPOINT = TITILER_PGSTAC_ENDPOINT
 DEFAULT_TILE_MATRIX_SET = "WebMercatorQuad"
 
-
-def cog_tile_url(
-    cog_url: str,
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-) -> str:
-    """Generate a TiTiler tile URL for a COG.
-
-    Parameters
-    ----------
-    cog_url : str
-        URL to the Cloud-Optimized GeoTIFF.
-    titiler_endpoint : str
-        TiTiler service URL.
-
-    Returns
-    -------
-    str
-        TileJSON URL for use with MapLibre/Leaflet.
-    """
-    encoded = quote_plus(cog_url)
-    return f"{titiler_endpoint}/cog/tilejson.json?url={encoded}"
-
-
-def cog_preview_url(
-    cog_url: str,
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-    max_size: int = 1024,
-) -> str:
-    """Generate a TiTiler preview image URL.
-
-    Parameters
-    ----------
-    cog_url : str
-        URL to the COG.
-    titiler_endpoint : str
-        TiTiler service URL.
-    max_size : int
-        Maximum dimension in pixels.
-
-    Returns
-    -------
-    str
-        Preview PNG URL.
-    """
-    encoded = quote_plus(cog_url)
-    return f"{titiler_endpoint}/cog/preview.png?url={encoded}&max_size={max_size}"
-
-
-def cog_stats_url(
-    cog_url: str,
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-) -> str:
-    """Generate a TiTiler statistics URL for a COG.
-
-    Parameters
-    ----------
-    cog_url : str
-        URL to the COG.
-    titiler_endpoint : str
-        TiTiler service URL.
-
-    Returns
-    -------
-    str
-        Statistics JSON URL.
-    """
-    encoded = quote_plus(cog_url)
-    return f"{titiler_endpoint}/cog/statistics?url={encoded}"
-
-
-def cog_info_url(
-    cog_url: str,
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-) -> str:
-    """Generate a TiTiler info URL for a COG.
-
-    Parameters
-    ----------
-    cog_url : str
-        URL to the COG.
-    titiler_endpoint : str
-        TiTiler service URL.
-
-    Returns
-    -------
-    str
-        Info JSON URL (bounds, CRS, band info).
-    """
-    encoded = quote_plus(cog_url)
-    return f"{titiler_endpoint}/cog/info?url={encoded}"
-
-
-def cog_bounds_url(
-    cog_url: str,
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-) -> str:
-    """Generate a TiTiler bounds URL for a COG.
-
-    Parameters
-    ----------
-    cog_url : str
-        URL to the COG.
-    titiler_endpoint : str
-        TiTiler service URL.
-
-    Returns
-    -------
-    str
-        Bounds JSON URL.
-    """
-    encoded = quote_plus(cog_url)
-    return f"{titiler_endpoint}/cog/bounds?url={encoded}"
-
-
-def mosaic_tile_url(
-    cog_urls: list[str],
-    titiler_endpoint: str = DEFAULT_TITILER_ENDPOINT,
-) -> str:
-    """Generate a TiTiler mosaic TileJSON URL from multiple COGs.
-
-    This is the programmatic equivalent of the MosaicJSON approach used
-    in KyFromAbove GIS workshop materials — but constructed as a URL
-    rather than requiring a separate mosaic JSON file.
-
-    Parameters
-    ----------
-    cog_urls : list[str]
-        URLs to Cloud-Optimized GeoTIFFs.
-    titiler_endpoint : str
-        TiTiler service URL.
-
-    Returns
-    -------
-    str
-        TileJSON URL for the mosaic, usable with MapLibre/Leaflet.
-    """
-    params = "&".join(f"url={quote_plus(u)}" for u in cog_urls)
-    return f"{titiler_endpoint}/mosaic/tilejson.json?{params}"
-
-
-# ---------------------------------------------------------------------------
-# pgSTAC helpers — collection-based (no individual COG URLs needed)
-# ---------------------------------------------------------------------------
 
 def _resolve_collection_id(product_or_collection: str) -> str:
     """Accept a product key (``dem_phase3``) or raw collection ID (``dem-phase3``)."""
@@ -201,6 +49,11 @@ def _pgstac_query_string(
     return urlencode(params) if params else ""
 
 
+# ---------------------------------------------------------------------------
+# Collection helpers
+# ---------------------------------------------------------------------------
+
+
 def collection_tile_url(
     collection: str,
     bbox: tuple[float, float, float, float] | None = None,
@@ -210,14 +63,10 @@ def collection_tile_url(
 ) -> str:
     """Generate a TileJSON URL for a STAC collection via TiTiler-pgSTAC.
 
-    This is the simplest way to get dynamic tiles for KyFromAbove data —
-    just provide a product name and optional bbox.
-
     Parameters
     ----------
     collection : str
-        Product key (e.g., ``"dem_phase3"``) or STAC collection ID
-        (e.g., ``"dem-phase3"``).
+        Product key (e.g., ``"dem_phase3"``) or STAC collection ID.
     bbox : tuple, optional
         Bounding box filter as (xmin, ymin, xmax, ymax) in EPSG:4326.
     tile_matrix_set : str
@@ -231,11 +80,6 @@ def collection_tile_url(
     -------
     str
         TileJSON URL for use with MapLibre / Leaflet.
-
-    Examples
-    --------
-    >>> collection_tile_url("dem_phase3", bbox=(-84.9, 38.15, -84.8, 38.25))
-    'https://.../{tileMatrixSetId}/tilejson.json?bbox=...'
     """
     cid = _resolve_collection_id(collection)
     qs = _pgstac_query_string(bbox=bbox, **kwargs)
@@ -372,7 +216,7 @@ def collection_point_url(
 
 
 # ---------------------------------------------------------------------------
-# pgSTAC helpers — item-based (single STAC item)
+# Item helpers
 # ---------------------------------------------------------------------------
 
 
@@ -522,9 +366,9 @@ def hillshade_tile_url(
     bbox : tuple, optional
         Bounding box filter (xmin, ymin, xmax, ymax) in EPSG:4326.
     azimuth : float
-        Light source azimuth in degrees (0–360). Default 315 (NW).
+        Light source azimuth in degrees (0-360). Default 315 (NW).
     altitude : float
-        Light source altitude in degrees (0–90). Default 45.
+        Light source altitude in degrees (0-90). Default 45.
     buffer : int
         Edge buffer in pixels to reduce tile-edge artifacts. Default 3.
     tile_matrix_set : str
@@ -563,8 +407,6 @@ def slope_tile_url(
     **kwargs: str,
 ) -> str:
     """Generate a slope TileJSON URL using server-side DEM processing.
-
-    Slope values are in degrees (0–90).
 
     Parameters
     ----------
@@ -624,7 +466,7 @@ def contour_tile_url(
     increment : int
         Contour interval in elevation units. Default 35.
     thickness : int
-        Line thickness in pixels (0–10). Default 1.
+        Line thickness in pixels (0-10). Default 1.
     minz : int
         Minimum elevation to contour. Default -12000.
     maxz : int
@@ -664,9 +506,6 @@ def terrain_rgb_tile_url(
     **kwargs: str,
 ) -> str:
     """Generate a Mapbox Terrain-RGB encoded TileJSON URL.
-
-    Encodes elevation into RGB channels for use with MapLibre GL JS
-    terrain and 3D hillshade rendering.
 
     Parameters
     ----------
