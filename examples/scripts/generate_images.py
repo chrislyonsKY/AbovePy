@@ -1,6 +1,10 @@
 """Generate output PNG images for all examples.
 
 Produces sample images that are checked into the repo for documentation.
+All visualizations follow WCAG 2.1 AA guidelines:
+  - Text contrast >= 4.5:1 (normal) / 3:1 (large)
+  - Colorblind-safe palettes (no red-green reliance)
+
 Requires: pip install abovepy[all] matplotlib
 
 Usage:
@@ -15,6 +19,25 @@ import abovepy
 
 OUTPUT = Path(__file__).parent.parent / "output"
 OUTPUT.mkdir(parents=True, exist_ok=True)
+
+# WCAG 2.1 AA compliant text colors
+# #222222 on white = 17.4:1 contrast ratio
+# #333333 on white = 12.6:1 contrast ratio
+_TITLE_COLOR = "#222222"
+_LABEL_COLOR = "#333333"
+
+
+def _apply_wcag_style(fig, axes_list):
+    """Apply WCAG 2.1 AA compliant text colors to all figure text."""
+    fig.patch.set_facecolor("white")
+    for text in fig.texts:
+        text.set_color(_TITLE_COLOR)
+    for ax in axes_list:
+        ax.title.set_color(_TITLE_COLOR)
+        ax.xaxis.label.set_color(_LABEL_COLOR)
+        ax.yaxis.label.set_color(_LABEL_COLOR)
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_color(_LABEL_COLOR)
 
 
 def generate_stream_window():
@@ -41,13 +64,15 @@ def generate_stream_window():
     extent = [t[2], t[2] + data.shape[2] * t[0],
               t[5] + data.shape[1] * t[4], t[5]]
     im = ax.imshow(
-        data.squeeze(), cmap="terrain", extent=extent
+        data.squeeze(), cmap="cividis", extent=extent
     )
-    fig.colorbar(im, ax=ax, label="Elevation (ft)")
+    cb = fig.colorbar(im, ax=ax, label="Elevation (ft)")
+    cb.ax.yaxis.label.set_color(_LABEL_COLOR)
     ax.set_title("Streamed DEM Window — Frankfort, KY")
     ax.set_xlabel("Easting (ft, EPSG:3089)")
     ax.set_ylabel("Northing (ft)")
     ax.ticklabel_format(style="plain", useOffset=False)
+    _apply_wcag_style(fig, [ax])
     plt.tight_layout()
     path = OUTPUT / "stream_window.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -80,6 +105,7 @@ def generate_ortho_rgb():
         ax.imshow(rgb)
         ax.set_title("Ortho Phase 3 — KY State Capitol")
         ax.axis("off")
+        _apply_wcag_style(fig, [ax])
         plt.tight_layout()
         path = OUTPUT / "ortho_rgb.png"
         plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -115,7 +141,7 @@ def generate_compare_phases():
     vmax = max(data1.max(), data3.max())
 
     axes[0].imshow(
-        data1.squeeze(), cmap="terrain",
+        data1.squeeze(), cmap="cividis",
         vmin=vmin, vmax=vmax,
     )
     axes[0].set_title(
@@ -124,7 +150,7 @@ def generate_compare_phases():
     axes[0].axis("off")
 
     im = axes[1].imshow(
-        data3.squeeze(), cmap="terrain",
+        data3.squeeze(), cmap="cividis",
         vmin=vmin, vmax=vmax,
     )
     axes[1].set_title(
@@ -133,7 +159,9 @@ def generate_compare_phases():
     axes[1].axis("off")
 
     fig.colorbar(im, cax=axes[2], label="Elevation (ft)")
-    plt.suptitle("DEM Phase Comparison — Frankfort, KY")
+    plt.suptitle("DEM Phase Comparison — Frankfort, KY",
+                 color=_TITLE_COLOR)
+    _apply_wcag_style(fig, list(axes))
     plt.tight_layout()
     path = OUTPUT / "compare_dem_phases.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -154,8 +182,8 @@ def generate_search_map():
     fig, ax = plt.subplots(figsize=(10, 8))
     tiles.plot(
         ax=ax,
-        edgecolor="teal",
-        facecolor="teal",
+        edgecolor="#0077BB",
+        facecolor="#0077BB",
         alpha=0.3,
         linewidth=0.5,
     )
@@ -164,6 +192,7 @@ def generate_search_map():
     )
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
+    _apply_wcag_style(fig, [ax])
     plt.tight_layout()
     path = OUTPUT / "search_results_map.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -203,13 +232,15 @@ def generate_hillshade():
     hs = np.clip(hs * 255, 0, 255).astype(np.uint8)
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    axes[0].imshow(dem, cmap="terrain")
+    axes[0].imshow(dem, cmap="cividis")
     axes[0].set_title("DEM Phase 3 (2ft)")
     axes[0].axis("off")
     axes[1].imshow(hs, cmap="gray")
     axes[1].set_title("Hillshade (az=315, alt=45)")
     axes[1].axis("off")
-    plt.suptitle("Frankfort, KY — Hillshade from Streamed DEM")
+    plt.suptitle("Frankfort, KY — Hillshade from Streamed DEM",
+                 color=_TITLE_COLOR)
+    _apply_wcag_style(fig, list(axes))
     plt.tight_layout()
     path = OUTPUT / "hillshade.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -350,12 +381,12 @@ def generate_rem():
     # Plot
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-    axes[0].imshow(dem, cmap="terrain")
+    axes[0].imshow(dem, cmap="cividis")
     axes[0].set_title("DEM Phase 3 (2ft)")
     axes[0].axis("off")
 
     im = axes[1].imshow(
-        rem, cmap="RdYlBu_r", vmin=0, vmax=80
+        rem, cmap="viridis", vmin=0, vmax=80
     )
     # Overlay river (reproject to pixel coords)
     rc = []
@@ -368,14 +399,16 @@ def generate_rem():
             rc.append((c, r))
     if rc:
         rx, ry = zip(*rc, strict=False)
-        axes[1].plot(rx, ry, "k-", linewidth=1, alpha=0.7)
+        axes[1].plot(rx, ry, color="white", linewidth=1.5, alpha=0.9)
     axes[1].set_title("REM — Height Above River (ft)")
     axes[1].axis("off")
     fig.colorbar(im, ax=axes[1], label="Feet above river")
 
     plt.suptitle(
-        "Kentucky River REM — Frankfort, KY"
+        "Kentucky River REM — Frankfort, KY",
+        color=_TITLE_COLOR,
     )
+    _apply_wcag_style(fig, list(axes))
     plt.tight_layout()
     path = OUTPUT / "kentucky_river_rem.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")
@@ -553,30 +586,32 @@ def generate_mine_volume():
     # Plot
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-    axes[0].imshow(dem, cmap="terrain")
+    axes[0].imshow(dem, cmap="cividis")
     axes[0].contour(mask.astype(float), levels=[0.5],
-                    colors="red", linewidths=1.5)
+                    colors="#EE7733", linewidths=1.5)
     axes[0].set_title(f"DEM — Permit {permit}")
     axes[0].axis("off")
 
     im = axes[1].imshow(
         np.where(mask, cut, np.nan),
-        cmap="Reds",
+        cmap="inferno",
         vmin=0,
         vmax=max(np.percentile(cut[mask], 95), 1),
     )
     axes[1].contour(mask.astype(float), levels=[0.5],
-                    colors="red", linewidths=1.5)
+                    colors="#EE7733", linewidths=1.5)
     axes[1].set_title(
-        f"Cut Depth — {vol_cy:,.0f} yd³"
+        f"Cut Depth — {vol_cy:,.0f} yd\u00b3"
     )
     axes[1].axis("off")
     fig.colorbar(im, ax=axes[1], label="Cut depth (ft)")
 
     plt.suptitle(
         f"Mine Volume Estimate — Perry County, KY\n"
-        f"Permit {permit} · {acres:.0f} acres"
+        f"Permit {permit} \u00b7 {acres:.0f} acres",
+        color=_TITLE_COLOR,
     )
+    _apply_wcag_style(fig, list(axes))
     plt.tight_layout()
     path = OUTPUT / "mine_volume.png"
     plt.savefig(str(path), dpi=150, bbox_inches="tight")

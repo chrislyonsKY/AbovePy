@@ -4,6 +4,34 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] — 2026-03-16
+
+### Added
+
+- **Terrain analysis** — server-side DEM processing via TiTiler-pgSTAC algorithms:
+  `hillshade_tile_url()`, `slope_tile_url()`, `contour_tile_url()`, `terrain_rgb_tile_url()`
+- **pgSTAC search registration** — `register_search()` creates persistent virtual mosaics
+  via `/searches/register`; `search_tile_url()`, `search_map_url()`, `search_bbox_url()`,
+  `search_info_url()` build URLs from the returned hash
+- **Visualization helpers** — `tile_url()` and `preview_url()` smart dispatchers that
+  accept product + bbox/county; `show()` renders interactive leafmap in Jupyter notebooks
+  with optional terrain algorithm overlay
+- **Oblique imagery** — 4 new products (`oblique_phase3_bwd/fwd/left/right`) with
+  `OBLIQUE` product type; `search_obliques()` and `list_oblique_seasons()` for S3-based
+  discovery until the STAC collection is published
+- `s3_prefix` field on `Product` dataclass for products with direct S3 access paths
+- New example scripts: `explore_obliques.py`, `oblique_site_inspection.py`
+
+### Changed
+
+- All example visualizations updated for **WCAG 2.1 AA** compliance:
+  - Colorblind-safe palettes (`cividis`, `inferno`, `viridis`, Paul Tol qualitative)
+  - Replaced `hsv` (aspect), `RdBu` (change detection), `Reds` (mine volume)
+  - Text contrast ratios meet AA minimums (4.5:1 normal, 3:1 large)
+  - Dark theme web viewer text upgraded from `#888`/`#aaa` to `#b0b0b0`/`#c0c0c0`
+- `titiler_urls.py` example expanded to demonstrate pgSTAC, terrain, viz, and search features
+- README updated with terrain analysis, oblique imagery, and visualization sections
+
 ## [1.0.1] — 2026-03-13
 
 ### Added

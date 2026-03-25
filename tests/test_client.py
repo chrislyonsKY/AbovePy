@@ -65,7 +65,7 @@ class TestClientInfo:
     def test_info_all_products(self):
         client = KyFromAboveClient()
         df = client.info()
-        assert len(df) == 9
+        assert len(df) == 13
         assert "product" in df.columns
 
     def test_info_single_product(self):

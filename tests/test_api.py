@@ -84,7 +84,7 @@ class TestListCounties:
 class TestInfoConvenience:
     def test_info_returns_dataframe(self):
         df = abovepy.info()
-        assert len(df) == 9
+        assert len(df) == 13
         assert "product" in df.columns
 
     def test_info_single_product(self):

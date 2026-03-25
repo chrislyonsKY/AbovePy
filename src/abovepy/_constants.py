@@ -3,6 +3,11 @@
 STAC_URL = "https://spved5ihrl.execute-api.us-west-2.amazonaws.com/"
 S3_BUCKET = "kyfromabove"
 S3_REGION = "us-west-2"
+S3_OBLIQUES_PREFIX = "imagery/obliques/Phase3/"
+
+# KyFromAbove TiTiler endpoints (hosted by Ian Horn / COT-GIS)
+TITILER_ENDPOINT = "https://6hp4guqpwe.execute-api.us-west-2.amazonaws.com"
+TITILER_PGSTAC_ENDPOINT = "https://vdo05uew72.execute-api.us-west-2.amazonaws.com"
 NATIVE_CRS = "EPSG:3089"  # Kentucky Single Zone, US Survey Feet
 DEFAULT_INPUT_CRS = "EPSG:4326"  # What users typically provide
 TILE_SIZE_FT = 5000  # 5000×5000 foot tile grid

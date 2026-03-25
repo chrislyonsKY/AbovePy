@@ -64,9 +64,9 @@ class TestLiveSTACConnection:
         assert resp.status_code == 200
 
     def test_info_all_products(self):
-        """info() returns metadata for all 9 products."""
+        """info() returns metadata for all 13 products."""
         df = abovepy.info()
-        assert len(df) == 9
+        assert len(df) == 13
         assert "product" in df.columns
         assert "resolution" in df.columns
         assert "format" in df.columns

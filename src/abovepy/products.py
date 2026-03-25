@@ -16,6 +16,7 @@ class ProductType(Enum):
     DEM = "dem"
     ORTHO = "ortho"
     POINTCLOUD = "pointcloud"
+    OBLIQUE = "oblique"
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,7 @@ class Product:
     format: str
     phase: int
     native_crs: str = "EPSG:3089"
+    s3_prefix: str | None = None
 
     def __repr__(self) -> str:
         return f"Product({self.key!r}, {self.display_name!r}, {self.format}, {self.resolution})"
@@ -140,6 +142,47 @@ PRODUCTS: dict[str, Product] = {
         resolution="varies",
         format="COPC",
         phase=3,
+    ),
+    # --- Oblique Imagery (Phase 3 only — STAC collection pending) ---
+    "oblique_phase3_bwd": Product(
+        key="oblique_phase3_bwd",
+        display_name="Oblique Phase 3 Backward (3-inch)",
+        collection_id="obliques-phase3",
+        product_type=ProductType.OBLIQUE,
+        resolution="3in",
+        format="COG",
+        phase=3,
+        s3_prefix="imagery/obliques/Phase3/",
+    ),
+    "oblique_phase3_fwd": Product(
+        key="oblique_phase3_fwd",
+        display_name="Oblique Phase 3 Forward (3-inch)",
+        collection_id="obliques-phase3",
+        product_type=ProductType.OBLIQUE,
+        resolution="3in",
+        format="COG",
+        phase=3,
+        s3_prefix="imagery/obliques/Phase3/",
+    ),
+    "oblique_phase3_left": Product(
+        key="oblique_phase3_left",
+        display_name="Oblique Phase 3 Left (3-inch)",
+        collection_id="obliques-phase3",
+        product_type=ProductType.OBLIQUE,
+        resolution="3in",
+        format="COG",
+        phase=3,
+        s3_prefix="imagery/obliques/Phase3/",
+    ),
+    "oblique_phase3_right": Product(
+        key="oblique_phase3_right",
+        display_name="Oblique Phase 3 Right (3-inch)",
+        collection_id="obliques-phase3",
+        product_type=ProductType.OBLIQUE,
+        resolution="3in",
+        format="COG",
+        phase=3,
+        s3_prefix="imagery/obliques/Phase3/",
     ),
 }
 # fmt: on
