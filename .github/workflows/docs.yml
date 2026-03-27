@@ -25,10 +25,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install mkdocs-material mkdocstrings[python] mkdocs-jupyter
+        run: pip install zensical mkdocstrings[python]
 
       - name: Build docs
-        run: mkdocs build --strict
+        run: zensical build --clean
 
       - uses: actions/upload-pages-artifact@v4
         with:

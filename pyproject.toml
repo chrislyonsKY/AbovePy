@@ -53,9 +53,8 @@ dev = [
     "mypy>=1.8",
 ]
 docs = [
-    "mkdocs-material>=9.5",
+    "zensical>=0.0.29",
     "mkdocstrings[python]>=0.24",
-    "mkdocs-jupyter>=0.24",
 ]
 
 [project.urls]
