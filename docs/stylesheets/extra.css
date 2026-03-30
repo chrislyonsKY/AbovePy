@@ -1,95 +1,248 @@
-/* abovepy docs — custom styles */
+/* abovepy docs — custom styles
+   Inspired by zensical.org's modern aesthetic */
 
-/* Brand colors */
+/* ------------------------------------------------------------------ */
+/* Brand palette                                                       */
+/* ------------------------------------------------------------------ */
+
 :root {
-  --md-primary-fg-color: #00897b;
-  --md-primary-fg-color--light: #4db6ac;
-  --md-primary-fg-color--dark: #00695c;
-  --md-accent-fg-color: #00bfa5;
+  --abovepy-teal: #00897b;
+  --abovepy-teal-light: #4db6ac;
+  --abovepy-teal-dark: #00695c;
+  --abovepy-accent: #00bfa5;
+  --abovepy-gradient: linear-gradient(135deg, #00897b, #00bfa5, #26c6da);
+  --abovepy-gradient-warm: linear-gradient(35deg, #00897b, #26c6da);
+  --abovepy-card-border: rgba(0, 0, 0, 0.08);
+  --abovepy-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --abovepy-card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #4db6ac;
-  --md-primary-fg-color--light: #80cbc4;
-  --md-primary-fg-color--dark: #00897b;
-  --md-accent-fg-color: #64ffda;
+  --abovepy-card-border: rgba(255, 255, 255, 0.08);
+  --abovepy-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --abovepy-card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Hero section on home page */
-.md-typeset .hero {
+/* ------------------------------------------------------------------ */
+/* Hero section — full-bleed dark gradient with large typography       */
+/* ------------------------------------------------------------------ */
+
+.mdx-hero {
+  background: linear-gradient(160deg, #0d1117 0%, #00695c 50%, #004d40 100%);
+  color: #fff;
+  padding: 5rem 1.5rem 4rem;
   text-align: center;
-  padding: 2rem 1rem;
-  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  margin: -1.2rem -0.8rem 2rem;
+  border-radius: 0 0 1.5rem 1.5rem;
 }
 
-.md-typeset .hero h1 {
-  font-size: 2.4rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+.mdx-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 191, 165, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(38, 198, 218, 0.12) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.md-typeset .hero p {
-  font-size: 1.2rem;
+.mdx-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  margin: 0 auto 1rem;
+  max-width: 720px;
+  color: #fff;
+  position: relative;
+}
+
+.mdx-hero .hero-sub {
+  font-size: clamp(1rem, 2vw, 1.25rem);
   opacity: 0.8;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+  position: relative;
 }
 
-/* Feature grid */
-.md-typeset .grid {
+/* CTA buttons — gradient primary, frosted secondary */
+.mdx-hero .hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.mdx-hero .hero-buttons a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.8rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.mdx-hero .hero-buttons a:hover {
+  transform: translateY(-1px);
+}
+
+.mdx-hero .hero-buttons .btn-primary {
+  background: linear-gradient(35deg, #4db6ac, #26c6da);
+  color: #0d1117;
+  box-shadow: 0 4px 16px rgba(0, 191, 165, 0.3);
+}
+
+.mdx-hero .hero-buttons .btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(0, 191, 165, 0.45);
+}
+
+.mdx-hero .hero-buttons .btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.mdx-hero .hero-buttons .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Install command pill */
+.mdx-hero .install-pill {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-family: var(--md-code-font-family);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2.5rem;
+  position: relative;
+  backdrop-filter: blur(4px);
+}
+
+/* ------------------------------------------------------------------ */
+/* Feature grid — card layout with hover effects                      */
+/* ------------------------------------------------------------------ */
+
+.md-typeset .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.2rem;
-  margin: 1.5rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0 2.5rem;
 }
 
-.md-typeset .grid .card {
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 0.4rem;
-  padding: 1.2rem;
-  transition: box-shadow 0.2s;
+.md-typeset .feature-card {
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--abovepy-card-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--abovepy-card-shadow);
 }
 
-.md-typeset .grid .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.md-typeset .feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--abovepy-card-shadow-hover);
 }
 
-.md-typeset .grid .card h3 {
-  margin-top: 0;
+.md-typeset .feature-card .card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: var(--abovepy-gradient);
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.md-typeset .feature-card h3 {
+  margin: 0 0 0.4rem;
   font-size: 1rem;
+  font-weight: 700;
 }
 
-.md-typeset .grid .card p {
+.md-typeset .feature-card p {
   font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 0;
+  opacity: 0.75;
+  margin: 0;
+  line-height: 1.5;
 }
 
-/* Code block styling */
+/* ------------------------------------------------------------------ */
+/* Section dividers                                                    */
+/* ------------------------------------------------------------------ */
+
+.md-typeset .section-label {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--abovepy-teal);
+  margin-bottom: 0.25rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Product table — tighter, cleaner                                    */
+/* ------------------------------------------------------------------ */
+
+.md-typeset table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bottom CTA buttons                                                  */
+/* ------------------------------------------------------------------ */
+
+.md-typeset .cta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+}
+
+.md-typeset .cta-row .md-button {
+  border-radius: 2rem;
+  padding: 0.6rem 1.6rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.md-typeset .cta-row .md-button--primary {
+  background: var(--abovepy-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Code blocks                                                         */
+/* ------------------------------------------------------------------ */
+
 .md-typeset pre > code {
   font-size: 0.82rem;
 }
 
-/* Badge styling for version/status */
-.md-typeset .badge {
-  display: inline-block;
-  padding: 0.15rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--md-primary-fg-color);
-  color: white;
+/* ------------------------------------------------------------------ */
+/* Announcement bar polish                                             */
+/* ------------------------------------------------------------------ */
+
+.md-banner {
+  font-size: 0.8rem;
 }
 
-/* Install command highlight */
-.md-typeset .install-cmd {
-  background: var(--md-code-bg-color);
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 0.4rem;
-  padding: 0.8rem 1.2rem;
-  font-family: var(--md-code-font-family);
-  font-size: 0.95rem;
-  text-align: center;
-  margin: 1.5rem auto;
-  max-width: 400px;
+.md-banner code {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
 }
