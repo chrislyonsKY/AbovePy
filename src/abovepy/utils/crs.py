@@ -106,7 +106,7 @@ def buffer_feet(
     to_3089 = Transformer.from_crs(input_crs, _NATIVE_CRS, always_xy=True).transform
     to_input = Transformer.from_crs(_NATIVE_CRS, input_crs, always_xy=True).transform
 
-    geom_3089 = shp_transform(to_3089, geometry)  # type: ignore[arg-type]
+    geom_3089 = shp_transform(to_3089, geometry)
     buffered = geom_3089.buffer(distance_feet)
     return shp_transform(to_input, buffered)
 
