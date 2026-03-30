@@ -31,20 +31,20 @@ def main():
 
     # Search
     print(f"Searching {args.product} tiles for {args.county} County...")
-    tiles = abovepy.search(county=args.county, product=args.product)
-    print(f"Found {len(tiles)} tiles")
+    result = abovepy.search(county=args.county, product=args.product)
+    print(f"Found {result.count} tiles")
 
-    if len(tiles) == 0:
+    if result.empty:
         print("No tiles found. Check county name and product key.")
         return
 
     # Estimate download size
-    total_mb = tiles.file_size.sum() / (1024 * 1024)
-    print(f"Estimated download size: {total_mb:.0f} MB")
+    size_info = result.estimate_size()
+    print(f"Estimated download size: {size_info['total_mb']:.0f} MB")
 
     # Download
     print(f"\nDownloading to {output_dir}...")
-    paths = abovepy.download(tiles, output_dir=output_dir)
+    paths = result.download(output_dir=output_dir)
     print(f"\nDone. {len(paths)} files saved to {output_dir}")
 
 

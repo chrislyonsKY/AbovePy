@@ -40,14 +40,16 @@ from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.obliques import list_oblique_seasons, search_obliques
 from abovepy.products import Product, ProductType, list_products
-from abovepy.searches import register_search
+from abovepy.result import SearchResult
 from abovepy.stac import clear_cache
+from abovepy.titiler import register_search
 from abovepy.utils.bbox import list_counties
 from abovepy.viz import preview_url, show, tile_url
 
 if TYPE_CHECKING:
     import geopandas as gpd
     import pandas as pd
+    from shapely.geometry.base import BaseGeometry
 
 _default_client: KyFromAboveClient | None = None
 
@@ -67,19 +69,26 @@ def search(
     crs: str = "EPSG:4326",
     datetime: str | None = None,
     max_items: int = 500,
-) -> gpd.GeoDataFrame:
+    intersects: dict[str, Any] | BaseGeometry | None = None,
+    filter: dict[str, Any] | str | None = None,
+    sortby: list[str] | str | None = None,
+    ids: list[str] | None = None,
+    fields: list[str] | None = None,
+    point: tuple[float, float] | None = None,
+    buffer_miles: float | None = None,
+    geometry: BaseGeometry | None = None,
+) -> SearchResult:
     """Find KyFromAbove tiles intersecting an area of interest.
 
-    Provide either ``bbox`` or ``county``, not both.
+    Provide one of: ``bbox``, ``county``, ``point``, ``geometry``,
+    ``intersects``, or ``ids``.
 
     Parameters
     ----------
     bbox : tuple, optional
         Bounding box as (xmin, ymin, xmax, ymax).
     product : str
-        Product key: "dem_phase1", "dem_phase2", "dem_phase3",
-        "ortho_phase1", "ortho_phase2", "ortho_phase3",
-        "laz_phase1", "laz_phase2", "laz_phase3".
+        Product key (e.g., ``"dem_phase3"``, ``"ortho_phase3"``).
     county : str, optional
         Kentucky county name (e.g., "Pike", "Franklin"). Case-insensitive.
     crs : str
@@ -88,12 +97,28 @@ def search(
         ISO 8601 datetime range (e.g., "2022-01/2024-01").
     max_items : int
         Maximum tiles to return. Default 500.
+    intersects : dict or Shapely geometry, optional
+        GeoJSON geometry or Shapely geometry for spatial intersection.
+    filter : dict or str, optional
+        CQL2 filter expression for advanced STAC queries.
+    sortby : list[str] or str, optional
+        Sort fields (e.g., ``["+datetime"]``).
+    ids : list[str], optional
+        Specific STAC item IDs to fetch.
+    fields : list[str], optional
+        Fields to include/exclude from the STAC response.
+    point : tuple, optional
+        (longitude, latitude) point. Used with ``buffer_miles``.
+    buffer_miles : float, optional
+        Buffer radius in miles around ``point`` or ``geometry``.
+    geometry : Shapely geometry, optional
+        Any Shapely geometry for spatial search.
 
     Returns
     -------
-    geopandas.GeoDataFrame
-        Tile index with columns: tile_id, product, geometry,
-        asset_url, file_size, datetime, collection_id.
+    SearchResult
+        Tile index wrapped in a workflow object. Access the raw
+        GeoDataFrame via ``.tiles`` or ``.to_geodataframe()``.
     """
     return _get_client().search(
         bbox=bbox,
@@ -102,11 +127,19 @@ def search(
         crs=crs,
         datetime=datetime,
         max_items=max_items,
+        intersects=intersects,
+        filter=filter,
+        sortby=sortby,
+        ids=ids,
+        fields=fields,
+        point=point,
+        buffer_miles=buffer_miles,
+        geometry=geometry,
     )
 
 
 def download(
-    tiles: gpd.GeoDataFrame,
+    tiles: gpd.GeoDataFrame | SearchResult,
     output_dir: str | Path,
     overwrite: bool = False,
 ) -> list[Path]:
@@ -114,7 +147,7 @@ def download(
 
     Parameters
     ----------
-    tiles : geopandas.GeoDataFrame
+    tiles : GeoDataFrame or SearchResult
         Tile index from search().
     output_dir : str or Path
         Directory to save downloaded files.
@@ -126,6 +159,8 @@ def download(
     list[Path]
         Paths to downloaded files.
     """
+    if isinstance(tiles, SearchResult):
+        tiles = tiles.tiles
     return _get_client().download(tiles=tiles, output_dir=output_dir, overwrite=overwrite)
 
 
@@ -165,8 +200,8 @@ def mosaic(
 
     Parameters
     ----------
-    tiles_or_paths : list[Path] or GeoDataFrame
-        Tile file paths or tile index GeoDataFrame.
+    tiles_or_paths : list[Path], GeoDataFrame, or SearchResult
+        Tile file paths, tile index, or search result.
     bbox : tuple, optional
         Clip output to this bounding box.
     output : str or Path, optional
@@ -178,6 +213,8 @@ def mosaic(
     -------
     Path or tuple[numpy.ndarray, dict]
     """
+    if isinstance(tiles_or_paths, SearchResult):
+        tiles_or_paths = tiles_or_paths.tiles
     return _get_client().mosaic(
         tiles_or_paths=tiles_or_paths,
         bbox=bbox,
@@ -213,6 +250,7 @@ __all__ = [
     "ProductType",
     "ReadError",
     "SearchError",
+    "SearchResult",
     "__version__",
     "clear_cache",
     "download",

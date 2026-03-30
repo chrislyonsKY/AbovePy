@@ -32,7 +32,6 @@ site/
 # OS
 Thumbs.db
 .DS_Store
-._*
 
 # AI Development
 ai-dev/

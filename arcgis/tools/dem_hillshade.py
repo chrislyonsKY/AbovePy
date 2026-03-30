@@ -133,26 +133,28 @@ class DEMHillshade:
                 arcpy.AddMessage(
                     "Searching {} County for {} tiles...".format(county, dem_display)
                 )
-                tiles = abovepy.search(county=county, product=product_key)
+                result = abovepy.search(county=county, product=product_key)
             else:
                 bbox = extent_to_bbox_4326(extent)
-                tiles = abovepy.search(bbox=bbox, product=product_key)
+                result = abovepy.search(bbox=bbox, product=product_key)
         except Exception as e:
             arcpy.AddError("Search failed: {}".format(e))
             return
 
-        if tiles.empty:
+        if result.empty:
             arcpy.AddWarning("No DEM tiles found.")
             return
 
-        tile_count = len(tiles)
-        arcpy.AddMessage("Found {} DEM tiles.".format(tile_count))
+        est = result.estimate_size()
+        arcpy.AddMessage("Found {} DEM tiles (~{} MB estimated).".format(
+            est["tile_count"], est["total_mb"]
+        ))
 
         # Step 2: Download to scratch folder
         scratch_folder = os.path.join(arcpy.env.scratchFolder, "abovepy_dem")
-        arcpy.SetProgressor("step", "Downloading DEM tiles...", 0, tile_count, 1)
+        arcpy.SetProgressor("step", "Downloading DEM tiles...", 0, result.count, 1)
         try:
-            paths = abovepy.download(tiles, output_dir=scratch_folder)
+            paths = result.download(output_dir=scratch_folder, max_workers=4)
         except Exception as e:
             arcpy.AddError("Download failed: {}".format(e))
             return

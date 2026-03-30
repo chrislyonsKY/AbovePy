@@ -97,22 +97,24 @@ class DownloadTiles:
         arcpy.AddMessage("Searching for {} tiles...".format(product_display))
 
         try:
-            tiles = abovepy.search(bbox=bbox, product=product_key)
+            result = abovepy.search(bbox=bbox, product=product_key)
         except Exception as e:
             arcpy.AddError("Search failed: {}".format(e))
             return
 
-        if tiles.empty:
+        if result.empty:
             arcpy.AddWarning("No tiles found in the specified extent.")
             return
 
-        tile_count = len(tiles)
-        arcpy.AddMessage("Found {} tiles. Downloading...".format(tile_count))
-        arcpy.SetProgressor("step", "Downloading tiles...", 0, tile_count, 1)
+        est = result.estimate_size()
+        arcpy.AddMessage("Found {} tiles (~{} MB estimated). Downloading...".format(
+            est["tile_count"], est["total_mb"]
+        ))
+        arcpy.SetProgressor("step", "Downloading tiles...", 0, result.count, 1)
 
         try:
-            paths = abovepy.download(
-                tiles, output_dir=out_folder, overwrite=overwrite
+            paths = result.download(
+                output_dir=out_folder, overwrite=overwrite, max_workers=4
             )
         except Exception as e:
             arcpy.AddError("Download failed: {}".format(e))

@@ -14,18 +14,18 @@ import abovepy
 def main():
     # First, find a tile to inspect
     print("=== Finding a DEM tile near Lexington ===")
-    tiles = abovepy.search(
+    result = abovepy.search(
         bbox=(-84.50, 38.03, -84.48, 38.05),
         product="dem_phase3",
     )
-    print(f"Found {len(tiles)} tiles\n")
+    print(f"Found {result.count} tiles\n")
 
-    if len(tiles) == 0:
+    if result.empty:
         print("No tiles found.")
         return
 
-    tile_url = tiles.iloc[0].asset_url
-    tile_id = tiles.iloc[0].tile_id
+    tile_url = result.tiles.iloc[0].asset_url
+    tile_id = result.tiles.iloc[0].tile_id
 
     # Inspect metadata without downloading any pixels
     print(f"=== Inspecting tile: {tile_id} ===")

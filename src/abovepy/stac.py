@@ -47,9 +47,14 @@ def create_client(stac_url: str = STAC_URL) -> Client:
 def search_stac(
     client: Client,
     collection_id: str,
-    bbox: tuple[float, float, float, float],
+    bbox: tuple[float, float, float, float] | None = None,
     datetime: str | None = None,
     max_items: int = 500,
+    intersects: dict[str, Any] | None = None,
+    filter: dict[str, Any] | str | None = None,
+    sortby: list[str] | str | None = None,
+    ids: list[str] | None = None,
+    fields: list[str] | None = None,
 ) -> list[Any]:
     """Query the KyFromAbove STAC API for matching items.
 
@@ -63,25 +68,56 @@ def search_stac(
         STAC client instance.
     collection_id : str
         STAC collection ID (e.g., "dem-phase3").
-    bbox : tuple
+    bbox : tuple, optional
         Bounding box in EPSG:4326 (xmin, ymin, xmax, ymax).
     datetime : str, optional
         ISO 8601 datetime range.
     max_items : int
         Maximum items to return.
+    intersects : dict, optional
+        GeoJSON geometry for spatial intersection (alternative to bbox).
+    filter : dict or str, optional
+        CQL2 filter expression.
+    sortby : list[str] or str, optional
+        Sort fields (e.g., ``["+datetime"]``).
+    ids : list[str], optional
+        Specific STAC item IDs to fetch.
+    fields : list[str], optional
+        Fields to include/exclude from response.
 
     Returns
     -------
     list[pystac.Item]
         Matching STAC items.
     """
-    cache_key = make_cache_key(collection_id, bbox, datetime, max_items)
+    cache_key = make_cache_key(
+        collection_id,
+        bbox,
+        datetime,
+        max_items,
+        intersects=intersects,
+        filter=filter,
+        sortby=sortby,
+        ids=ids,
+        fields=fields,
+    )
     cached = _stac_cache.get(cache_key)
     if cached is not None:
         logger.debug("STAC cache hit for %s (%d items)", collection_id, len(cached))
         return list(cached)
 
-    items = _search_with_retry(client, collection_id, bbox, datetime, max_items)
+    items = _search_with_retry(
+        client,
+        collection_id,
+        bbox,
+        datetime,
+        max_items,
+        intersects=intersects,
+        filter=filter,
+        sortby=sortby,
+        ids=ids,
+        fields=fields,
+    )
 
     _stac_cache.set(cache_key, items)
     logger.info("STAC search returned %d items from %s", len(items), collection_id)
@@ -91,9 +127,14 @@ def search_stac(
 def _search_with_retry(
     client: Client,
     collection_id: str,
-    bbox: tuple[float, float, float, float],
+    bbox: tuple[float, float, float, float] | None,
     datetime: str | None,
     max_items: int,
+    intersects: dict[str, Any] | None = None,
+    filter: dict[str, Any] | str | None = None,
+    sortby: list[str] | str | None = None,
+    ids: list[str] | None = None,
+    fields: list[str] | None = None,
 ) -> list[Any]:
     """Execute a STAC search with retry on transient failures.
 
@@ -103,12 +144,22 @@ def _search_with_retry(
         STAC client instance.
     collection_id : str
         STAC collection ID.
-    bbox : tuple
+    bbox : tuple, optional
         Bounding box in EPSG:4326.
     datetime : str, optional
         ISO 8601 datetime range.
     max_items : int
         Maximum items to return.
+    intersects : dict, optional
+        GeoJSON geometry for spatial intersection.
+    filter : dict or str, optional
+        CQL2 filter expression.
+    sortby : list[str] or str, optional
+        Sort fields.
+    ids : list[str], optional
+        Specific STAC item IDs.
+    fields : list[str], optional
+        Fields to include/exclude.
 
     Returns
     -------
@@ -121,14 +172,29 @@ def _search_with_retry(
     """
     last_error: Exception | None = None
 
+    # Build kwargs dynamically — only pass non-None params
+    search_kwargs: dict[str, Any] = {
+        "collections": [collection_id],
+        "max_items": max_items,
+    }
+    if bbox is not None:
+        search_kwargs["bbox"] = bbox
+    if datetime is not None:
+        search_kwargs["datetime"] = datetime
+    if intersects is not None:
+        search_kwargs["intersects"] = intersects
+    if filter is not None:
+        search_kwargs["filter"] = filter
+    if sortby is not None:
+        search_kwargs["sortby"] = sortby if isinstance(sortby, list) else [sortby]
+    if ids is not None:
+        search_kwargs["ids"] = ids
+    if fields is not None:
+        search_kwargs["fields"] = fields
+
     for attempt in range(MAX_RETRIES):
         try:
-            search = client.search(
-                collections=[collection_id],
-                bbox=bbox,
-                datetime=datetime,
-                max_items=max_items,
-            )
+            search = client.search(**search_kwargs)
             return list(search.items())
         except Exception as exc:
             last_error = exc

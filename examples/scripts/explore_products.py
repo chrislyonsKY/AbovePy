@@ -31,8 +31,8 @@ def main():
     print("\n=== Tile counts for Franklin County ===\n")
     for product_key in ["dem_phase3", "ortho_phase3", "laz_phase2"]:
         try:
-            tiles = abovepy.search(county="Franklin", product=product_key)
-            print(f"  {product_key}: {len(tiles)} tiles")
+            result = abovepy.search(county="Franklin", product=product_key)
+            print(f"  {product_key}: {result.count} tiles")
         except Exception as e:
             print(f"  {product_key}: error — {e}")
 

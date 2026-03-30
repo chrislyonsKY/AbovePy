@@ -40,15 +40,15 @@ def main():
 
     # Search for DEM tiles covering downtown Frankfort
     print("Searching for DEM tiles near Frankfort...")
-    tiles = abovepy.search(
+    result = abovepy.search(
         bbox=(-84.9, 38.17, -84.83, 38.22),
         product="dem_phase3",
     )
-    print(f"Found {len(tiles)} tiles")
+    print(f"Found {result.count} tiles")
 
     # Download
     print("Downloading...")
-    paths = abovepy.download(tiles, output_dir=output_dir / "tiles")
+    paths = result.download(output_dir=output_dir / "tiles")
 
     # Mosaic
     print("Building mosaic...")

@@ -4,7 +4,7 @@ import httpx
 import pytest
 import respx
 
-from abovepy.searches import (
+from abovepy.titiler import (
     register_search,
     search_bbox_url,
     search_info_url,

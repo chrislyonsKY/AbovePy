@@ -49,3 +49,7 @@ class BboxError(AbovepyError, ValueError):
 
     Inherits ValueError for backward compatibility.
     """
+
+
+class AnalysisError(AbovepyError):
+    """Raised when a terrain/analysis computation fails."""

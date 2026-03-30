@@ -42,6 +42,10 @@ PRODUCT_MAP = {
     "LiDAR Point Cloud Phase 1 (LAZ)": "laz_phase1",
     "LiDAR Point Cloud Phase 2 (COPC)": "laz_phase2",
     "LiDAR Point Cloud Phase 3 (COPC)": "laz_phase3",
+    "Oblique Phase 3 Backward (3-inch)": "oblique_phase3_bwd",
+    "Oblique Phase 3 Forward (3-inch)": "oblique_phase3_fwd",
+    "Oblique Phase 3 Left (3-inch)": "oblique_phase3_left",
+    "Oblique Phase 3 Right (3-inch)": "oblique_phase3_right",
 }
 
 # DEM-only subset for hillshade tool

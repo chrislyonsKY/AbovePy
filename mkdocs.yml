@@ -13,18 +13,19 @@ theme:
       primary: teal
       accent: teal
       toggle:
-        icon: material/brightness-7
+        icon: lucide/sun
         name: Switch to dark mode
     - scheme: slate
       primary: teal
       accent: light green
       toggle:
-        icon: material/brightness-4
+        icon: lucide/moon
         name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.top
     - navigation.instant
+    - navigation.sections
     - search.highlight
     - search.suggest
     - content.code.copy
@@ -67,10 +68,24 @@ nav:
     - Overview: api/reference.md
     - Client: api/client.md
     - Products: api/products.md
+    - SearchResult: api/result.md
     - I/O (Raster & Point Cloud): api/io.md
     - TiTiler URL Helpers: api/titiler.md
     - Utilities: api/utils.md
     - Exceptions: api/exceptions.md
+  - Community:
+    - Start Here: community/start-here.md
+    - Contributing: community/contributing.md
+    - Development: community/development.md
+    - Support: community/support.md
+    - Governance: community/governance.md
+    - Security: community/security.md
+    - Roadmap: community/roadmap.md
+    - Maintainers: community/maintainers.md
+    - Responsible Use: community/responsible-use.md
+    - Attribution: community/attribution.md
+    - Disclaimer: community/disclaimer.md
+    - Privacy: community/privacy.md
 
 markdown_extensions:
   - admonition

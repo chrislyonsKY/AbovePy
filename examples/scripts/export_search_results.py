@@ -1,6 +1,6 @@
-"""Export search results to GeoJSON, GeoPackage, and CSV.
+"""Export search results to GeoJSON, GeoPackage, CSV, and GeoParquet.
 
-Demonstrates how to take abovepy search results (a GeoDataFrame) and
+Demonstrates how to take abovepy search results (a SearchResult) and
 export them to standard GIS interchange formats for use in QGIS,
 ArcGIS Pro, or other tools.
 
@@ -19,12 +19,13 @@ def main():
 
     # Search for DEM tiles covering Fayette County (Lexington)
     print("=== Searching DEM Phase 3 — Fayette County ===")
-    tiles = abovepy.search(county="Fayette", product="dem_phase3")
-    print(f"Found {len(tiles)} tiles")
+    result = abovepy.search(county="Fayette", product="dem_phase3")
+    tiles = result.tiles  # GeoDataFrame for direct DataFrame operations
+    print(f"Found {result.count} tiles")
     print(f"Columns: {list(tiles.columns)}")
     print(f"CRS: {tiles.crs}\n")
 
-    if len(tiles) == 0:
+    if result.empty:
         print("No tiles found.")
         return
 
@@ -32,10 +33,15 @@ def main():
     print("=== Preview ===")
     print(tiles[["tile_id", "product", "file_size"]].head(5).to_string(index=False))
 
+    # Export to GeoParquet — efficient columnar format (new in v2)
+    parquet_path = output_dir / "fayette_dem_tiles.parquet"
+    result.to_geoparquet(parquet_path)
+    print(f"\nGeoParquet: {parquet_path} ({parquet_path.stat().st_size / 1024:.1f} KB)")
+
     # Export to GeoJSON — widely supported, text-based
     geojson_path = output_dir / "fayette_dem_tiles.geojson"
     tiles.to_file(str(geojson_path), driver="GeoJSON")
-    print(f"\nGeoJSON:    {geojson_path} ({geojson_path.stat().st_size / 1024:.1f} KB)")
+    print(f"GeoJSON:    {geojson_path} ({geojson_path.stat().st_size / 1024:.1f} KB)")
 
     # Export to GeoPackage — efficient binary format, good for large datasets
     gpkg_path = output_dir / "fayette_dem_tiles.gpkg"

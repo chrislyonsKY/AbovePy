@@ -24,17 +24,17 @@ def main():
 
     for county in counties:
         print(f"Searching {county} County...")
-        tiles = abovepy.search(county=county, product=product)
+        result = abovepy.search(county=county, product=product)
 
-        total_mb = tiles.file_size.sum() / (1024 * 1024) if len(tiles) > 0 else 0.0
+        total_mb = result.tiles.file_size.sum() / (1024 * 1024) if not result.empty else 0.0
 
         summary.append({
             "county": county,
-            "tile_count": len(tiles),
+            "tile_count": result.count,
             "total_mb": round(total_mb, 1),
         })
-        all_tiles.append(tiles)
-        print(f"  -> {len(tiles)} tiles ({total_mb:.1f} MB)")
+        all_tiles.append(result.tiles)
+        print(f"  -> {result.count} tiles ({total_mb:.1f} MB)")
 
     # Combine into one GeoDataFrame
     combined = pd.concat(all_tiles, ignore_index=True)

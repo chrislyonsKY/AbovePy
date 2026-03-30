@@ -124,9 +124,10 @@ class TTLCache:
 
 def make_cache_key(
     collection_id: str,
-    bbox: tuple[float, float, float, float],
+    bbox: tuple[float, float, float, float] | None = None,
     datetime: str | None = None,
     max_items: int = 500,
+    **extra: Any,
 ) -> str:
     """Build a deterministic cache key from search parameters.
 
@@ -134,22 +135,29 @@ def make_cache_key(
     ----------
     collection_id : str
         STAC collection ID.
-    bbox : tuple
+    bbox : tuple, optional
         Bounding box.
     datetime : str, optional
         Datetime filter.
     max_items : int
         Max items limit.
+    **extra
+        Additional search params (intersects, filter, sortby, ids, fields).
 
     Returns
     -------
     str
         Hex digest cache key.
     """
-    raw = "{}|{}|{}|{}".format(
+    import json as _json
+
+    bbox_str = ",".join(f"{v:.6f}" for v in bbox) if bbox else ""
+    extra_str = _json.dumps(extra, sort_keys=True, default=str) if extra else ""
+    raw = "{}|{}|{}|{}|{}".format(
         collection_id,
-        ",".join(f"{v:.6f}" for v in bbox),
+        bbox_str,
         datetime or "",
         max_items,
+        extra_str,
     )
     return hashlib.sha256(raw.encode()).hexdigest()
