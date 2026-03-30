@@ -13,6 +13,15 @@ from abovepy.products import get_product
 from abovepy.result import SearchResult
 
 
+def _has_pyarrow() -> bool:
+    try:
+        import pyarrow  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 @pytest.fixture
 def sample_product():
     return get_product("dem_phase3")
@@ -126,12 +135,18 @@ class TestExport:
         assert data["type"] == "FeatureCollection"
         assert len(data["features"]) == 3
 
+    @pytest.mark.skipif(
+        not _has_pyarrow(), reason="pyarrow not installed"
+    )
     def test_to_geoparquet(self, result, tmp_path):
         output = tmp_path / "tiles.parquet"
         path = result.to_geoparquet(output)
         assert path.exists()
         assert path == output
 
+    @pytest.mark.skipif(
+        not _has_pyarrow(), reason="pyarrow not installed"
+    )
     def test_to_geoparquet_creates_dirs(self, result, tmp_path):
         output = tmp_path / "sub" / "dir" / "tiles.parquet"
         path = result.to_geoparquet(output)

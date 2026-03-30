@@ -166,7 +166,7 @@ class TestCmdSearch:
     @patch("abovepy.search")
     def test_search_table_format(self, mock_search, capsys):
         mock_search.return_value = _mock_search_result()
-        main(["search", "--bbox", "-84.9,38.15,-84.8,38.25"])
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25"])
         out = capsys.readouterr().out
         assert "T1" in out
         assert "Found 1 tile(s)" in out
@@ -174,7 +174,7 @@ class TestCmdSearch:
     @patch("abovepy.search")
     def test_search_json_format(self, mock_search, capsys):
         mock_search.return_value = _mock_search_result()
-        main(["search", "--bbox", "-84.9,38.15,-84.8,38.25", "-f", "json"])
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25", "-f", "json"])
         out = capsys.readouterr().out
         data = json.loads(out)
         assert isinstance(data, list)
@@ -182,7 +182,7 @@ class TestCmdSearch:
     @patch("abovepy.search")
     def test_search_geojson_format(self, mock_search, capsys):
         mock_search.return_value = _mock_search_result()
-        main(["search", "--bbox", "-84.9,38.15,-84.8,38.25", "-f", "geojson"])
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25", "-f", "geojson"])
         out = capsys.readouterr().out
         data = json.loads(out)
         assert data["type"] == "FeatureCollection"
@@ -197,7 +197,7 @@ class TestCmdSearch:
     @patch("abovepy.search")
     def test_search_by_point(self, mock_search, capsys):
         mock_search.return_value = _mock_search_result()
-        main(["search", "--point", "-84.85,38.19", "--buffer", "2"])
+        main(["search", "--point=-84.85,38.19", "--buffer", "2"])
         mock_search.assert_called_once()
         assert mock_search.call_args.kwargs["point"] == (-84.85, 38.19)
         assert mock_search.call_args.kwargs["buffer_miles"] == 2.0
@@ -212,7 +212,7 @@ class TestCmdSearch:
     @patch("abovepy.search")
     def test_search_with_sortby(self, mock_search, capsys):
         mock_search.return_value = _mock_search_result()
-        main(["search", "--bbox", "-84.9,38.15,-84.8,38.25", "--sortby", "+datetime"])
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25", "--sortby", "+datetime"])
         assert mock_search.call_args.kwargs["sortby"] == "+datetime"
 
 
@@ -281,7 +281,7 @@ class TestCmdInfo:
 class TestCmdTileUrl:
     @patch("abovepy.viz._urls.collection_tile_url", return_value="https://example.com/tiles")
     def test_tile_url_basic(self, mock_url, capsys):
-        main(["tile-url", "--bbox", "-84.9,38.15,-84.8,38.25"])
+        main(["tile-url", "--bbox=-84.9,38.15,-84.8,38.25"])
         out = capsys.readouterr().out.strip()
         assert "example.com" in out
 
@@ -290,7 +290,7 @@ class TestCmdTileUrl:
         {"hillshade": lambda *a, **kw: "https://example.com/hs"},
     )
     def test_tile_url_with_algorithm(self, capsys):
-        main(["tile-url", "--bbox", "-84.9,38.15,-84.8,38.25", "--algorithm", "hillshade"])
+        main(["tile-url", "--bbox=-84.9,38.15,-84.8,38.25", "--algorithm", "hillshade"])
         out = capsys.readouterr().out.strip()
         assert "example.com" in out
 
@@ -303,7 +303,7 @@ class TestCmdTileUrl:
 class TestCmdPreview:
     @patch("abovepy.viz._urls.collection_bbox_url", return_value="https://example.com/preview.png")
     def test_preview_prints_url(self, mock_url, capsys):
-        main(["preview", "--bbox", "-84.9,38.15,-84.8,38.25"])
+        main(["preview", "--bbox=-84.9,38.15,-84.8,38.25"])
         out = capsys.readouterr().out.strip()
         assert "preview.png" in out
 
