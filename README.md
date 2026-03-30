@@ -274,7 +274,7 @@ An ArcGIS Pro Python Toolbox is included in `arcgis/AbovePro.pyt` with tools for
 - **DEM Hillshade** — automated DEM → hillshade workflow
 - **County Download** — download by county name dropdown
 
-See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/abovepy/tutorials/arcgis-pro/) for installation and usage.
+See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/AbovePy/tutorials/arcgis-pro/) for installation and usage.
 
 ## Web Visualization
 
