@@ -6,7 +6,7 @@ import argparse
 import json
 import subprocess
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import geopandas as gpd
 import pytest
@@ -51,8 +51,13 @@ class TestBuildParser:
 
     def test_subcommands_exist(self):
         parser = _build_parser()
-        for cmd in ["search", "download", "mosaic", "info", "products", "tile-url", "preview", "estimate"]:
-            args = parser.parse_args([cmd] if cmd not in ("mosaic",) else [cmd, "f.tif", "-o", "out.vrt"])
+        subcommands = [
+            "search", "download", "mosaic", "info",
+            "products", "tile-url", "preview", "estimate",
+        ]
+        for cmd in subcommands:
+            argv = [cmd] if cmd != "mosaic" else [cmd, "f.tif", "-o", "out.vrt"]
+            args = parser.parse_args(argv)
             assert args.command == cmd
 
 

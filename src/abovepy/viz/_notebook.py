@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abovepy._constants import TITILER_PGSTAC_ENDPOINT
-from abovepy.titiler._pgstac import DEFAULT_TILE_MATRIX_SET
 from abovepy.viz._urls import _resolve_bbox, tile_url
 
 

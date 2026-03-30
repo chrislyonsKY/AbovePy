@@ -15,8 +15,6 @@ from abovepy.titiler._cog import (
 from abovepy.titiler._pgstac import (
     DEFAULT_PGSTAC_ENDPOINT,
     DEFAULT_TILE_MATRIX_SET,
-    _pgstac_query_string,
-    _resolve_collection_id,
     collection_bbox_url,
     collection_info_url,
     collection_map_url,

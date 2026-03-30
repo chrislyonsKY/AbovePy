@@ -299,8 +299,8 @@ def contour_lines(
     geopandas.GeoDataFrame
         Contour lines with columns: ``elevation``, ``geometry`` (LineString).
     """
-    import matplotlib.pyplot as plt
     import geopandas as gpd
+    import matplotlib.pyplot as plt
     from shapely.geometry import LineString
 
     dem = np.asarray(dem, dtype=np.float64)
@@ -329,7 +329,7 @@ def contour_lines(
         a, b, c, d, e, f = t[0], t[1], t[2], t[3], t[4], t[5]
 
     rows = []
-    for level_val, collection in zip(cs.levels, cs.allsegs):
+    for level_val, collection in zip(cs.levels, cs.allsegs, strict=True):
         for seg in collection:
             if len(seg) < 2:
                 continue

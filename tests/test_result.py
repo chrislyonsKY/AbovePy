@@ -9,7 +9,7 @@ import geopandas as gpd
 import pytest
 from shapely.geometry import box
 
-from abovepy.products import Product, ProductType, get_product
+from abovepy.products import get_product
 from abovepy.result import SearchResult
 
 

@@ -6,8 +6,6 @@ import logging
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -197,4 +195,3 @@ class TestLazFallback:
         mock_rpc.assert_called_once_with(
             "/data/test.laz", bbox=None, classifications=None
         )
-        reader.close.assert_not_called() if False else None  # noqa: no reader
