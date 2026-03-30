@@ -26,10 +26,11 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
-    environment: pypi
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          password: ${{ secrets.PIPY_API_TOKEN }}
