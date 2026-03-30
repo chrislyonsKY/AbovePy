@@ -37,7 +37,7 @@ class TestClientInit:
 class TestClientSearch:
     def test_requires_bbox_or_county(self):
         client = KyFromAboveClient()
-        with pytest.raises(ValueError, match="Provide either"):
+        with pytest.raises(ValueError, match="Provide one of"):
             client.search(product="dem_phase3")
 
     def test_invalid_product(self):

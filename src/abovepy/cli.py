@@ -1,6 +1,6 @@
 """CLI for abovepy — ``abovepy <subcommand>`` or ``python -m abovepy <subcommand>``.
 
-Subcommands: search, download, mosaic, info, products, tile-url, preview.
+Subcommands: search, download, mosaic, info, products, tile-url, preview, estimate.
 """
 
 from __future__ import annotations
@@ -47,6 +47,8 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_area_args(p_search)
     p_search.add_argument("--datetime", help="ISO 8601 datetime or range")
     p_search.add_argument("--max-items", type=int, default=500, help="Max tiles (default: 500)")
+    p_search.add_argument("--sortby", help="Sort field (e.g., +datetime)")
+    p_search.add_argument("--ids", help="Comma-separated STAC item IDs")
     _add_format_arg(p_search, choices=["table", "json", "geojson"])
     p_search.set_defaults(func=_cmd_search)
 
@@ -56,6 +58,10 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_area_args(p_download)
     p_download.add_argument("--output-dir", "-o", default=".", help="Output directory (default: .)")
     p_download.add_argument("--overwrite", action="store_true", help="Overwrite existing files")
+    p_download.add_argument(
+        "--workers", type=int, default=4, help="Concurrent downloads (default: 4)",
+    )
+    p_download.add_argument("--no-resume", action="store_true", help="Disable download resume")
     p_download.set_defaults(func=_cmd_download)
 
     # --- mosaic ---
@@ -99,7 +105,17 @@ def _build_parser() -> argparse.ArgumentParser:
     p_preview.add_argument("--width", type=int, default=512, help="Width (default: 512)")
     p_preview.add_argument("--height", type=int, default=512, help="Height (default: 512)")
     p_preview.add_argument("--save", metavar="PATH", help="Download preview to file")
+    p_preview.add_argument(
+        "--open", dest="open_browser", action="store_true", help="Open in browser",
+    )
     p_preview.set_defaults(func=_cmd_preview)
+
+    # --- estimate ---
+    p_estimate = subparsers.add_parser("estimate", help="Estimate download size for an area")
+    _add_product_arg(p_estimate)
+    _add_area_args(p_estimate)
+    _add_format_arg(p_estimate, choices=["table", "json"])
+    p_estimate.set_defaults(func=_cmd_estimate)
 
     return parser
 
@@ -114,22 +130,32 @@ def _cmd_search(args: argparse.Namespace) -> None:
     import abovepy
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
-    tiles = abovepy.search(
+    point = _parse_point(args.point) if args.point else None
+    ids = args.ids.split(",") if args.ids else None
+    sortby = args.sortby if args.sortby else None
+
+    result = abovepy.search(
         product=args.product,
         bbox=bbox,
         county=args.county,
+        point=point,
+        buffer_miles=args.buffer,
+        ids=ids,
+        sortby=sortby,
         datetime=args.datetime,
         max_items=args.max_items,
     )
 
     fmt = args.format or "table"
     if fmt == "geojson":
-        print(tiles.to_json(indent=2))
+        print(result.to_geojson())
     elif fmt == "json":
         # Drop geometry for JSON
-        print(tiles.drop(columns="geometry").to_json(orient="records", indent=2))
+        print(result.tiles.drop(columns="geometry").to_json(orient="records", indent=2))
     else:
-        _print_table(tiles)
+        _print_table(result.tiles)
+        est = result.estimate_size()
+        print(f"\nFound {est['tile_count']} tile(s), ~{est['total_mb']} MB estimated")
 
 
 def _cmd_download(args: argparse.Namespace) -> None:
@@ -137,18 +163,27 @@ def _cmd_download(args: argparse.Namespace) -> None:
     import abovepy
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
-    tiles = abovepy.search(
+    point = _parse_point(args.point) if args.point else None
+
+    result = abovepy.search(
         product=args.product,
         bbox=bbox,
         county=args.county,
+        point=point,
+        buffer_miles=args.buffer,
     )
 
-    if tiles.empty:
+    if result.empty:
         print("No tiles found.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Found {len(tiles)} tile(s). Downloading...")
-    paths = abovepy.download(tiles, output_dir=args.output_dir, overwrite=args.overwrite)
+    est = result.estimate_size()
+    print(f"Found {est['tile_count']} tile(s), ~{est['total_mb']} MB estimated. Downloading...")
+    paths = result.download(
+        output_dir=args.output_dir,
+        overwrite=args.overwrite,
+        max_workers=args.workers,
+    )
     print(f"Downloaded {len(paths)} file(s) to {args.output_dir}")
 
 
@@ -229,6 +264,7 @@ def _cmd_tile_url(args: argparse.Namespace) -> None:
     from abovepy.viz import tile_url
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
+
     url = tile_url(
         product=args.product,
         bbox=bbox,
@@ -243,6 +279,7 @@ def _cmd_preview(args: argparse.Namespace) -> None:
     from abovepy.viz import preview_url
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
+
     url = preview_url(
         product=args.product,
         bbox=bbox,
@@ -257,8 +294,39 @@ def _cmd_preview(args: argparse.Namespace) -> None:
         resp.raise_for_status()
         Path(args.save).write_bytes(resp.content)
         print(f"Preview saved to {args.save}")
+    elif args.open_browser:
+        import webbrowser
+        webbrowser.open(url)
+        print(url)
     else:
         print(url)
+
+
+def _cmd_estimate(args: argparse.Namespace) -> None:
+    """Execute the 'estimate' subcommand."""
+    import abovepy
+
+    bbox = _parse_bbox(args.bbox) if args.bbox else None
+    point = _parse_point(args.point) if args.point else None
+
+    result = abovepy.search(
+        product=args.product,
+        bbox=bbox,
+        county=args.county,
+        point=point,
+        buffer_miles=args.buffer,
+    )
+
+    est = result.estimate_size()
+    fmt = args.format or "table"
+
+    if fmt == "json":
+        print(json.dumps(est, indent=2))
+    else:
+        print(f"Product:    {args.product}")
+        print(f"Tiles:      {est['tile_count']}")
+        print(f"Avg size:   {est['avg_tile_mb']} MB/tile")
+        print(f"Total est:  {est['total_mb']} MB")
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +344,8 @@ def _add_product_arg(parser: argparse.ArgumentParser) -> None:
 def _add_area_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--bbox", help="Bounding box: xmin,ymin,xmax,ymax")
     parser.add_argument("--county", help="Kentucky county name")
+    parser.add_argument("--point", help="Longitude,latitude (e.g., -84.85,38.19)")
+    parser.add_argument("--buffer", type=float, help="Buffer in miles (used with --point)")
 
 
 def _add_format_arg(
@@ -298,14 +368,21 @@ def _parse_bbox(value: str) -> tuple[float, float, float, float]:
     return tuple(float(p) for p in parts)  # type: ignore[return-value]
 
 
+def _parse_point(value: str) -> tuple[float, float]:
+    """Parse 'lon,lat' string to tuple."""
+    parts = value.split(",")
+    if len(parts) != 2:
+        raise argparse.ArgumentTypeError(
+            f"Expected 2 comma-separated values (lon,lat), got {len(parts)}"
+        )
+    return (float(parts[0]), float(parts[1]))
+
+
 def _print_table(gdf: object) -> None:
     """Print a GeoDataFrame as a terminal-friendly table."""
     import pandas as pd
 
-    if hasattr(gdf, "drop"):
-        df = gdf.drop(columns="geometry", errors="ignore")  # type: ignore[union-attr]
-    else:
-        df = gdf
+    df = gdf.drop(columns="geometry", errors="ignore") if hasattr(gdf, "drop") else gdf  # type: ignore[union-attr]
     print(pd.DataFrame(df).to_string(index=False))  # type: ignore[arg-type]
 
 

@@ -13,18 +13,18 @@ import abovepy
 def main():
     # Search for a single DEM tile
     print("Searching for DEM tiles...")
-    tiles = abovepy.search(
+    result = abovepy.search(
         bbox=(-84.85, 38.18, -84.82, 38.21),
         product="dem_phase3",
     )
-    print(f"Found {len(tiles)} tiles")
+    print(f"Found {result.count} tiles")
 
-    if len(tiles) == 0:
+    if result.empty:
         print("No tiles found.")
         return
 
     # Stream a windowed read — only fetches the bytes within the bbox
-    url = tiles.iloc[0].asset_url
+    url = result.tiles.iloc[0].asset_url
     print(f"\nStreaming from: {url}")
     print("Reading window bbox=(-84.85, 38.18, -84.82, 38.21)...")
 

@@ -52,6 +52,7 @@ class Product:
     phase: int
     native_crs: str = "EPSG:3089"
     s3_prefix: str | None = None
+    avg_tile_size_mb: float = 5.0
 
     def __repr__(self) -> str:
         return f"Product({self.key!r}, {self.display_name!r}, {self.format}, {self.resolution})"
@@ -68,6 +69,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="5ft",
         format="COG",
         phase=1,
+        avg_tile_size_mb=3.0,
     ),
     "dem_phase2": Product(
         key="dem_phase2",
@@ -77,6 +79,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="2ft",
         format="COG",
         phase=2,
+        avg_tile_size_mb=5.0,
     ),
     "dem_phase3": Product(
         key="dem_phase3",
@@ -86,6 +89,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="2ft",
         format="COG",
         phase=3,
+        avg_tile_size_mb=5.0,
     ),
     # --- Orthoimagery ---
     "ortho_phase1": Product(
@@ -96,6 +100,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="6in",
         format="COG",
         phase=1,
+        avg_tile_size_mb=40.0,
     ),
     "ortho_phase2": Product(
         key="ortho_phase2",
@@ -105,6 +110,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="6in",
         format="COG",
         phase=2,
+        avg_tile_size_mb=40.0,
     ),
     "ortho_phase3": Product(
         key="ortho_phase3",
@@ -114,6 +120,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="3in",
         format="COG",
         phase=3,
+        avg_tile_size_mb=80.0,
     ),
     # --- Point Cloud / LiDAR ---
     "laz_phase1": Product(
@@ -124,6 +131,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="varies",
         format="LAZ",
         phase=1,
+        avg_tile_size_mb=100.0,
     ),
     "laz_phase2": Product(
         key="laz_phase2",
@@ -133,6 +141,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="varies",
         format="COPC",
         phase=2,
+        avg_tile_size_mb=150.0,
     ),
     "laz_phase3": Product(
         key="laz_phase3",
@@ -142,6 +151,7 @@ PRODUCTS: dict[str, Product] = {
         resolution="varies",
         format="COPC",
         phase=3,
+        avg_tile_size_mb=150.0,
     ),
     # --- Oblique Imagery (Phase 3 only — STAC collection pending) ---
     "oblique_phase3_bwd": Product(
@@ -153,6 +163,7 @@ PRODUCTS: dict[str, Product] = {
         format="COG",
         phase=3,
         s3_prefix="imagery/obliques/Phase3/",
+        avg_tile_size_mb=80.0,
     ),
     "oblique_phase3_fwd": Product(
         key="oblique_phase3_fwd",
@@ -163,6 +174,7 @@ PRODUCTS: dict[str, Product] = {
         format="COG",
         phase=3,
         s3_prefix="imagery/obliques/Phase3/",
+        avg_tile_size_mb=80.0,
     ),
     "oblique_phase3_left": Product(
         key="oblique_phase3_left",
@@ -173,6 +185,7 @@ PRODUCTS: dict[str, Product] = {
         format="COG",
         phase=3,
         s3_prefix="imagery/obliques/Phase3/",
+        avg_tile_size_mb=80.0,
     ),
     "oblique_phase3_right": Product(
         key="oblique_phase3_right",
@@ -183,6 +196,7 @@ PRODUCTS: dict[str, Product] = {
         format="COG",
         phase=3,
         s3_prefix="imagery/obliques/Phase3/",
+        avg_tile_size_mb=80.0,
     ),
 }
 # fmt: on

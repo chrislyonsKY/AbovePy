@@ -4,6 +4,47 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.0.0] — 2026-03-30
+
+### Breaking Changes
+
+- **`search()` now returns `SearchResult`** instead of a bare `GeoDataFrame`.
+  Access the raw GeoDataFrame via `.tiles` or `.to_geodataframe()`.
+  `download()` and `mosaic()` accept both `SearchResult` and `GeoDataFrame`.
+
+### Added
+
+- **`SearchResult` workflow object** — chainable result from `search()` with
+  `.download()`, `.preview()`, `.map()`, `.mosaic()`, `.estimate_size()`,
+  `.to_geoparquet()`, `.to_geojson()`, `.compare()`, `.filter_by_bbox()`,
+  `.head()`, and rich Jupyter display via `_repr_html_()`
+- **Enhanced search parameters** — `intersects` (GeoJSON or Shapely geometry),
+  `filter` (CQL2), `sortby`, `ids`, `fields` passed through to STAC API
+- **Kentucky area selectors** — `point=(lon, lat)` + `buffer_miles=` for
+  circular searches, `geometry=` for any Shapely geometry
+- **Concurrent downloads** — `max_workers` parameter (default 4) uses
+  `ThreadPoolExecutor` for parallel tile downloads
+- **Resumable downloads** — `.part` file protocol with HTTP Range headers;
+  interrupted downloads resume from where they left off
+- **Cloud-native COPC reads** — `read_copc()` uses `laspy.CopcReader` for
+  spatial and LOD queries over HTTP without downloading entire files
+- **CLI `estimate` subcommand** — `abovepy estimate --county Pike` shows
+  tile count and estimated download size
+- **CLI improvements** — `--point`, `--buffer`, `--ids`, `--sortby` on search;
+  `--workers`, `--no-resume` on download; `--open` on preview; summary lines
+  on search and download output
+- **Size estimation** — `Product.avg_tile_size_mb` field enables download
+  size predictions per product type
+- Community health documents: SUPPORT.md, MAINTAINERS.md, DEVELOPMENT.md,
+  GOVERNANCE.md, RESPONSIBLE_USE.md, DISCLAIMER.md, PRIVACY.md, ATTRIBUTION.md
+
+### Changed
+
+- Download chunk size increased from 8 KB to 64 KB
+- Cache key generation supports new search parameters
+- `BboxError` message updated to list all available area selectors
+- `__main__.py` now delegates to CLI subcommand parser
+
 ## [1.1.0] — 2026-03-16
 
 ### Added

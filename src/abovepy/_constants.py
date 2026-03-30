@@ -22,3 +22,7 @@ MAX_RETRIES = 3
 RETRY_BACKOFF_FACTOR = 0.5
 REQUEST_TIMEOUT = 30  # seconds
 DOWNLOAD_TIMEOUT = 300  # seconds for large tile downloads
+
+# Download concurrency and chunking
+DEFAULT_DOWNLOAD_WORKERS = 4
+DOWNLOAD_CHUNK_SIZE = 65536

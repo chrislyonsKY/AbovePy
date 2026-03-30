@@ -9,6 +9,7 @@ downloading the entire file.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -123,6 +124,144 @@ def inspect_pointcloud(source: str | Path) -> dict[str, Any]:
             "maxs": (header.x_max, header.y_max, header.z_max),
             "creation_date": str(header.creation_date),
         }
+
+
+def read_copc(
+    source: str | Path,
+    bbox: tuple[float, float, float, float] | None = None,
+    resolution: float | None = None,
+    classifications: list[int] | None = None,
+    z_range: tuple[float, float] | None = None,
+    crs: str | None = None,
+) -> tuple[Any, dict[str, Any]]:
+    """Read a COPC file with cloud-native spatial queries.
+
+    Unlike :func:`read_pointcloud`, this uses ``laspy.CopcReader`` for
+    efficient, range-request-based reads of Cloud Optimised Point Cloud
+    files — no full download required.
+
+    Parameters
+    ----------
+    source : str or Path
+        Local path, S3 URI, or HTTPS URL to a COPC file.
+    bbox : tuple, optional
+        Spatial filter ``(xmin, ymin, xmax, ymax)`` in the CRS specified
+        by *crs* (defaults to the file's native CRS).
+    resolution : float, optional
+        COPC resolution level for the query.  ``None`` returns all
+        resolutions.
+    classifications : list[int], optional
+        Filter to specific LAS classification codes (e.g., ``[2]`` for
+        ground).
+    z_range : tuple[float, float], optional
+        ``(zmin, zmax)`` range to include in the query bounds.  If
+        *bbox* is given without *z_range*, z bounds default to ±inf.
+    crs : str, optional
+        CRS of the *bbox* coordinates (e.g. ``"EPSG:4326"``).  If the
+        file's CRS differs, the bbox is reprojected before querying.
+
+    Returns
+    -------
+    tuple[laspy.ScaleAwarePointRecord, dict]
+        ``(points, metadata)`` — point record and a metadata dict with
+        keys: *path*, *point_count*, *point_format*, *scales*, *offsets*,
+        *bounds*.
+
+    Raises
+    ------
+    ImportError
+        If laspy or numpy is not installed.
+    """
+    try:
+        import laspy
+        import laspy.copc
+        import numpy as np
+    except ImportError as err:
+        raise ImportError(_INSTALL_MSG) from err
+
+    source_str = str(source)
+
+    # Resolve S3 URIs to HTTPS
+    source_url = source_str
+    if source_str.startswith("s3://"):
+        parts = source_str.replace("s3://", "").split("/", 1)
+        bucket, key = parts[0], parts[1]
+        source_url = f"https://{bucket}.s3.amazonaws.com/{key}"
+
+    try:
+        reader = laspy.CopcReader.open(source_url)
+    except Exception:
+        # If the file is LAZ (not COPC), fall back to read_pointcloud
+        logger.warning(
+            "Failed to open as COPC; falling back to read_pointcloud: %s",
+            source_str,
+        )
+        return read_pointcloud(
+            source, bbox=bbox, classifications=classifications
+        )
+
+    try:
+        # Build query kwargs
+        query_kwargs: dict[str, Any] = {}
+
+        if bbox is not None:
+            xmin, ymin, xmax, ymax = bbox
+
+            # Reproject bbox if a CRS was given and differs from file CRS
+            file_crs_wkt = None
+            with contextlib.suppress(Exception):
+                file_crs_wkt = reader.header.parse_crs().to_wkt()
+            if crs is not None and file_crs_wkt:
+                try:
+                    from pyproj import CRS as ProjCRS
+                    from pyproj import Transformer
+
+                    src_crs = ProjCRS.from_user_input(crs)
+                    dst_crs = ProjCRS.from_wkt(file_crs_wkt)
+                    if src_crs != dst_crs:
+                        transformer = Transformer.from_crs(
+                            src_crs, dst_crs, always_xy=True
+                        )
+                        xmin, ymin = transformer.transform(xmin, ymin)
+                        xmax, ymax = transformer.transform(xmax, ymax)
+                except Exception:
+                    logger.warning("CRS reprojection failed; using bbox as-is")
+
+            zmin = z_range[0] if z_range is not None else -np.inf
+            zmax = z_range[1] if z_range is not None else np.inf
+
+            bounds = laspy.copc.Bounds(
+                mins=np.array([xmin, ymin, zmin]),
+                maxs=np.array([xmax, ymax, zmax]),
+            )
+            query_kwargs["bounds"] = bounds
+
+        if resolution is not None:
+            query_kwargs["resolution"] = resolution
+
+        points = reader.query(**query_kwargs)
+
+        # Apply classification filter
+        if classifications is not None:
+            cls_mask = sum(points.classification == c for c in classifications) > 0
+            points = points[cls_mask]
+
+        header = reader.header
+        metadata = {
+            "path": source_str,
+            "point_count": len(points),
+            "point_format": header.point_format.id,
+            "scales": tuple(header.scales),
+            "offsets": tuple(header.offsets),
+            "bounds": {
+                "mins": (header.x_min, header.y_min, header.z_min),
+                "maxs": (header.x_max, header.y_max, header.z_max),
+            },
+        }
+    finally:
+        reader.close()
+
+    return points, metadata
 
 
 def _read_remote(url: str) -> Any:

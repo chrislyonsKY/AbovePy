@@ -2,4 +2,6 @@
 
 from __future__ import annotations
 
-__all__ = ["cog"]
+from abovepy.io.pointcloud import read_copc
+
+__all__ = ["cog", "read_copc"]

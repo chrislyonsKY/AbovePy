@@ -14,9 +14,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import geopandas as gpd
     import pandas as pd
+    from shapely.geometry.base import BaseGeometry
 
 from abovepy._constants import DEFAULT_INPUT_CRS, STAC_URL
 from abovepy.products import PRODUCTS, VALID_PRODUCTS, get_product
+from abovepy.result import SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +73,19 @@ class KyFromAboveClient:
         crs: str = DEFAULT_INPUT_CRS,
         datetime: str | None = None,
         max_items: int = 500,
-    ) -> gpd.GeoDataFrame:
+        intersects: dict[str, Any] | BaseGeometry | None = None,
+        filter: dict[str, Any] | str | None = None,
+        sortby: list[str] | str | None = None,
+        ids: list[str] | None = None,
+        fields: list[str] | None = None,
+        point: tuple[float, float] | None = None,
+        buffer_miles: float | None = None,
+        geometry: BaseGeometry | None = None,
+    ) -> SearchResult:
         """Find tiles intersecting an area of interest.
+
+        Provide one of: ``bbox``, ``county``, ``point``, ``geometry``,
+        ``intersects``, or ``ids``.
 
         Parameters
         ----------
@@ -88,20 +101,62 @@ class KyFromAboveClient:
             ISO 8601 datetime range.
         max_items : int
             Maximum tiles to return.
+        intersects : dict or Shapely geometry, optional
+            GeoJSON geometry or Shapely geometry for spatial intersection.
+        filter : dict or str, optional
+            CQL2 filter expression for advanced STAC queries.
+        sortby : list[str] or str, optional
+            Sort fields (e.g., ``["+datetime"]``).
+        ids : list[str], optional
+            Specific STAC item IDs to fetch.
+        fields : list[str], optional
+            Fields to include/exclude from the STAC response.
+        point : tuple, optional
+            (longitude, latitude) point. Used with ``buffer_miles``.
+        buffer_miles : float, optional
+            Buffer radius in miles around ``point`` or ``geometry``.
+        geometry : Shapely geometry, optional
+            Any Shapely geometry for spatial search.
 
         Returns
         -------
-        geopandas.GeoDataFrame
-            Tile index with metadata and asset URLs.
+        SearchResult
+            Tile index wrapped in a workflow object.
         """
         from abovepy.stac import items_to_geodataframe, search_stac
         from abovepy.utils.bbox import get_county_bbox, validate_bbox
         from abovepy.utils.crs import bbox_intersects_kentucky
 
-        # Resolve bbox from county or validate provided bbox
-        if county is not None:
+        # Build query_params for SearchResult
+        query_params: dict[str, Any] = {
+            "product": product, "bbox": bbox, "county": county, "crs": crs,
+            "datetime": datetime, "max_items": max_items,
+        }
+
+        # Resolve intersects from GeoJSON dict
+        intersects_geojson: dict[str, Any] | None = None
+
+        # --- Area selector resolution (priority order) ---
+        if ids is not None:
+            # Skip all spatial params when fetching by ID
+            bbox = None
+            query_params["ids"] = ids
+        elif county is not None:
             bbox = get_county_bbox(county)
             logger.info("Using bbox for %s County: %s", county, bbox)
+        elif point is not None:
+            intersects_geojson = _point_to_intersects(point, buffer_miles or 1.0)
+            bbox = None
+            query_params["point"] = point
+            query_params["buffer_miles"] = buffer_miles
+        elif geometry is not None:
+            intersects_geojson = _geometry_to_intersects(geometry, buffer_miles)
+            bbox = None
+            query_params["geometry"] = "custom"
+        elif intersects is not None:
+            intersects_geojson = _normalize_intersects(intersects)
+            bbox = None
+            query_params["intersects"] = "custom"
         elif bbox is not None:
             validate_bbox(bbox)
             if not bbox_intersects_kentucky(bbox, crs=crs):
@@ -112,7 +167,9 @@ class KyFromAboveClient:
         else:
             from abovepy._exceptions import BboxError
 
-            raise BboxError("Provide either bbox= or county=")
+            raise BboxError(
+                "Provide one of: bbox=, county=, point=, geometry=, intersects=, or ids="
+            )
 
         # Look up the product
         prod = get_product(product)
@@ -124,6 +181,11 @@ class KyFromAboveClient:
             bbox=bbox,
             datetime=datetime,
             max_items=max_items,
+            intersects=intersects_geojson,
+            filter=filter,
+            sortby=sortby,
+            ids=ids,
+            fields=fields,
         )
 
         # Convert to GeoDataFrame
@@ -132,7 +194,7 @@ class KyFromAboveClient:
         if gdf.empty:
             logger.warning("No %s tiles found in the specified area.", prod.display_name)
 
-        return gdf
+        return SearchResult(gdf, prod, query_params)
 
     def download(
         self,
@@ -269,3 +331,45 @@ class KyFromAboveClient:
         pystac_client.Client
         """
         return self._get_stac_client()
+
+
+# ---------------------------------------------------------------------------
+# Area selector helpers
+# ---------------------------------------------------------------------------
+
+_MILES_TO_DEGREES = 1.0 / 69.0  # approximate at Kentucky's latitude
+
+
+def _point_to_intersects(
+    point: tuple[float, float],
+    buffer_miles: float,
+) -> dict[str, Any]:
+    """Convert a point + buffer to a GeoJSON polygon for STAC intersects."""
+    from shapely.geometry import Point, mapping
+
+    lon, lat = point
+    buf_deg = buffer_miles * _MILES_TO_DEGREES
+    geom = Point(lon, lat).buffer(buf_deg)
+    return dict(mapping(geom))
+
+
+def _geometry_to_intersects(
+    geometry: Any,
+    buffer_miles: float | None,
+) -> dict[str, Any]:
+    """Convert a Shapely geometry (optionally buffered) to GeoJSON."""
+    from shapely.geometry import mapping
+
+    if buffer_miles is not None:
+        buf_deg = buffer_miles * _MILES_TO_DEGREES
+        geometry = geometry.buffer(buf_deg)
+    return dict(mapping(geometry))
+
+
+def _normalize_intersects(intersects: Any) -> dict[str, Any]:
+    """Accept either a GeoJSON dict or a Shapely geometry."""
+    if isinstance(intersects, dict):
+        return intersects
+    from shapely.geometry import mapping
+
+    return dict(mapping(intersects))

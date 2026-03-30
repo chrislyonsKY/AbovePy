@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "abovepy"
-version = "1.1.0"
+version = "2.0.0"
 description = "KyFromAbove LiDAR, DEM, and orthoimagery data access for Python"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-lidar = ["laspy>=2.5"]
+lidar = ["laspy>=2.5", "requests>=2.28"]
 viz = ["leafmap>=0.30", "matplotlib>=3.8"]
 s3 = ["boto3>=1.28"]
 analysis = ["scipy>=1.11"]
@@ -53,6 +53,7 @@ dev = [
     "mypy>=1.8",
 ]
 docs = [
+    "zensical>=0.0.20",
     "mkdocs-material>=9.5",
     "mkdocstrings[python]>=0.24",
     "mkdocs-jupyter>=0.24",

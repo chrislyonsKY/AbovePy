@@ -109,24 +109,28 @@ class FindTiles:
                         county, product_display
                     )
                 )
-                tiles = abovepy.search(county=county, product=product_key)
+                result = abovepy.search(county=county, product=product_key)
             else:
                 bbox = extent_to_bbox_4326(extent)
                 arcpy.AddMessage(
                     "Searching extent for {} tiles...".format(product_display)
                 )
-                tiles = abovepy.search(bbox=bbox, product=product_key)
+                result = abovepy.search(bbox=bbox, product=product_key)
         except Exception as e:
             arcpy.AddError("Search failed: {}".format(e))
             return
 
-        if tiles.empty:
+        if result.empty:
             arcpy.AddWarning("No tiles found in the specified area.")
             return
 
-        arcpy.AddMessage("Found {} tiles.".format(len(tiles)))
+        est = result.estimate_size()
+        arcpy.AddMessage("Found {} tiles (~{} MB estimated).".format(
+            est["tile_count"], est["total_mb"]
+        ))
 
         # Convert GeoDataFrame to feature class
+        tiles = result.tiles
         sr_4326 = arcpy.SpatialReference(4326)
         arcpy.management.CreateFeatureclass(
             arcpy.env.scratchGDB,
