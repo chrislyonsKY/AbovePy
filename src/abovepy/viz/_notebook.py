@@ -51,7 +51,7 @@ def show(
         If leafmap is not installed.
     """
     try:
-        import leafmap  # type: ignore[import-untyped]
+        import leafmap
     except ImportError:
         raise ImportError(
             "leafmap is required for show(). Install it with: pip install abovepy[viz]"

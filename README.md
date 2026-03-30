@@ -13,7 +13,6 @@
 **KyFromAbove LiDAR, DEM, orthoimagery, and oblique imagery data access for Python.**
 
 Kentucky's [KyFromAbove](https://kyfromabove.ky.gov/) program provides statewide 2ft DEMs, 3-inch orthoimagery, 3-inch oblique imagery, and COPC LiDAR point clouds — all publicly available on S3 with a STAC API for discovery. `abovepy` gives you Pythonic access to all of it, plus server-side terrain analysis via TiTiler. No credentials required.
-
 ## Install
 
 ```bash

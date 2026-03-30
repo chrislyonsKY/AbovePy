@@ -129,7 +129,7 @@ def aspect(
     # Mark flat areas
     flat = (dx == 0) & (dy == 0)
     asp[flat] = -1
-    return asp  # type: ignore[return-value]
+    return asp
 
 
 def flood_inundation(
@@ -219,7 +219,7 @@ def dem_diff(
     dem_after = np.asarray(dem_after, dtype=np.float64)
     if dem_before.shape != dem_after.shape:
         raise AnalysisError(f"Shape mismatch: {dem_before.shape} vs {dem_after.shape}")
-    return dem_after - dem_before  # type: ignore[return-value]
+    return dem_after - dem_before
 
 
 def elevation_profile(
@@ -317,16 +317,16 @@ def contour_lines(
     if hasattr(transform, "a"):
         # Affine object
         a, b, c, d, e, f = (
-            transform.a,  # type: ignore[union-attr]
-            transform.b,  # type: ignore[union-attr]
-            transform.c,  # type: ignore[union-attr]
-            transform.d,  # type: ignore[union-attr]
-            transform.e,  # type: ignore[union-attr]
-            transform.f,  # type: ignore[union-attr]
+            transform.a,
+            transform.b,
+            transform.c,
+            transform.d,
+            transform.e,
+            transform.f,
         )
     else:
         # Tuple (a, b, c, d, e, f, ...)
-        t: tuple[float, ...] = tuple(transform)  # type: ignore[arg-type]
+        t: tuple[float, ...] = tuple(transform)
         a, b, c, d, e, f = t[0], t[1], t[2], t[3], t[4], t[5]
 
     rows = []
@@ -557,7 +557,7 @@ def interpolate_reference_surface(
         fill_value=np.nanmean(boundary_elevations),
     )
 
-    return surface.astype(np.float64)  # type: ignore[return-value]
+    return surface.astype(np.float64)
 
 
 def relative_elevation_model(
@@ -613,4 +613,4 @@ def relative_elevation_model(
     )
 
     rem = dem - channel_surface
-    return np.maximum(rem, 0.0)  # type: ignore[return-value]
+    return np.maximum(rem, 0.0)
