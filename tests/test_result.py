@@ -219,6 +219,64 @@ class TestCompare:
 
 
 # ---------------------------------------------------------------------------
+# Provenance & validation
+# ---------------------------------------------------------------------------
+
+
+class TestProvenance:
+    def test_provenance_keys(self, result):
+        prov = result.provenance()
+        assert prov["product"] == "dem_phase3"
+        assert prov["source_program"] == "KyFromAbove"
+        assert prov["tile_count"] == 3
+        assert prov["native_crs"] == "EPSG:3089"
+        assert "acquisition_period" in prov
+        assert "asset_urls" in prov
+        assert len(prov["asset_urls"]) == 3
+
+    def test_provenance_acquisition_period(self, result):
+        prov = result.provenance()
+        assert "2022" in prov["acquisition_period"]
+        assert "2025" in prov["acquisition_period"]
+
+    def test_provenance_empty(self, empty_result):
+        prov = empty_result.provenance()
+        assert prov["tile_count"] == 0
+        assert prov["estimated_size_mb"] == 0.0
+
+
+class TestValidate:
+    def test_validate_clean_result(self, result):
+        warnings = result.validate()
+        # May have datetime warnings since our fixtures use None
+        assert isinstance(warnings, list)
+
+    def test_validate_empty_result(self, empty_result):
+        warnings = empty_result.validate()
+        assert any("empty" in w.lower() for w in warnings)
+
+    def test_validate_missing_asset_urls(self, sample_product):
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": ["T1"],
+                "product": ["dem_phase3"],
+                "datetime": [None],
+                "asset_url": [None],
+                "collection_id": ["dem-phase3"],
+            },
+            geometry=[box(0, 0, 1, 1)],
+            crs="EPSG:4326",
+        )
+        result = SearchResult(gdf, sample_product, {})
+        warnings = result.validate()
+        assert any("no asset URL" in w for w in warnings)
+
+    def test_validate_null_datetimes(self, result):
+        warnings = result.validate()
+        assert any("no acquisition date" in w for w in warnings)
+
+
+# ---------------------------------------------------------------------------
 # Subsetting
 # ---------------------------------------------------------------------------
 

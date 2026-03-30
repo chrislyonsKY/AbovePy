@@ -66,11 +66,20 @@ def download_tiles(
     downloaded: list[Path] = []
     failed: list[str] = []
 
+    # Check if tiles have collection_id for subdirectory grouping
+    has_collection = "collection_id" in tiles.columns
+
     # Build list of (url, dest) pairs, skipping existing files
     work_items: list[tuple[str, Path]] = []
     for url in urls:
         filename = Path(url).name
-        dest = output_dir / filename
+        if has_collection:
+            collection = str(tiles.loc[tiles["asset_url"] == url, "collection_id"].iloc[0])
+            product_dir = output_dir / collection
+            product_dir.mkdir(parents=True, exist_ok=True)
+            dest = product_dir / filename
+        else:
+            dest = output_dir / filename
         if dest.exists() and not overwrite:
             logger.debug("Skipping existing file: %s", dest)
             downloaded.append(dest)
@@ -150,6 +159,19 @@ def _download_file(client: Any, url: str, dest: Path, resume: bool = True) -> No
                 with open(part_path, mode) as f:
                     for chunk in response.iter_bytes(chunk_size=DOWNLOAD_CHUNK_SIZE):
                         f.write(chunk)
+
+            # Validate downloaded size against Content-Length if available
+            content_length = response.headers.get("content-length")
+            if content_length is not None:
+                expected = int(content_length)
+                actual = part_path.stat().st_size
+                if actual != expected:
+                    logger.warning(
+                        "Size mismatch for %s: expected %d bytes, got %d",
+                        url,
+                        expected,
+                        actual,
+                    )
 
             # Success — rename .part to final destination
             part_path.rename(dest)

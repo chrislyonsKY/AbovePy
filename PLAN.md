@@ -1,135 +1,157 @@
-# abovepy 1.1.0 — Implementation Plan
+# abovepy Product Roadmap — Now / Next / Later
 
-**Version bump**: 1.0.1 → 1.1.0
+**Core promise:** "Give me the right Kentucky data for this site, in the right CRS/units, packaged cleanly."
 
-## Feature 1: Terrain Analysis (TiTiler Algorithms)
+## Validation of direction
 
-Add server-side terrain analysis helpers that generate TiTiler algorithm URLs for DEM data. No new dependencies — just URL construction like the existing titiler module.
+The codebase is strong — SearchResult, concurrent downloads, COPC reads, TiTiler integration, oblique discovery, ArcGIS toolbox, 318 tests. The product thesis (Kentucky-specific workbench, not generic STAC wrapper) is correct and the code already reflects it.
 
-### New functions in `titiler.py`:
+**What the code fights in the proposed roadmap:**
+1. **CRS:** Everything works in EPSG:4326 internally. EPSG:3089 is metadata-only. Feet-based buffering uses a rough miles-to-degrees hack. No corridor/polygon clip support.
+2. **Packaging:** Export has 3 format writers but zero packaging concept — no manifest, no provenance, no multi-file bundles.
+3. **Obliques:** Direction+season enumeration only. JSON sidecars (which contain georeferencing/metadata) are URL-only, never fetched or parsed.
+4. **Product metadata:** No acquisition dates, source attribution, QA flags — just product type/format/resolution.
+5. **Download integrity:** Basename-only naming (collision risk), no content-length validation, no checksums.
+6. **CI security:** Actions on floating tags, API token auth (not Trusted Publishing), no CodeQL.
 
-| Function | What it does |
-|---|---|
-| `hillshade_tile_url()` | Collection tile URL with `algorithm=hillshade` + optional azimuth/altitude params |
-| `slope_tile_url()` | Collection tile URL with `algorithm=slope` + optional buffer/z_exaggeration |
-| `contour_tile_url()` | Collection tile URL with `algorithm=contours` + optional increment/thickness/minz/maxz |
-| `terrain_rgb_tile_url()` | Collection tile URL with `algorithm=terrainrgb` (Mapbox-compatible encoding) |
-
-Each wraps `collection_tile_url()` with the correct `algorithm` param and algorithm-specific parameters. Defaults to `dem_phase3` collection since terrain only makes sense on DEMs.
-
-### Files changed:
-- `src/abovepy/titiler.py` — add 4 functions + `_pgstac_algorithm_params()` helper
-- `tests/test_titiler.py` — add tests for each terrain function
+None of these are blocking — they're all additive changes on a solid foundation.
 
 ---
 
-## Feature 2: pgSTAC Search Registration
+## NOW — v2.1 (ship within 2 weeks)
 
-Add helpers to register persistent virtual mosaics via the TiTiler-pgSTAC `/searches/register` endpoint. This enables saved views and shareable tile URLs.
+Highest-value slice that doesn't over-expand scope. All are code changes to existing modules.
 
-### New module: `src/abovepy/searches.py`
+### 1. Kentucky Engineering Geometry (utils/crs.py, client.py)
+- `buffer_feet(geometry, feet, crs="EPSG:3089")` — reproject to 3089, buffer, reproject back
+- `corridor_buffer(line, width_feet)` — LineString + width in feet → polygon
+- Update `client.search()`: accept `buffer_feet=` alongside existing `buffer_miles=`
+- Add `crs="EPSG:3089"` option to `search()` that keeps bbox/geometry in native CRS
+- Explicit CRS/units warnings when mixing coordinate systems
 
-| Function | What it does |
-|---|---|
-| `register_search()` | POST to `/searches/register` with a CQL2 filter (collection + bbox + datetime). Returns a search hash ID. |
-| `search_tile_url()` | Generate a TileJSON URL from a registered search hash: `/searches/{hash}/{tms}/tilejson.json` |
-| `search_map_url()` | Generate a map viewer URL from a registered search hash |
-| `search_info_url()` | Info URL for a registered search |
-| `search_bbox_url()` | Rendered image URL from a registered search + bbox |
+### 2. QA / Provenance on SearchResult (result.py, products.py)
+- Add to `Product` dataclass: `acquisition_year_start`, `acquisition_year_end`, `source_program`
+- New `SearchResult.provenance()` → dict with: source URLs, acquisition dates, CRS, tile count, estimated size, AOI record, mixed-phase warnings, coverage gap detection
+- New `SearchResult.validate()` → list of warnings (mixed phases, nodata, coverage gaps, CRS mismatches)
 
-`register_search()` is the only function that makes an HTTP call (POST via httpx). The rest are pure URL builders like the existing titiler helpers.
+### 3. Download Integrity (_download.py)
+- Validate `Content-Length` header against downloaded bytes
+- Hierarchical filenames: `{product}/{tile_id}.ext` instead of basename-only
+- Log warnings for size mismatches
 
-### Files changed:
-- `src/abovepy/searches.py` — new module
-- `tests/test_searches.py` — new test file (mock the POST with respx)
-- `src/abovepy/__init__.py` — export `register_search`
+### 4. Remote Read Safety (io/pointcloud.py, io/cog.py)
+- HEAD request size check in `_read_remote()` before full download
+- Configurable `max_remote_size_mb` (default 500)
+- URL allowlist: default to `*.s3.amazonaws.com`, `*.execute-api.us-west-2.amazonaws.com`
+- Auto-fallback to `read_copc()` for COPC files instead of full download
 
----
+### 5. CI Hardening (.github/workflows/)
+- Pin all actions to commit SHAs
+- Add CodeQL workflow
+- Add dependency review on PRs
+- Migrate PyPI publish to Trusted Publishing (OIDC)
 
-## Feature 3: Visualization Helpers
-
-Two levels: URL-only helpers (always available) + interactive `show()` for notebooks (requires `viz` extra).
-
-### New module: `src/abovepy/viz.py`
-
-**URL helpers (no extra deps):**
-
-| Function | What it does |
-|---|---|
-| `tile_url()` | Smart dispatcher: takes a product + bbox/county → returns the best TileJSON URL (uses pgSTAC collection endpoint) |
-| `preview_url()` | Takes product + bbox → returns a rendered PNG URL |
-
-**Notebook display (requires `leafmap` from `viz` extra):**
-
-| Function | What it does |
-|---|---|
-| `show()` | Takes product + bbox/county, builds a leafmap Map with the TiTiler tile layer, returns the Map object for Jupyter display. Supports `algorithm=` for terrain overlays. |
-
-### Files changed:
-- `src/abovepy/viz.py` — new module
-- `tests/test_viz.py` — new tests (mock leafmap import for show())
-- `src/abovepy/__init__.py` — export `show` (with lazy import)
-- `pyproject.toml` — no new deps (leafmap already in `viz` extra)
+**Surfaces:** Python, CLI (--buffer-feet, provenance output)
+**Tests:** ~40 new tests
+**Breaking:** None
 
 ---
 
-## Feature 4: Oblique Imagery (Stub Products + S3 Discovery)
+## NEXT — v2.2 (4-6 weeks)
 
-Add oblique products to the registry. Since Ian's STAC collection isn't ready yet, provide S3-based discovery as a fallback. The product entries use placeholder collection IDs that will be updated once the STAC collection exists.
+### 6. Deliverable Packaging (new: package.py, result.py)
+- `SearchResult.package(output_dir, clip_bbox=None, include_preview=True)` → `Package`
+- `Package` dataclass: files, manifest.json, footprints.gpkg, preview.png, provenance.json, DISCLAIMER.txt
+- Manifest schema: file paths, checksums (SHA-256), CRS, acquisition dates, tile count, AOI WKT
+- Outputs consumable by Python, ArcGIS Pro, QGIS (GeoPackage index, COG rasters)
+- CLI: `abovepy package --county Franklin -o ./delivery`
 
-### Changes to `products.py`:
+### 7. Oblique Intelligence (obliques/_s3.py, new: obliques/_spatial.py)
+- Fetch and cache JSON sidecar metadata (camera params, footprint, timestamp)
+- Spatial search: `search_obliques(point=(-84.85, 38.19), radius_feet=500)`
+- Nearest-frame selection by point/AOI
+- 4-direction bundle grouping: given a point, return best Bwd/Fwd/Left/Right frame set
+- Rich `ObliqueFrame` dataclass with parsed metadata
 
-Add `OBLIQUE` to `ProductType` enum, then add 4 new products:
+### 8. QGIS Interoperability
+- GeoPackage outputs with proper layer names and CRS metadata
+- GeoParquet tile indexes
+- QGIS-friendly package structure (data/ + styles/ + project.qgs template)
+- Documentation: "Using abovepy with QGIS" tutorial
 
-| Product key | S3 prefix | Description |
-|---|---|---|
-| `oblique_phase3_bwd` | `imagery/obliques/Phase3/.../Bwd_*` | Backward oblique, 3-inch |
-| `oblique_phase3_fwd` | `imagery/obliques/Phase3/.../Fwd_*` | Forward oblique, 3-inch |
-| `oblique_phase3_left` | `imagery/obliques/Phase3/.../Left_*` | Left oblique, 3-inch |
-| `oblique_phase3_right` | `imagery/obliques/Phase3/.../Right_*` | Right oblique, 3-inch |
+### 9. Richer STAC Asset Handling (stac.py)
+- Expose all STAC assets (not just primary) — thumbnail, metadata, alternate formats
+- Runtime conformance check against `/api` endpoint
+- Graceful fallback when CQL2 not supported
 
-Each product gets a `collection_id` of `"obliques-phase3"` (placeholder — will match Ian's STAC collection when created) and a new optional `s3_prefix` field on the `Product` dataclass.
-
-### New: `src/abovepy/obliques.py`
-
-| Function | What it does |
-|---|---|
-| `list_oblique_seasons()` | List available seasons from S3 prefix listing |
-| `search_obliques()` | Given a direction + season, list available frames from S3. Returns a GeoDataFrame with S3 URLs and metadata parsed from the JSON sidecar files. |
-
-This is a lightweight S3-based fallback. Once Ian's STAC collection is live, `search()` will work with obliques via the normal STAC path and these helpers become convenience wrappers.
-
-### Files changed:
-- `src/abovepy/products.py` — add `OBLIQUE` type + 4 products + `s3_prefix` field
-- `src/abovepy/obliques.py` — new module for S3-based oblique discovery
-- `tests/test_obliques.py` — new tests
-- `src/abovepy/_constants.py` — add `S3_OBLIQUES_PREFIX`
-- `src/abovepy/__init__.py` — export `search_obliques`
+**Surfaces:** Python, CLI, QGIS (file interop)
+**Tests:** ~60 new tests
 
 ---
 
-## Housekeeping
+## LATER — v2.3+ (8+ weeks)
 
-| File | Change |
-|---|---|
-| `src/abovepy/_version.py` | `1.0.1` → `1.1.0` |
-| `pyproject.toml` | version `1.0.1` → `1.1.0`, add `"oblique"` to keywords |
-| `CHANGELOG.md` | Add `[1.1.0]` section |
+### 10. Lazy Analysis Bridge
+- Optional `SearchResult.to_xarray()` via `stackstac` or `odc-stac`
+- `SearchResult.to_dask()` for parallel array operations
+- Keep optional — `pip install abovepy[xarray]`
+
+### 11. Advanced Analysis APIs
+- `abovepy.sample(point, product)` — elevation at a point
+- `abovepy.profile(line, product)` — elevation along a transect
+- `abovepy.zonal_stats(polygon, product)` — statistics within a polygon
+- `abovepy.cut_fill(polygon, reference_elevation)` — volume calculation
+- `abovepy.change_detection(bbox, product_before, product_after)` — difference map
+- These wrap the existing terrain.py functions with search+read orchestration
+
+### 12. Parcel / Route Search (if validated)
+- Parcel-number search (requires county parcel data — external dependency)
+- Route/corridor search by road name or line geometry
+- Would need bundled or fetched lookup data
+
+### 13. Web Viewer Templates
+- Shareable MapLibre GL JS viewer HTML
+- Configurable for DEM, ortho, oblique, or multi-product views
+- Embeddable in reports
 
 ---
 
-## Implementation Order
+## Feature × Persona Matrix
 
-1. **Terrain analysis** — smallest scope, extends existing titiler.py
-2. **pgSTAC search registration** — new module, self-contained
-3. **Visualization helpers** — depends on terrain URLs being done
-4. **Oblique imagery** — most exploratory, independent of the other 3
-5. **Version bump + changelog** — last step after all features land
+| Feature | Surveyor | Civil Eng. | GIS Analyst | Planner | Emergency Mgmt |
+|---------|----------|------------|-------------|---------|----------------|
+| EPSG:3089 + feet buffers | **critical** | **critical** | high | medium | medium |
+| Deliverable packaging | **critical** | **critical** | high | high | medium |
+| QA / provenance | **critical** | **critical** | medium | low | medium |
+| Corridor buffer search | medium | **critical** | medium | medium | low |
+| Oblique inspection | high | high | medium | medium | **critical** |
+| QGIS interop | medium | medium | **critical** | high | high |
+| Lazy xarray loading | low | low | high | low | low |
+| Phase comparison | medium | high | **critical** | medium | medium |
+| Flood/cut-fill analysis | low | **critical** | medium | high | **critical** |
 
----
+## Feature × Surface Matrix
 
-## What's NOT in scope
+| Feature | Python | CLI | ArcGIS Pro | QGIS |
+|---------|--------|-----|------------|------|
+| Feet-based buffers | v2.1 | v2.1 | v2.1 (params) | via file |
+| Provenance / validate | v2.1 | v2.1 (--provenance) | v2.2 (tool output) | via manifest |
+| Deliverable packaging | v2.2 | v2.2 (package cmd) | v2.2 (tool) | v2.2 (native) |
+| Oblique spatial search | v2.2 | v2.2 | v2.2 (tool) | via file |
+| QGIS packaging | v2.2 | v2.2 | — | v2.2 |
+| xarray bridge | v2.3 | — | — | — |
+| Analysis APIs | v2.3 | v2.3 | v2.3 (tools) | via file |
 
-- Local numpy-based terrain analysis (user chose TiTiler-only)
-- Full ortho/nadir imagery STAC support (already works via existing products)
-- Pushing to remote or creating a PR (per user preference)
+## Highest-Value First Slice (v2.1 MVP)
+
+Ship `buffer_feet()`, `corridor_buffer()`, `SearchResult.provenance()`, `SearchResult.validate()`, download integrity, and CI hardening. This gives surveyors and engineers the CRS handling they need, adds the QA layer they expect, and hardens the project for government adoption — all without touching the package/oblique/QGIS layers that need more design.
+
+**Estimated scope:** ~15 files modified, ~40 tests added, 0 breaking changes.
+
+## Structural Changes Needed
+
+1. **Remove `__slots__` from SearchResult** — blocks adding `.provenance()`, `.validate()`, `.package()` attributes
+2. **Extend Product dataclass** — add acquisition dates, source metadata, QA status
+3. **Factor CRS utilities** — `_reproject_bbox` lives in io/cog.py but should be in utils/crs.py for reuse
+4. **URL allowlist module** — new `_security.py` with host validation for remote reads
+5. **Package output module** — new `package.py` with `Package` dataclass and manifest schema

@@ -278,12 +278,24 @@ def _read_remote(url: str) -> Any:
     import laspy
 
     from abovepy._constants import DOWNLOAD_TIMEOUT
+    from abovepy._security import check_remote_size, validate_remote_url
+
+    validate_remote_url(url)
+
+    if url.lower().endswith((".copc.laz", ".copc")):
+        logger.info(
+            "Consider using read_copc() for cloud-native spatial queries "
+            "instead of downloading the entire file: %s",
+            url,
+        )
 
     if url.startswith("s3://"):
         # Convert to HTTPS for public bucket
         parts = url.replace("s3://", "").split("/", 1)
         bucket, key = parts[0], parts[1]
         url = f"https://{bucket}.s3.amazonaws.com/{key}"
+
+    check_remote_size(url)
 
     logger.info("Downloading point cloud: %s", url)
     with httpx.Client(timeout=DOWNLOAD_TIMEOUT) as client:

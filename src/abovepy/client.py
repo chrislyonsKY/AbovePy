@@ -80,6 +80,7 @@ class KyFromAboveClient:
         fields: list[str] | None = None,
         point: tuple[float, float] | None = None,
         buffer_miles: float | None = None,
+        buffer_feet: float | None = None,
         geometry: BaseGeometry | None = None,
     ) -> SearchResult:
         """Find tiles intersecting an area of interest.
@@ -112,9 +113,14 @@ class KyFromAboveClient:
         fields : list[str], optional
             Fields to include/exclude from the STAC response.
         point : tuple, optional
-            (longitude, latitude) point. Used with ``buffer_miles``.
+            (longitude, latitude) point. Used with ``buffer_miles`` or
+            ``buffer_feet``.
         buffer_miles : float, optional
             Buffer radius in miles around ``point`` or ``geometry``.
+        buffer_feet : float, optional
+            Buffer radius in US survey feet around ``point`` or ``geometry``.
+            Uses EPSG:3089 projection for accurate measurement. Takes
+            precedence over ``buffer_miles`` if both are provided.
         geometry : Shapely geometry, optional
             Any Shapely geometry for spatial search.
 
@@ -149,12 +155,21 @@ class KyFromAboveClient:
             bbox = get_county_bbox(county)
             logger.info("Using bbox for %s County: %s", county, bbox)
         elif point is not None:
-            intersects_geojson = _point_to_intersects(point, buffer_miles or 1.0)
+            if buffer_feet is not None:
+                intersects_geojson = _point_to_intersects_feet(point, buffer_feet)
+            else:
+                intersects_geojson = _point_to_intersects(point, buffer_miles or 1.0)
             bbox = None
             query_params["point"] = point
             query_params["buffer_miles"] = buffer_miles
+            query_params["buffer_feet"] = buffer_feet
         elif geometry is not None:
-            intersects_geojson = _geometry_to_intersects(geometry, buffer_miles)
+            if buffer_feet is not None:
+                intersects_geojson = _geometry_to_intersects_feet(geometry, buffer_feet)
+            elif buffer_miles is not None:
+                intersects_geojson = _geometry_to_intersects(geometry, buffer_miles)
+            else:
+                intersects_geojson = _normalize_intersects(geometry)
             bbox = None
             query_params["geometry"] = "custom"
         elif intersects is not None:
@@ -368,6 +383,33 @@ def _geometry_to_intersects(
         buf_deg = buffer_miles * _MILES_TO_DEGREES
         geometry = geometry.buffer(buf_deg)
     return dict(mapping(geometry))
+
+
+def _point_to_intersects_feet(
+    point: tuple[float, float],
+    buffer_feet: float,
+) -> dict[str, Any]:
+    """Convert a point + buffer in feet to GeoJSON using EPSG:3089."""
+    from shapely.geometry import Point, mapping
+
+    from abovepy.utils.crs import buffer_feet as _buffer_feet
+
+    geom = Point(point[0], point[1])
+    buffered = _buffer_feet(geom, buffer_feet, input_crs="EPSG:4326")
+    return dict(mapping(buffered))
+
+
+def _geometry_to_intersects_feet(
+    geometry: Any,
+    buffer_feet: float,
+) -> dict[str, Any]:
+    """Buffer a geometry in feet using EPSG:3089, return GeoJSON."""
+    from shapely.geometry import mapping
+
+    from abovepy.utils.crs import buffer_feet as _buffer_feet
+
+    buffered = _buffer_feet(geometry, buffer_feet, input_crs="EPSG:4326")
+    return dict(mapping(buffered))
 
 
 def _normalize_intersects(intersects: Any) -> dict[str, Any]:

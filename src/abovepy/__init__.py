@@ -76,6 +76,7 @@ def search(
     fields: list[str] | None = None,
     point: tuple[float, float] | None = None,
     buffer_miles: float | None = None,
+    buffer_feet: float | None = None,
     geometry: BaseGeometry | None = None,
 ) -> SearchResult:
     """Find KyFromAbove tiles intersecting an area of interest.
@@ -134,6 +135,7 @@ def search(
         fields=fields,
         point=point,
         buffer_miles=buffer_miles,
+        buffer_feet=buffer_feet,
         geometry=geometry,
     )
 
