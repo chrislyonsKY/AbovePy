@@ -4,65 +4,32 @@ hide:
   - toc
 ---
 
-<div class="mdx-hero" markdown>
-
-# Kentucky's geospatial data, one import away
-
-<div class="hero-sub">
-The fastest way for GIS analysts to find, inspect, compare, and operationalize KyFromAbove elevation, imagery, and LiDAR data.
-</div>
-
-<div class="install-pill">pip install abovepy</div>
-
-<div class="hero-buttons">
-<a href="getting-started/" class="btn-primary">Get Started</a>
-<a href="api/reference/" class="btn-secondary">API Reference</a>
-<a href="https://github.com/chrislyonsKY/AbovePy" class="btn-secondary">GitHub</a>
-</div>
-
-</div>
-
-<div class="feature-grid" markdown>
-
-<div class="feature-card" markdown>
-<div class="card-icon">&#x1F50D;</div>
-
-### Search & Discover
-
-Find DEM, ortho, LiDAR, and oblique tiles by county, bbox, point+buffer, or custom geometry. 13 products across 3 phases. Returns a chainable `SearchResult` object.
-</div>
-
-<div class="feature-card" markdown>
-<div class="card-icon">&#x2B07;</div>
-
-### Download & Export
-
-Concurrent downloads with resume support. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, or GeoParquet.
-</div>
-
-<div class="feature-card" markdown>
-<div class="card-icon">&#x1F30E;</div>
-
-### Analyze & Visualize
-
-Local terrain analysis — hillshade, slope, flood, contours, volume. Server-side TiTiler algorithms. Interactive notebook maps via leafmap.
-</div>
-
-<div class="feature-card" markdown>
-<div class="card-icon">&#x1F5FA;</div>
-
-### ArcGIS Pro Ready
-
-Python Toolbox with 5 tools — find tiles, download, hillshade workflows. County dropdown, concurrent downloads, no STAC knowledge required.
-</div>
-
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="card-icon">&#x1F50D;</div>
+    <h3>Search &amp; Discover</h3>
+    <p>Find DEM, ortho, LiDAR, and oblique tiles by county, bbox, point+buffer, or custom geometry. 13 products across 3 phases.</p>
+  </div>
+  <div class="feature-card">
+    <div class="card-icon">&#x2B07;</div>
+    <h3>Download &amp; Export</h3>
+    <p>Concurrent downloads with resume support. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, or GeoParquet.</p>
+  </div>
+  <div class="feature-card">
+    <div class="card-icon">&#x1F30E;</div>
+    <h3>Analyze &amp; Visualize</h3>
+    <p>Local terrain analysis &mdash; hillshade, slope, flood, contours, volume. Server-side TiTiler algorithms. Interactive notebook maps.</p>
+  </div>
+  <div class="feature-card">
+    <div class="card-icon">&#x1F5FA;</div>
+    <h3>ArcGIS Pro Ready</h3>
+    <p>Python Toolbox with 5 tools &mdash; find tiles, download, hillshade workflows. County dropdown, concurrent downloads, no STAC knowledge required.</p>
+  </div>
 </div>
 
 ---
 
-<div class="section-label">Quick Start</div>
-
-## Search, estimate, download
+## Quick Start
 
 ```python
 import abovepy
@@ -81,8 +48,6 @@ paths = result.download("./data")
 vrt = result.mosaic(output="frankfort.vrt")
 ```
 
-<div class="section-label">Advanced</div>
-
 ## Cloud-native reads & phase comparison
 
 ```python
@@ -97,12 +62,12 @@ phase2 = abovepy.search(county="Franklin", product="dem_phase2")
 overlap = result.compare(phase2)
 
 # Point-based search with buffer
-nearby = abovepy.search(point=(-84.85, 38.19), buffer_miles=2, product="ortho_phase3")
+nearby = abovepy.search(
+    point=(-84.85, 38.19), buffer_miles=2, product="ortho_phase3"
+)
 ```
 
 ---
-
-<div class="section-label">Data catalog</div>
 
 ## Supported Products
 
@@ -117,8 +82,6 @@ All data in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy accepts EPSG:
 
 ---
 
-<div class="section-label">Philosophy</div>
-
 ## What abovepy is not
 
 abovepy is **not** a general STAC client, tile server, or point cloud processor.
@@ -130,10 +93,6 @@ Use [PDAL](https://pdal.io/) for heavy LiDAR workflows.
 
 ---
 
-<div class="cta-row" markdown>
-
 [Get Started](getting-started.md){ .md-button .md-button--primary }
 [API Reference](api/reference.md){ .md-button }
 [View on GitHub](https://github.com/chrislyonsKY/AbovePy){ .md-button }
-
-</div>
