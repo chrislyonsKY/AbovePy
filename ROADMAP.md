@@ -17,7 +17,7 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 
 ## v2.1 (Near Term)
 
-**Theme: Engineering-grade CRS, provenance, and safety**
+**Theme: Engineering-grade CRS, provenance, safety, and QGIS**
 
 - First-class EPSG:3089 support — feet-based point+buffer, corridor/centerline buffers, polygon clip workflows
 - Strong CRS and units validation with explicit warnings
@@ -27,6 +27,7 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 - Remote read safety — file-size guards, URL allowlist for known KyFromAbove hosts
 - Product metadata — acquisition date ranges, source program attribution, QA status
 - CI hardening — pin GitHub Actions to SHAs, CodeQL, dependency review, Trusted Publishing
+- **QGIS plugin (AboveQGIS)** — Processing toolbox provider with tools for search, download, mosaic, and hillshade. Draw extent or pick county from dropdown, select product, get data loaded into your QGIS project. Distributed via QGIS Plugin Repository. Built on abovepy core, no separate codebase to maintain.
 
 ## v2.2 (Mid Term)
 
@@ -79,7 +80,7 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 | **Python library** | Full | Full | Full | Full | Full |
 | **CLI** | Full | Full | Full | Full | Full |
 | **ArcGIS Pro** | Toolbox (5 tools) | +provenance | +packaging, +oblique | +analysis | maintained |
-| **QGIS** | File interop | — | Native packaging | maintained | maintained |
+| **QGIS** | File interop | Plugin v1 (Processing tools) | +packaging, +oblique | +analysis | maintained |
 | **Civil 3D** | — | — | File import (LandXML, DXF) | Plugin prototype | Plugin v1 |
 | **Carlson** | — | — | File import (LandXML, DXF) | — | Plugin v1 |
 | **ORD / MicroStation** | — | — | File import (GeoTIFF, LAS) | — | Addin v1 |
