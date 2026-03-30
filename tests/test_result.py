@@ -135,18 +135,14 @@ class TestExport:
         assert data["type"] == "FeatureCollection"
         assert len(data["features"]) == 3
 
-    @pytest.mark.skipif(
-        not _has_pyarrow(), reason="pyarrow not installed"
-    )
+    @pytest.mark.skipif(not _has_pyarrow(), reason="pyarrow not installed")
     def test_to_geoparquet(self, result, tmp_path):
         output = tmp_path / "tiles.parquet"
         path = result.to_geoparquet(output)
         assert path.exists()
         assert path == output
 
-    @pytest.mark.skipif(
-        not _has_pyarrow(), reason="pyarrow not installed"
-    )
+    @pytest.mark.skipif(not _has_pyarrow(), reason="pyarrow not installed")
     def test_to_geoparquet_creates_dirs(self, result, tmp_path):
         output = tmp_path / "sub" / "dir" / "tiles.parquet"
         path = result.to_geoparquet(output)
