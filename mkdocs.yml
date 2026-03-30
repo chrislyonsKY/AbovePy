@@ -7,7 +7,7 @@ repo_name: chrislyonsKY/AbovePy
 edit_uri: edit/main/docs/
 
 theme:
-  name: material
+  variant: modern
   palette:
     - scheme: default
       primary: teal
