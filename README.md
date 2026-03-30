@@ -12,7 +12,7 @@
 
 **KyFromAbove LiDAR, DEM, orthoimagery, and oblique imagery data access for Python.**
 
-Kentucky's [KyFromAbove](https://kyfromabove.ky.gov/) program provides statewide 2ft DEMs, 3-inch orthoimagery, 3-inch oblique imagery, and COPC LiDAR point clouds Ã¢â‚¬â€ all publicly available on S3 with a STAC API for discovery. `abovepy` gives you Pythonic access to all of it, plus server-side terrain analysis via TiTiler. No credentials required.
+Kentucky's [KyFromAbove](https://kyfromabove.ky.gov/) program provides statewide 2ft DEMs, 3-inch orthoimagery, 3-inch oblique imagery, and COPC LiDAR point clouds — all publicly available on S3 with a STAC API for discovery. `abovepy` gives you Pythonic access to all of it, plus server-side terrain analysis via TiTiler. No credentials required.
 
 ## Install
 
@@ -84,12 +84,12 @@ print(abovepy.info())
 
 ### Terrain analysis (server-side)
 
-Generate hillshade, slope, and contour tiles directly from the TiTiler-pgSTAC server Ã¢â‚¬â€ no downloads needed:
+Generate hillshade, slope, and contour tiles directly from the TiTiler-pgSTAC server — no downloads needed:
 
 ```python
 from abovepy.titiler import hillshade_tile_url, slope_tile_url, contour_tile_url
 
-# Hillshade TileJSON URL Ã¢â‚¬â€ use in MapLibre/Leaflet/leafmap
+# Hillshade TileJSON URL — use in MapLibre/Leaflet/leafmap
 url = hillshade_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25))
 
 # Slope in degrees
@@ -139,7 +139,7 @@ Compare 5ft Phase 1 vs 2ft Phase 3 resolution from the same tile in Frankfort:
 
 ### Hillshade from Streamed DEM
 
-Compute a hillshade directly from a cloud-hosted DEM tile Ã¢â‚¬â€ no download required:
+Compute a hillshade directly from a cloud-hosted DEM tile — no download required:
 
 ![Hillshade](examples/output/hillshade.png)
 
@@ -181,7 +181,7 @@ Compare Phase 1 vs Phase 3 DEM over a Pike County mining area to detect terrain 
 
 ### Flood Inundation Simulation
 
-Simulate rising water levels on a DEM Ã¢â‚¬â€ watch the Kentucky River floodplain fill:
+Simulate rising water levels on a DEM — watch the Kentucky River floodplain fill:
 
 ![Flood Inundation](examples/output/flood_inundation.png)
 
@@ -261,7 +261,7 @@ See [examples/scripts/](examples/scripts/) for the full source code behind each 
 | `oblique_phase3_left` | 3 inch | COG | `obliques-phase3`* |
 | `oblique_phase3_right` | 3 inch | COG | `obliques-phase3`* |
 
-\* Oblique STAC collection pending Ã¢â‚¬â€ use `search_obliques()` for S3-based discovery.
+\* Oblique STAC collection pending — use `search_obliques()` for S3-based discovery.
 
 All data is natively in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy accepts bounding boxes in EPSG:4326 by default.
 
@@ -269,11 +269,11 @@ All data is natively in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy a
 
 An ArcGIS Pro Python Toolbox is included in `arcgis/AbovePro.pyt` with tools for:
 
-- **Find KyFromAbove Tiles** Ã¢â‚¬â€ draw extent, pick product, see available tiles
-- **Download Tiles** Ã¢â‚¬â€ download with progress tracking
-- **Download and Load** Ã¢â‚¬â€ download + add to map in one step
-- **DEM Hillshade** Ã¢â‚¬â€ automated DEM Ã¢â€ â€™ hillshade workflow
-- **County Download** Ã¢â‚¬â€ download by county name dropdown
+- **Find KyFromAbove Tiles** — draw extent, pick product, see available tiles
+- **Download Tiles** — download with progress tracking
+- **Download and Load** — download + add to map in one step
+- **DEM Hillshade** — automated DEM → hillshade workflow
+- **County Download** — download by county name dropdown
 
 See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/abovepy/tutorials/arcgis-pro/) for installation and usage.
 
@@ -316,10 +316,10 @@ results = stac_client.search(
 
 ## Related Resources
 
-- **[kyfromabove-on-aws-examples](https://github.com/ianhorn/kyfromabove-on-aws-examples)** Ã¢â‚¬â€ Foundational examples for accessing KyFromAbove data on AWS using tile index GeoPackages and boto3. Great reference for understanding the raw S3 data structure that abovepy wraps.
-- **[kyfromabove-gisconference2025-workshop](https://github.com/ianhorn/kyfromabove-gisconference2025-workshop)** Ã¢â‚¬â€ 2025 KY GIS Conference workshop covering STAC API access from Python, ArcGIS Pro, and QGIS. Includes building height estimation from COPC LiDAR, DEM change detection, and MosaicJSON workflows.
-- **[KyFromAbove](https://kyfromabove.ky.gov/)** Ã¢â‚¬â€ Official program site from the Kentucky Division of Geographic Information.
-- **[STAC Browser](https://kygeonet.ky.gov/stac/)** Ã¢â‚¬â€ Browse the KyFromAbove STAC catalog interactively.
+- **[kyfromabove-on-aws-examples](https://github.com/ianhorn/kyfromabove-on-aws-examples)** — Foundational examples for accessing KyFromAbove data on AWS using tile index GeoPackages and boto3. Great reference for understanding the raw S3 data structure that abovepy wraps.
+- **[kyfromabove-gisconference2025-workshop](https://github.com/ianhorn/kyfromabove-gisconference2025-workshop)** — 2025 KY GIS Conference workshop covering STAC API access from Python, ArcGIS Pro, and QGIS. Includes building height estimation from COPC LiDAR, DEM change detection, and MosaicJSON workflows.
+- **[KyFromAbove](https://kyfromabove.ky.gov/)** — Official program site from the Kentucky Division of Geographic Information.
+- **[STAC Browser](https://kygeonet.ky.gov/stac/)** — Browse the KyFromAbove STAC catalog interactively.
 
 ## Data Source
 
@@ -329,6 +329,6 @@ results = stac_client.search(
 
 ## License
 
-GPL-3.0 Ã¢â‚¬â€ see [LICENSE](LICENSE).
+GPL-3.0 — see [LICENSE](LICENSE).
 
 ---
