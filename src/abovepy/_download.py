@@ -85,23 +85,23 @@ def download_tiles(
         httpx.Client(timeout=DOWNLOAD_TIMEOUT) as client,
         ThreadPoolExecutor(max_workers=max_workers) as executor,
     ):
-            future_to_url = {
-                executor.submit(_download_file, client, url, dest, resume): (url, dest)
-                for url, dest in work_items
-            }
-            for future in tqdm(
-                as_completed(future_to_url),
-                total=len(future_to_url),
-                desc="Downloading tiles",
-                unit="tile",
-            ):
-                url, dest = future_to_url[future]
-                try:
-                    future.result()
-                    downloaded.append(dest)
-                except Exception:
-                    logger.exception("Failed to download %s", url)
-                    failed.append(url)
+        future_to_url = {
+            executor.submit(_download_file, client, url, dest, resume): (url, dest)
+            for url, dest in work_items
+        }
+        for future in tqdm(
+            as_completed(future_to_url),
+            total=len(future_to_url),
+            desc="Downloading tiles",
+            unit="tile",
+        ):
+            url, dest = future_to_url[future]
+            try:
+                future.result()
+                downloaded.append(dest)
+            except Exception:
+                logger.exception("Failed to download %s", url)
+                failed.append(url)
 
     if failed:
         logger.warning("Failed to download %d tile(s): %s", len(failed), failed)
@@ -109,9 +109,7 @@ def download_tiles(
     return downloaded
 
 
-def _download_file(
-    client: Any, url: str, dest: Path, resume: bool = True
-) -> None:
+def _download_file(client: Any, url: str, dest: Path, resume: bool = True) -> None:
     """Download a single file with retry logic and resume support.
 
     Downloads to a ``.part`` temporary file first, then renames to the
@@ -150,9 +148,7 @@ def _download_file(
                 mode = "ab" if existing_size > 0 and response.status_code == 206 else "wb"
 
                 with open(part_path, mode) as f:
-                    for chunk in response.iter_bytes(
-                        chunk_size=DOWNLOAD_CHUNK_SIZE
-                    ):
+                    for chunk in response.iter_bytes(chunk_size=DOWNLOAD_CHUNK_SIZE):
                         f.write(chunk)
 
             # Success — rename .part to final destination

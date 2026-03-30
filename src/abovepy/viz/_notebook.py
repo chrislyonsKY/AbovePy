@@ -54,8 +54,7 @@ def show(
         import leafmap  # type: ignore[import-untyped]
     except ImportError:
         raise ImportError(
-            "leafmap is required for show(). "
-            "Install it with: pip install abovepy[viz]"
+            "leafmap is required for show(). Install it with: pip install abovepy[viz]"
         ) from None
 
     resolved_bbox = _resolve_bbox(bbox, county)
@@ -83,6 +82,7 @@ def show(
         )
         if span > 0:
             import math
+
             default_zoom = int(math.log2(360 / span))
             default_zoom = max(5, min(default_zoom, 18))
 

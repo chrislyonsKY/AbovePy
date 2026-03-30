@@ -56,9 +56,8 @@ def hillshade(
     slope_rad = np.arctan(np.sqrt(dx**2 + dy**2))
     aspect_rad = np.arctan2(-dy, dx)
 
-    shade = (
-        np.sin(alt_rad) * np.cos(slope_rad)
-        + np.cos(alt_rad) * np.sin(slope_rad) * np.cos(az_rad - aspect_rad)
+    shade = np.sin(alt_rad) * np.cos(slope_rad) + np.cos(alt_rad) * np.sin(slope_rad) * np.cos(
+        az_rad - aspect_rad
     )
     shade = np.clip(shade, 0, 1)
     return (shade * 255).astype(np.uint8)
@@ -219,9 +218,7 @@ def dem_diff(
     dem_before = np.asarray(dem_before, dtype=np.float64)
     dem_after = np.asarray(dem_after, dtype=np.float64)
     if dem_before.shape != dem_after.shape:
-        raise AnalysisError(
-            f"Shape mismatch: {dem_before.shape} vs {dem_after.shape}"
-        )
+        raise AnalysisError(f"Shape mismatch: {dem_before.shape} vs {dem_after.shape}")
     return dem_after - dem_before
 
 
@@ -320,8 +317,12 @@ def contour_lines(
     if hasattr(transform, "a"):
         # Affine object
         a, b, c, d, e, f = (
-            transform.a, transform.b, transform.c,
-            transform.d, transform.e, transform.f,
+            transform.a,
+            transform.b,
+            transform.c,
+            transform.d,
+            transform.e,
+            transform.f,
         )
     else:
         # Tuple (a, b, c, d, e, f, ...)
@@ -335,10 +336,12 @@ def contour_lines(
                 continue
             # Transform pixel coords to georeferenced coords
             geo_coords = [(a * x + b * y + c, d * x + e * y + f) for x, y in seg]
-            rows.append({
-                "elevation": float(level_val),
-                "geometry": LineString(geo_coords),
-            })
+            rows.append(
+                {
+                    "elevation": float(level_val),
+                    "geometry": LineString(geo_coords),
+                }
+            )
 
     return gpd.GeoDataFrame(rows, geometry="geometry", crs=crs)
 
@@ -372,7 +375,7 @@ def zonal_stats(
     if values.size == 0:
         raise AnalysisError("No cells selected by mask.")
 
-    cell_area = resolution ** 2
+    cell_area = resolution**2
     return {
         "min": float(np.nanmin(values)),
         "max": float(np.nanmax(values)),
@@ -395,8 +398,7 @@ def _require_scipy() -> None:
         import scipy  # noqa: F401
     except ImportError:
         raise ImportError(
-            "scipy is required for this function. "
-            "Install it with: pip install abovepy[analysis]"
+            "scipy is required for this function. Install it with: pip install abovepy[analysis]"
         ) from None
 
 
@@ -433,7 +435,7 @@ def volume(
     if mask is not None:
         diff = diff[np.asarray(mask, dtype=bool)]
 
-    cell_area = resolution ** 2
+    cell_area = resolution**2
 
     cut = diff[diff < 0]
     fill = diff[diff > 0]
@@ -479,15 +481,13 @@ def volume_from_surface(
     dem = np.asarray(dem, dtype=np.float64)
     reference_surface = np.asarray(reference_surface, dtype=np.float64)
     if dem.shape != reference_surface.shape:
-        raise AnalysisError(
-            f"Shape mismatch: {dem.shape} vs {reference_surface.shape}"
-        )
+        raise AnalysisError(f"Shape mismatch: {dem.shape} vs {reference_surface.shape}")
 
     diff = dem - reference_surface
     if mask is not None:
         diff = diff[np.asarray(mask, dtype=bool)]
 
-    cell_area = resolution ** 2
+    cell_area = resolution**2
     cut = diff[diff < 0]
     fill = diff[diff > 0]
 
@@ -547,7 +547,7 @@ def interpolate_reference_surface(
     boundary_elevations = dem[boundary_rows, boundary_cols]
 
     # Build interpolation grid over full array
-    rows_grid, cols_grid = np.mgrid[0:dem.shape[0], 0:dem.shape[1]]
+    rows_grid, cols_grid = np.mgrid[0 : dem.shape[0], 0 : dem.shape[1]]
 
     surface = griddata(
         points=np.column_stack([boundary_rows, boundary_cols]),
@@ -599,7 +599,7 @@ def relative_elevation_model(
     channel_points = np.asarray(channel_points)
     channel_elevations = np.asarray(channel_elevations, dtype=np.float64)
 
-    rows_grid, cols_grid = np.mgrid[0:dem.shape[0], 0:dem.shape[1]]
+    rows_grid, cols_grid = np.mgrid[0 : dem.shape[0], 0 : dem.shape[1]]
 
     # channel_points is (col, row), griddata expects (row, col) for consistency
     points = np.column_stack([channel_points[:, 1], channel_points[:, 0]])

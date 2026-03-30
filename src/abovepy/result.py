@@ -283,9 +283,7 @@ class SearchResult:
     # Subsetting
     # ------------------------------------------------------------------
 
-    def filter_by_bbox(
-        self, bbox: tuple[float, float, float, float]
-    ) -> SearchResult:
+    def filter_by_bbox(self, bbox: tuple[float, float, float, float]) -> SearchResult:
         """Filter tiles to those intersecting a bounding box.
 
         Parameters
@@ -335,10 +333,7 @@ class SearchResult:
 
     def __repr__(self) -> str:
         est = self.estimate_size()
-        return (
-            f"SearchResult({self._product.key!r}, "
-            f"{self.count} tile(s), ~{est['total_mb']} MB)"
-        )
+        return f"SearchResult({self._product.key!r}, {self.count} tile(s), ~{est['total_mb']} MB)"
 
     def _repr_html_(self) -> str:
         """Rich display for Jupyter notebooks."""

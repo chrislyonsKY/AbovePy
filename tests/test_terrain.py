@@ -197,7 +197,10 @@ class TestDemDiff:
 class TestElevationProfile:
     def test_horizontal_transect(self, sloped_dem):
         dists, elevs = elevation_profile(
-            sloped_dem, start=(25, 0), end=(25, 49), resolution=1.0,
+            sloped_dem,
+            start=(25, 0),
+            end=(25, 49),
+            resolution=1.0,
         )
         assert len(dists) == len(elevs)
         # Elevation should increase along the transect
@@ -205,14 +208,20 @@ class TestElevationProfile:
 
     def test_distances_start_at_zero(self, sloped_dem):
         dists, _ = elevation_profile(
-            sloped_dem, start=(0, 0), end=(49, 49), resolution=5.0,
+            sloped_dem,
+            start=(0, 0),
+            end=(49, 49),
+            resolution=5.0,
         )
         assert dists[0] == 0.0
         assert dists[-1] > 0.0
 
     def test_custom_num_points(self, sloped_dem):
         dists, elevs = elevation_profile(
-            sloped_dem, start=(0, 0), end=(49, 49), resolution=1.0,
+            sloped_dem,
+            start=(0, 0),
+            end=(49, 49),
+            resolution=1.0,
             num_points=10,
         )
         assert len(dists) == 10

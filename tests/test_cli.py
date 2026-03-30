@@ -52,8 +52,14 @@ class TestBuildParser:
     def test_subcommands_exist(self):
         parser = _build_parser()
         subcommands = [
-            "search", "download", "mosaic", "info",
-            "products", "tile-url", "preview", "estimate",
+            "search",
+            "download",
+            "mosaic",
+            "info",
+            "products",
+            "tile-url",
+            "preview",
+            "estimate",
         ]
         for cmd in subcommands:
             argv = [cmd] if cmd != "mosaic" else [cmd, "f.tif", "-o", "out.vrt"]
@@ -279,7 +285,10 @@ class TestCmdTileUrl:
         out = capsys.readouterr().out.strip()
         assert "example.com" in out
 
-    @patch("abovepy.viz._urls._ALGORITHM_BUILDERS", {"hillshade": lambda *a, **kw: "https://example.com/hs"})
+    @patch(
+        "abovepy.viz._urls._ALGORITHM_BUILDERS",
+        {"hillshade": lambda *a, **kw: "https://example.com/hs"},
+    )
     def test_tile_url_with_algorithm(self, capsys):
         main(["tile-url", "--bbox", "-84.9,38.15,-84.8,38.25", "--algorithm", "hillshade"])
         out = capsys.readouterr().out.strip()
@@ -354,7 +363,9 @@ class TestSubprocess:
     def test_abovepy_products(self):
         result = subprocess.run(
             [sys.executable, "-m", "abovepy", "products"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         assert result.returncode == 0
         assert "dem_phase3" in result.stdout

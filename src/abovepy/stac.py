@@ -91,8 +91,15 @@ def search_stac(
         Matching STAC items.
     """
     cache_key = make_cache_key(
-        collection_id, bbox, datetime, max_items,
-        intersects=intersects, filter=filter, sortby=sortby, ids=ids, fields=fields,
+        collection_id,
+        bbox,
+        datetime,
+        max_items,
+        intersects=intersects,
+        filter=filter,
+        sortby=sortby,
+        ids=ids,
+        fields=fields,
     )
     cached = _stac_cache.get(cache_key)
     if cached is not None:
@@ -100,8 +107,16 @@ def search_stac(
         return list(cached)
 
     items = _search_with_retry(
-        client, collection_id, bbox, datetime, max_items,
-        intersects=intersects, filter=filter, sortby=sortby, ids=ids, fields=fields,
+        client,
+        collection_id,
+        bbox,
+        datetime,
+        max_items,
+        intersects=intersects,
+        filter=filter,
+        sortby=sortby,
+        ids=ids,
+        fields=fields,
     )
 
     _stac_cache.set(cache_key, items)

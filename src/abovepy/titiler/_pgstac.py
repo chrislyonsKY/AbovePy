@@ -385,9 +385,7 @@ def hillshade_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "hillshade"
-    extra["algorithm_params"] = (
-        f'{{"azimuth":{azimuth},"altitude":{altitude},"buffer":{buffer}}}'
-    )
+    extra["algorithm_params"] = f'{{"azimuth":{azimuth},"altitude":{altitude},"buffer":{buffer}}}'
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -432,9 +430,7 @@ def slope_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "slope"
-    extra["algorithm_params"] = (
-        f'{{"buffer":{buffer},"z_exaggeration":{z_exaggeration}}}'
-    )
+    extra["algorithm_params"] = f'{{"buffer":{buffer},"z_exaggeration":{z_exaggeration}}}'
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -486,8 +482,7 @@ def contour_tile_url(
     extra = dict(kwargs)
     extra["algorithm"] = "contours"
     extra["algorithm_params"] = (
-        f'{{"increment":{increment},"thickness":{thickness},'
-        f'"minz":{minz},"maxz":{maxz}}}'
+        f'{{"increment":{increment},"thickness":{thickness},"minz":{minz},"maxz":{maxz}}}'
     )
     return collection_tile_url(
         collection,

@@ -196,9 +196,7 @@ def read_copc(
             "Failed to open as COPC; falling back to read_pointcloud: %s",
             source_str,
         )
-        return read_pointcloud(
-            source, bbox=bbox, classifications=classifications
-        )
+        return read_pointcloud(source, bbox=bbox, classifications=classifications)
 
     try:
         # Build query kwargs
@@ -219,9 +217,7 @@ def read_copc(
                     src_crs = ProjCRS.from_user_input(crs)
                     dst_crs = ProjCRS.from_wkt(file_crs_wkt)
                     if src_crs != dst_crs:
-                        transformer = Transformer.from_crs(
-                            src_crs, dst_crs, always_xy=True
-                        )
+                        transformer = Transformer.from_crs(src_crs, dst_crs, always_xy=True)
                         xmin, ymin = transformer.transform(xmin, ymin)
                         xmax, ymax = transformer.transform(xmax, ymax)
                 except Exception:

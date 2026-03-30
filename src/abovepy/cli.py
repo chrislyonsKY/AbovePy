@@ -35,7 +35,8 @@ def _build_parser() -> argparse.ArgumentParser:
         description="KyFromAbove geospatial data access for Python",
     )
     parser.add_argument(
-        "--version", action="store_true",
+        "--version",
+        action="store_true",
         help="Show version and exit",
     )
 
@@ -59,7 +60,10 @@ def _build_parser() -> argparse.ArgumentParser:
     p_download.add_argument("--output-dir", "-o", default=".", help="Output directory (default: .)")
     p_download.add_argument("--overwrite", action="store_true", help="Overwrite existing files")
     p_download.add_argument(
-        "--workers", type=int, default=4, help="Concurrent downloads (default: 4)",
+        "--workers",
+        type=int,
+        default=4,
+        help="Concurrent downloads (default: 4)",
     )
     p_download.add_argument("--no-resume", action="store_true", help="Disable download resume")
     p_download.set_defaults(func=_cmd_download)
@@ -81,7 +85,8 @@ def _build_parser() -> argparse.ArgumentParser:
     # --- products ---
     p_products = subparsers.add_parser("products", help="List available products")
     p_products.add_argument(
-        "--type", dest="product_type",
+        "--type",
+        dest="product_type",
         choices=["dem", "ortho", "pointcloud", "oblique"],
         help="Filter by product type",
     )
@@ -93,7 +98,8 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_product_arg(p_tile)
     _add_area_args(p_tile)
     p_tile.add_argument(
-        "--algorithm", choices=["hillshade", "slope", "contours", "terrainrgb"],
+        "--algorithm",
+        choices=["hillshade", "slope", "contours", "terrainrgb"],
         help="Terrain algorithm",
     )
     p_tile.set_defaults(func=_cmd_tile_url)
@@ -106,7 +112,10 @@ def _build_parser() -> argparse.ArgumentParser:
     p_preview.add_argument("--height", type=int, default=512, help="Height (default: 512)")
     p_preview.add_argument("--save", metavar="PATH", help="Download preview to file")
     p_preview.add_argument(
-        "--open", dest="open_browser", action="store_true", help="Open in browser",
+        "--open",
+        dest="open_browser",
+        action="store_true",
+        help="Open in browser",
     )
     p_preview.set_defaults(func=_cmd_preview)
 
@@ -290,12 +299,14 @@ def _cmd_preview(args: argparse.Namespace) -> None:
 
     if args.save:
         import httpx
+
         resp = httpx.get(url, timeout=60)
         resp.raise_for_status()
         Path(args.save).write_bytes(resp.content)
         print(f"Preview saved to {args.save}")
     elif args.open_browser:
         import webbrowser
+
         webbrowser.open(url)
         print(url)
     else:
@@ -336,7 +347,9 @@ def _cmd_estimate(args: argparse.Namespace) -> None:
 
 def _add_product_arg(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "--product", "-p", default="dem_phase3",
+        "--product",
+        "-p",
+        default="dem_phase3",
         help="Product key (default: dem_phase3)",
     )
 
@@ -353,7 +366,9 @@ def _add_format_arg(
     choices: list[str] | None = None,
 ) -> None:
     parser.add_argument(
-        "--format", "-f", choices=choices or ["table", "json"],
+        "--format",
+        "-f",
+        choices=choices or ["table", "json"],
         help="Output format",
     )
 
@@ -362,9 +377,7 @@ def _parse_bbox(value: str) -> tuple[float, float, float, float]:
     """Parse 'xmin,ymin,xmax,ymax' string to tuple."""
     parts = value.split(",")
     if len(parts) != 4:
-        raise argparse.ArgumentTypeError(
-            f"Expected 4 comma-separated values, got {len(parts)}"
-        )
+        raise argparse.ArgumentTypeError(f"Expected 4 comma-separated values, got {len(parts)}")
     return tuple(float(p) for p in parts)  # type: ignore[return-value]
 
 

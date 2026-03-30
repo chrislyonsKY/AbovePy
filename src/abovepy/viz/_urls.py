@@ -29,6 +29,7 @@ def _resolve_bbox(
     """Resolve county name to bbox, or pass through bbox."""
     if county is not None:
         from abovepy.utils.bbox import get_county_bbox
+
         return get_county_bbox(county)
     return bbox
 
@@ -76,9 +77,7 @@ def tile_url(
         builder = _ALGORITHM_BUILDERS.get(algorithm)
         if builder is None:
             valid = ", ".join(sorted(_ALGORITHM_BUILDERS))
-            raise ValueError(
-                f"Unknown algorithm '{algorithm}'. Valid: {valid}"
-            )
+            raise ValueError(f"Unknown algorithm '{algorithm}'. Valid: {valid}")
         return builder(
             product,
             bbox=resolved_bbox,

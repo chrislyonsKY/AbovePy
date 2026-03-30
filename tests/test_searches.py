@@ -90,7 +90,9 @@ def test_search_tile_url_with_params():
 
 def test_search_tile_url_custom_tms():
     url = search_tile_url(
-        "abc123", tile_matrix_set="WorldCRS84Quad", titiler_endpoint=PGSTAC,
+        "abc123",
+        tile_matrix_set="WorldCRS84Quad",
+        titiler_endpoint=PGSTAC,
     )
     assert "/WorldCRS84Quad/tilejson.json" in url
 
@@ -102,7 +104,9 @@ def test_search_map_url():
 
 def test_search_map_url_with_params():
     url = search_map_url(
-        "abc123", titiler_endpoint=PGSTAC, assets="data",
+        "abc123",
+        titiler_endpoint=PGSTAC,
+        assets="data",
     )
     assert "assets=data" in url
 

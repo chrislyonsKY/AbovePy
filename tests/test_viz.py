@@ -34,28 +34,36 @@ def test_tile_url_with_county():
 
 def test_tile_url_with_hillshade():
     url = tile_url(
-        "dem_phase3", algorithm="hillshade", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        algorithm="hillshade",
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=hillshade" in url
 
 
 def test_tile_url_with_slope():
     url = tile_url(
-        "dem_phase3", algorithm="slope", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        algorithm="slope",
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=slope" in url
 
 
 def test_tile_url_with_contours():
     url = tile_url(
-        "dem_phase3", algorithm="contours", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        algorithm="contours",
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=contours" in url
 
 
 def test_tile_url_with_terrainrgb():
     url = tile_url(
-        "dem_phase3", algorithm="terrainrgb", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        algorithm="terrainrgb",
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=terrainrgb" in url
 
@@ -92,7 +100,9 @@ def test_preview_url_with_bbox():
 
 def test_preview_url_with_county():
     url = preview_url(
-        "ortho_phase3", county="Franklin", titiler_endpoint=PGSTAC,
+        "ortho_phase3",
+        county="Franklin",
+        titiler_endpoint=PGSTAC,
     )
     assert "/collections/orthos-phase3/bbox/" in url
 
@@ -122,6 +132,7 @@ def test_preview_url_requires_bbox():
 def test_show_import_error(monkeypatch):
     """show() raises a clear error when leafmap isn't installed."""
     import builtins
+
     real_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs):
@@ -132,5 +143,6 @@ def test_show_import_error(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", mock_import)
 
     from abovepy.viz import show
+
     with pytest.raises(ImportError, match="leafmap is required"):
         show("dem_phase3")

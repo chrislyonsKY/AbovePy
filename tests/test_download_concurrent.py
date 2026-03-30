@@ -18,6 +18,7 @@ def _make_mock_tiles(urls):
 # Helpers to build mock httpx responses
 # ---------------------------------------------------------------------------
 
+
 def _mock_stream_response(status_code=200, data=b"tiledata"):
     """Return a context-manager mock that simulates ``client.stream()``."""
     response = MagicMock()

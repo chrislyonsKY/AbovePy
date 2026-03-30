@@ -129,8 +129,12 @@ class KyFromAboveClient:
 
         # Build query_params for SearchResult
         query_params: dict[str, Any] = {
-            "product": product, "bbox": bbox, "county": county, "crs": crs,
-            "datetime": datetime, "max_items": max_items,
+            "product": product,
+            "bbox": bbox,
+            "county": county,
+            "crs": crs,
+            "datetime": datetime,
+            "max_items": max_items,
         }
 
         # Resolve intersects from GeoJSON dict

@@ -191,7 +191,10 @@ def test_collection_bbox_url_with_colormap():
 
 def test_collection_point_url():
     url = collection_point_url(
-        "dem_phase3", lon=-84.85, lat=38.2, titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        lon=-84.85,
+        lat=38.2,
+        titiler_endpoint=PGSTAC,
     )
     assert "/collections/dem-phase3/point/-84.85,38.2" in url
 
@@ -203,14 +206,17 @@ def test_collection_point_url():
 
 def test_item_tile_url():
     url = item_tile_url(
-        "dem_phase3", "N123E456", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        "N123E456",
+        titiler_endpoint=PGSTAC,
     )
     assert "/collections/dem-phase3/items/N123E456/WebMercatorQuad/tilejson.json" in url
 
 
 def test_item_tile_url_with_assets():
     url = item_tile_url(
-        "dem_phase3", "N123E456",
+        "dem_phase3",
+        "N123E456",
         titiler_endpoint=PGSTAC,
         assets="data",
     )
@@ -219,7 +225,8 @@ def test_item_tile_url_with_assets():
 
 def test_item_preview_url():
     url = item_preview_url(
-        "ortho_phase3", "N123E456",
+        "ortho_phase3",
+        "N123E456",
         titiler_endpoint=PGSTAC,
         max_size=512,
     )
@@ -229,21 +236,26 @@ def test_item_preview_url():
 
 def test_item_info_url():
     url = item_info_url(
-        "dem_phase3", "N123E456", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        "N123E456",
+        titiler_endpoint=PGSTAC,
     )
     assert url == f"{PGSTAC}/collections/dem-phase3/items/N123E456/info"
 
 
 def test_item_statistics_url():
     url = item_statistics_url(
-        "dem_phase3", "N123E456", titiler_endpoint=PGSTAC,
+        "dem_phase3",
+        "N123E456",
+        titiler_endpoint=PGSTAC,
     )
     assert "/collections/dem-phase3/items/N123E456/statistics" in url
 
 
 def test_item_statistics_url_with_assets():
     url = item_statistics_url(
-        "dem_phase3", "N123E456",
+        "dem_phase3",
+        "N123E456",
         titiler_endpoint=PGSTAC,
         assets="data",
     )
@@ -270,12 +282,16 @@ def test_hillshade_tile_url_defaults():
 
 def test_hillshade_tile_url_custom_params():
     url = hillshade_tile_url(
-        azimuth=270, altitude=30, buffer=5, titiler_endpoint=PGSTAC,
+        azimuth=270,
+        altitude=30,
+        buffer=5,
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=hillshade" in url
     assert "algorithm_params=" in url
     # Params are JSON-encoded then URL-encoded
     from urllib.parse import unquote
+
     decoded = unquote(url)
     assert '"azimuth":270' in decoded
     assert '"altitude":30' in decoded
@@ -284,7 +300,8 @@ def test_hillshade_tile_url_custom_params():
 
 def test_hillshade_tile_url_with_bbox():
     url = hillshade_tile_url(
-        bbox=(-84.9, 38.15, -84.8, 38.25), titiler_endpoint=PGSTAC,
+        bbox=(-84.9, 38.15, -84.8, 38.25),
+        titiler_endpoint=PGSTAC,
     )
     assert "bbox=" in url
     assert "algorithm=hillshade" in url
@@ -303,7 +320,9 @@ def test_slope_tile_url_defaults():
 
 def test_slope_tile_url_custom_params():
     url = slope_tile_url(
-        buffer=5, z_exaggeration=2.0, titiler_endpoint=PGSTAC,
+        buffer=5,
+        z_exaggeration=2.0,
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=slope" in url
     assert "algorithm_params=" in url
@@ -317,7 +336,9 @@ def test_contour_tile_url_defaults():
 
 def test_contour_tile_url_custom_params():
     url = contour_tile_url(
-        increment=50, thickness=2, titiler_endpoint=PGSTAC,
+        increment=50,
+        thickness=2,
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=contours" in url
     assert "algorithm_params=" in url
@@ -331,7 +352,8 @@ def test_terrain_rgb_tile_url_defaults():
 
 def test_terrain_rgb_tile_url_with_bbox():
     url = terrain_rgb_tile_url(
-        bbox=(-84.9, 38.15, -84.8, 38.25), titiler_endpoint=PGSTAC,
+        bbox=(-84.9, 38.15, -84.8, 38.25),
+        titiler_endpoint=PGSTAC,
     )
     assert "algorithm=terrainrgb" in url
     assert "bbox=" in url

@@ -11,6 +11,7 @@ import numpy as np
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_mock_header():
     """Build a mock LAS header with plausible attributes."""
     header = MagicMock()
@@ -49,6 +50,7 @@ def _make_mock_points(n: int = 100, classifications: np.ndarray | None = None):
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestReadCopcBasic:
     """Test basic read_copc with a mocked CopcReader."""
@@ -167,9 +169,7 @@ class TestClassificationFilter:
         reader.query.return_value = points
         mock_copc_cls.open.return_value = reader
 
-        result_pts, meta = read_copc(
-            "/data/test.copc.laz", classifications=[2]
-        )
+        result_pts, meta = read_copc("/data/test.copc.laz", classifications=[2])
 
         # Only class-2 points kept → 5 points
         assert meta["point_count"] == 5
@@ -192,6 +192,4 @@ class TestLazFallback:
             pts, meta = read_copc("/data/test.laz")
 
         assert "falling back to read_pointcloud" in caplog.text.lower()
-        mock_rpc.assert_called_once_with(
-            "/data/test.laz", bbox=None, classifications=None
-        )
+        mock_rpc.assert_called_once_with("/data/test.laz", bbox=None, classifications=None)
