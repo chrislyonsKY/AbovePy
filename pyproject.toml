@@ -98,9 +98,12 @@ module = [
     "shapely.*",
     "tqdm",
     "laspy",
+    "laspy.*",
     "pystac_client",
     "pystac",
     "pyproj",
+    "matplotlib.*",
+    "scipy.*",
 ]
 ignore_missing_imports = true
 

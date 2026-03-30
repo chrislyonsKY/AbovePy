@@ -89,7 +89,7 @@ class SearchResult:
     @property
     def empty(self) -> bool:
         """Whether the result contains no tiles."""
-        return self._gdf.empty
+        return bool(self._gdf.empty)
 
     # ------------------------------------------------------------------
     # Size estimation
@@ -250,7 +250,7 @@ class SearchResult:
         str
             GeoJSON FeatureCollection.
         """
-        return self._gdf.to_json(indent=2)  # type: ignore[return-value]
+        return str(self._gdf.to_json(indent=2))
 
     # ------------------------------------------------------------------
     # Comparison

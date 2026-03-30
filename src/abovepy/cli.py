@@ -395,8 +395,8 @@ def _print_table(gdf: object) -> None:
     """Print a GeoDataFrame as a terminal-friendly table."""
     import pandas as pd
 
-    df = gdf.drop(columns="geometry", errors="ignore") if hasattr(gdf, "drop") else gdf  # type: ignore[union-attr]
-    print(pd.DataFrame(df).to_string(index=False))  # type: ignore[arg-type]
+    df = gdf.drop(columns="geometry", errors="ignore") if hasattr(gdf, "drop") else gdf
+    print(pd.DataFrame(df).to_string(index=False))
 
 
 if __name__ == "__main__":
