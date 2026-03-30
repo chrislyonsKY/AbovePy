@@ -8,28 +8,59 @@ hide:
   <div class="feature-card">
     <div class="card-icon">&#x1F50D;</div>
     <h3>Search &amp; Discover</h3>
-    <p>Find DEM, ortho, LiDAR, and oblique tiles by county, bbox, point+buffer, or custom geometry. 13 products across 3 phases.</p>
+    <p>Find DEM, ortho, LiDAR, and oblique tiles by county, bbox, point+buffer in feet, or custom geometry. 13 products across 3 acquisition phases.</p>
   </div>
   <div class="feature-card">
     <div class="card-icon">&#x2B07;</div>
     <h3>Download &amp; Export</h3>
-    <p>Concurrent downloads with resume support. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, or GeoParquet.</p>
+    <p>Concurrent downloads with resume. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, GeoParquet, or LandXML.</p>
   </div>
   <div class="feature-card">
     <div class="card-icon">&#x1F30E;</div>
     <h3>Analyze &amp; Visualize</h3>
-    <p>Local terrain analysis &mdash; hillshade, slope, flood, contours, volume. Server-side TiTiler algorithms. Interactive notebook maps.</p>
+    <p>Local terrain analysis &mdash; hillshade, slope, flood, contours, volume, profiles. Server-side TiTiler. Interactive notebook maps.</p>
+  </div>
+  <div class="feature-card">
+    <div class="card-icon">&#x1F4CB;</div>
+    <h3>Provenance &amp; QA</h3>
+    <p>Source documentation for deliverables &mdash; acquisition dates, CRS, tile counts, coverage gaps, mixed-phase warnings. Built for survey-grade work.</p>
   </div>
   <div class="feature-card">
     <div class="card-icon">&#x1F5FA;</div>
-    <h3>ArcGIS Pro Ready</h3>
-    <p>Python Toolbox with 5 tools &mdash; find tiles, download, hillshade workflows. County dropdown, concurrent downloads, no STAC knowledge required.</p>
+    <h3>ArcGIS Pro &amp; QGIS</h3>
+    <p>ArcGIS Pro toolbox with 5 tools. QGIS plugin coming in v2.1. No STAC knowledge required &mdash; county dropdown, click, go.</p>
+  </div>
+  <div class="feature-card">
+    <div class="card-icon">&#x1F4D0;</div>
+    <h3>Engineering CRS</h3>
+    <p>First-class EPSG:3089 support. Buffer in feet, corridor centerline search, polygon clips. Built for Kentucky surveyors and engineers.</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value">13</div>
+    <div class="stat-label">Data Products</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">3</div>
+    <div class="stat-label">Acquisition Phases</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">120</div>
+    <div class="stat-label">KY Counties</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">0</div>
+    <div class="stat-label">Credentials Needed</div>
   </div>
 </div>
 
 ---
 
-## Quick Start
+<div class="section-label">Quick Start</div>
+
+## Search, estimate, download
 
 ```python
 import abovepy
@@ -38,8 +69,13 @@ import abovepy
 result = abovepy.search(county="Franklin", product="dem_phase3")
 print(result)  # SearchResult('dem_phase3', 342 tiles, ~1710.0 MB)
 
-# Estimate before downloading
-result.estimate_size()
+# Check provenance for deliverable documentation
+result.provenance()
+# {'product': 'dem_phase3', 'acquisition_period': '2022–2025', ...}
+
+# Validate data quality
+result.validate()
+# ['3 tile(s) have no acquisition date metadata.']
 
 # Concurrent download (4 threads, resumable)
 paths = result.download("./data")
@@ -48,26 +84,29 @@ paths = result.download("./data")
 vrt = result.mosaic(output="frankfort.vrt")
 ```
 
-## Cloud-native reads & phase comparison
+<div class="section-label">Engineering workflows</div>
+
+## Feet-based search &amp; corridor buffers
 
 ```python
-# Stream a window without downloading
-data, profile = abovepy.read(
-    result.tiles.iloc[0].asset_url,
-    bbox=(-84.85, 38.18, -84.82, 38.21)
+# Point search with 1000-foot buffer (accurate in EPSG:3089)
+result = abovepy.search(
+    point=(-84.85, 38.19), buffer_feet=1000, product="dem_phase3"
 )
 
-# Compare Phase 2 vs Phase 3 coverage
+# Corridor search along a road centerline
+from shapely.geometry import LineString
+road = LineString([(-84.9, 38.2), (-84.8, 38.2)])
+result = abovepy.search(geometry=road, buffer_feet=200, product="ortho_phase3")
+
+# Phase comparison
 phase2 = abovepy.search(county="Franklin", product="dem_phase2")
 overlap = result.compare(phase2)
-
-# Point-based search with buffer
-nearby = abovepy.search(
-    point=(-84.85, 38.19), buffer_miles=2, product="ortho_phase3"
-)
 ```
 
 ---
+
+<div class="section-label">Data catalog</div>
 
 ## Supported Products
 
@@ -78,9 +117,11 @@ nearby = abovepy.search(
 | **LiDAR Point Cloud** | varies | LAZ / COPC | 1, 2, 3 |
 | **Oblique Imagery** | 3 in | Cloud-Optimized GeoTIFF | 3 |
 
-All data in **EPSG:3089** (Kentucky Single Zone, US feet). abovepy accepts EPSG:4326 bounding boxes by default and converts transparently. No API keys or credentials required.
+All data in **EPSG:3089** (Kentucky Single Zone, US survey feet). abovepy accepts EPSG:4326 bounding boxes by default and converts transparently. No API keys or credentials required.
 
 ---
+
+<div class="section-label">Philosophy</div>
 
 ## What abovepy is not
 
@@ -93,6 +134,10 @@ Use [PDAL](https://pdal.io/) for heavy LiDAR workflows.
 
 ---
 
+<div class="cta-row" markdown>
+
 [Get Started](getting-started.md){ .md-button .md-button--primary }
 [API Reference](api/reference.md){ .md-button }
 [View on GitHub](https://github.com/chrislyonsKY/AbovePy){ .md-button }
+
+</div>

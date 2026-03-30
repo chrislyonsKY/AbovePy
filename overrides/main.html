@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block announce %}
-  <strong>abovepy v2.0.0</strong> is here &mdash; <code>SearchResult</code> workflow object, concurrent downloads, cloud-native COPC reads.
-  <a href="https://github.com/chrislyonsKY/AbovePy/releases/tag/v2.0.0">Read the release notes</a>
+  <strong>abovepy v2.0.1</strong> &mdash; engineering CRS, provenance, download integrity, security hardening.
+  <a href="https://github.com/chrislyonsKY/AbovePy/releases/tag/v2.0.1">Release notes</a>
 {% endblock %}
 
 {% block hero %}
   {% if page and page.meta and page.meta.hide and "navigation" in page.meta.hide %}
   <div class="mdx-hero">
-    <h1>Kentucky's geospatial data, one import away</h1>
+    <h1>Kentucky's geospatial data,<br><em>one import away</em></h1>
     <div class="hero-sub">
-      The fastest way for GIS analysts to find, inspect, compare, and operationalize KyFromAbove elevation, imagery, and LiDAR data.
+      The fastest way for GIS analysts, surveyors, and engineers to find, inspect, compare, and operationalize KyFromAbove elevation, imagery, and LiDAR data.
     </div>
     <div class="install-pill">pip install abovepy</div>
     <div class="hero-buttons">
