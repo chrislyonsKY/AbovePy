@@ -2,7 +2,7 @@
 name=AboveQGIS
 qgisMinimumVersion=3.28
 description=KyFromAbove LiDAR, DEM, and orthoimagery data access for QGIS
-version=0.1.0
+version=1.0.0
 author=Chris Lyons
 email=chris.lyons@ky.gov
 about=Access Kentucky's KyFromAbove geospatial data directly from QGIS.
@@ -15,10 +15,17 @@ tags=kentucky,lidar,dem,elevation,kyfromabove,stac,cog,orthoimagery
 homepage=https://chrislyonsKY.github.io/AbovePy/
 category=Analysis
 icon=icon.png
-experimental=True
+experimental=False
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    1.0.0 - Stable release
+    - Promoted from experimental to stable
+    - Fix download crash in QGIS (tqdm stderr=None)
+    - County/extent help text on all parameters
+    - Cancellation support on download and mosaic
+    - Progress reporting during search and download
+    - Minimum abovepy version check on startup
     0.1.0 - Initial release
     - Search tiles by county or map extent
     - Download with concurrent transfers

@@ -38,29 +38,39 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         return (
             "Search and download KyFromAbove tiles to a local directory.\n\n"
             "Select a county or draw an extent, pick a product, and choose "
-            "an output folder. Downloads use concurrent transfers for speed."
+            "an output folder. Downloads use concurrent transfers for speed.\n\n"
+            "Tip: Use the Search tool first to check tile count and "
+            "estimated size before downloading."
         )
 
     def createInstance(self):  # noqa: N802
         return DownloadTilesAlgorithm()
 
     def initAlgorithm(self, config=None):  # noqa: N802
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.COUNTY,
-                "County",
-                options=COUNTIES,
-                defaultValue=0,
-                optional=False,
-            )
+        county_param = QgsProcessingParameterEnum(
+            self.COUNTY,
+            "County",
+            options=COUNTIES,
+            defaultValue=0,
+            optional=False,
         )
-        self.addParameter(
-            QgsProcessingParameterExtent(
-                self.EXTENT,
-                "Search extent (only used when county is not selected)",
-                optional=True,
-            )
+        county_param.setHelp(
+            "Select a Kentucky county to download. All 120 counties are available. "
+            "Choose '(use map extent instead)' to use the extent below."
         )
+        self.addParameter(county_param)
+
+        extent_param = QgsProcessingParameterExtent(
+            self.EXTENT,
+            "Search extent (only used when county is not selected)",
+            optional=True,
+        )
+        extent_param.setHelp(
+            "Draw or enter a bounding box to download. Only used when no "
+            "county is selected. You can use 'Use Map Canvas Extent'."
+        )
+        self.addParameter(extent_param)
+
         product_param = QgsProcessingParameterEnum(
             self.PRODUCT,
             "Product",
@@ -131,6 +141,10 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         max_items = self.parameterAsInt(parameters, self.MAX_ITEMS, context)
         workers = self.parameterAsInt(parameters, self.WORKERS, context)
 
+        if not output_dir:
+            feedback.reportError("Please select an output directory.")
+            return {}
+
         # Resolve search area
         county = None
         bbox = None
@@ -158,7 +172,11 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
                 )
                 return {}
 
+        if feedback.isCanceled():
+            return {}
+
         # Search
+        feedback.setProgress(5)
         try:
             result = abovepy.search(
                 county=county, bbox=bbox, product=product, max_items=max_items,
@@ -176,6 +194,10 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(
             f"Found {est['tile_count']} tile(s), ~{est['total_mb']} MB. Downloading..."
         )
+        feedback.setProgress(10)
+
+        if feedback.isCanceled():
+            return {}
 
         # Download
         try:
@@ -187,6 +209,7 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
             feedback.reportError(f"Download failed: {e}")
             return {}
 
+        feedback.setProgress(100)
         msg = f"Downloaded {len(paths)} file(s) to {output_dir}"
         feedback.pushInfo(msg)
         return {self.RESULT_MSG: msg}
