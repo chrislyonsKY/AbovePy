@@ -105,11 +105,16 @@ def download_tiles(
             executor.submit(_download_file, client, url, dest, resume): (url, dest)
             for url, dest in work_items
         }
+        # Disable tqdm when stderr is unavailable (e.g., QGIS embedded Python)
+        import sys
+
+        tqdm_disable = getattr(sys.stderr, "write", None) is None
         for future in tqdm(
             as_completed(future_to_url),
             total=len(future_to_url),
             desc="Downloading tiles",
             unit="tile",
+            disable=tqdm_disable,
         ):
             url, dest = future_to_url[future]
             try:
