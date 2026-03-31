@@ -2,6 +2,7 @@
 
 from qgis.core import QgsProcessingProvider
 
+from .algorithms.county_mosaic import LoadCountyMosaicAlgorithm
 from .algorithms.download import DownloadTilesAlgorithm
 from .algorithms.hillshade import HillshadeTileURLAlgorithm
 from .algorithms.mosaic import MosaicTilesAlgorithm
@@ -26,5 +27,6 @@ class AboveQGISProvider(QgsProcessingProvider):
     def loadAlgorithms(self):  # noqa: N802
         self.addAlgorithm(SearchTilesAlgorithm())
         self.addAlgorithm(DownloadTilesAlgorithm())
+        self.addAlgorithm(LoadCountyMosaicAlgorithm())
         self.addAlgorithm(MosaicTilesAlgorithm())
         self.addAlgorithm(HillshadeTileURLAlgorithm())

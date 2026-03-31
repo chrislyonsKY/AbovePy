@@ -7,7 +7,7 @@ the QGIS Processing toolbox. No credentials required.
 Requirements
 ------------
 - QGIS >= 3.22
-- abovepy >= 2.0.1 (installed automatically on first run)
+- abovepy >= 2.1.2 (installed automatically on first run)
 
 Installation
 ------------

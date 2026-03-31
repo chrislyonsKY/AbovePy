@@ -38,6 +38,7 @@ from abovepy._exceptions import (
 )
 from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
+from abovepy.mosaics import county_mosaic_url
 from abovepy.obliques import list_oblique_seasons, search_obliques
 from abovepy.products import Product, ProductType, list_products
 from abovepy.result import SearchResult
@@ -263,6 +264,7 @@ __all__ = [
     "buffer_feet",
     "clear_cache",
     "corridor_buffer",
+    "county_mosaic_url",
     "download",
     "info",
     "list_counties",

@@ -135,6 +135,7 @@ class AboveQGISPlugin:
         tools = [
             ("Search KyFromAbove Tiles", "aboveqgis:search_tiles"),
             ("Download KyFromAbove Tiles", "aboveqgis:download_tiles"),
+            ("Load County Ortho Mosaic", "aboveqgis:load_county_mosaic"),
             ("Mosaic KyFromAbove Tiles", "aboveqgis:mosaic_tiles"),
             ("Generate Hillshade Tile URL", "aboveqgis:hillshade_tile_url"),
         ]
