@@ -8,7 +8,7 @@ import pytest
 from rasterio.transform import from_bounds
 from shapely.geometry import box
 
-from abovepy.export import to_geopackage, to_geotiff, to_landxml, to_shapefile
+from abovepy.export import to_geopackage, to_geotiff, to_landxml, to_shapefile, to_stl
 
 
 @pytest.fixture
@@ -113,6 +113,18 @@ class TestToShapefile:
 NS = "http://www.landxml.org/schema/LandXML-1.2"
 
 
+def _has_scipy() -> bool:
+    try:
+        import scipy  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+_skip_no_scipy = pytest.mark.skipif(not _has_scipy(), reason="scipy not installed")
+
+
 @pytest.fixture
 def dem_data():
     """A simple 32x32 DEM with known elevation values and EPSG:3089 profile."""
@@ -132,6 +144,7 @@ def dem_data():
     return data, profile
 
 
+@_skip_no_scipy
 class TestToLandXML:
     def test_creates_xml_file(self, dem_data, tmp_path):
         data, profile = dem_data
@@ -256,3 +269,112 @@ class TestToLandXML:
         output = tmp_path / "surface.xml"
         result = to_landxml(data_3d, profile, output)
         assert result.exists()
+
+
+# ---------------------------------------------------------------------------
+# to_stl
+# ---------------------------------------------------------------------------
+
+
+class TestToSTL:
+    def test_creates_stl_file(self, dem_data, tmp_path):
+        data, profile = dem_data
+        output = tmp_path / "terrain.stl"
+        result = to_stl(data, profile, output)
+        assert result.exists()
+        assert result.suffix == ".stl"
+
+    def test_valid_binary_stl_header(self, dem_data, tmp_path):
+        import struct
+
+        data, profile = dem_data
+        output = tmp_path / "terrain.stl"
+        to_stl(data, profile, output)
+
+        with open(output, "rb") as f:
+            header = f.read(80)
+            assert b"AbovePy" in header
+            tri_count = struct.unpack("<I", f.read(4))[0]
+            assert tri_count > 0
+
+    def test_triangle_count_positive(self, dem_data, tmp_path):
+        import struct
+
+        data, profile = dem_data
+        output = tmp_path / "terrain.stl"
+        to_stl(data, profile, output)
+
+        with open(output, "rb") as f:
+            f.read(80)
+            tri_count = struct.unpack("<I", f.read(4))[0]
+
+        # Must have triangles for top surface + base + walls
+        assert tri_count > 0
+
+    def test_file_size_consistent(self, dem_data, tmp_path):
+        import struct
+
+        data, profile = dem_data
+        output = tmp_path / "terrain.stl"
+        to_stl(data, profile, output)
+
+        with open(output, "rb") as f:
+            f.read(80)
+            tri_count = struct.unpack("<I", f.read(4))[0]
+
+        # Binary STL: 80 header + 4 count + (50 bytes per triangle)
+        expected_size = 80 + 4 + tri_count * 50
+        assert output.stat().st_size == expected_size
+
+    def test_exaggeration(self, dem_data, tmp_path):
+        data, profile = dem_data
+        normal = tmp_path / "normal.stl"
+        exaggerated = tmp_path / "exaggerated.stl"
+        to_stl(data, profile, normal, exaggeration=1.0)
+        to_stl(data, profile, exaggerated, exaggeration=3.0)
+        # Same number of triangles, different Z values
+        assert normal.stat().st_size == exaggerated.stat().st_size
+
+    def test_decimate_reduces_triangles(self, dem_data, tmp_path):
+        data, profile = dem_data
+        full = tmp_path / "full.stl"
+        decimated = tmp_path / "decimated.stl"
+        to_stl(data, profile, full, decimate=1)
+        to_stl(data, profile, decimated, decimate=2)
+        assert decimated.stat().st_size < full.stat().st_size
+
+    def test_custom_base_height(self, dem_data, tmp_path):
+        data, profile = dem_data
+        output = tmp_path / "terrain.stl"
+        result = to_stl(data, profile, output, base_height=750.0)
+        assert result.exists()
+
+    def test_3d_input_squeezed(self, dem_data, tmp_path):
+        data, profile = dem_data
+        data_3d = data[np.newaxis, :, :]
+        output = tmp_path / "terrain.stl"
+        result = to_stl(data_3d, profile, output)
+        assert result.exists()
+
+    def test_creates_parent_dirs(self, dem_data, tmp_path):
+        data, profile = dem_data
+        output = tmp_path / "sub" / "dir" / "terrain.stl"
+        result = to_stl(data, profile, output)
+        assert result.exists()
+
+    def test_nodata_handled(self, tmp_path):
+        data = np.ones((16, 16), dtype=np.float32) * 850.0
+        data[0:4, 0:4] = -9999.0
+        transform = from_bounds(0, 0, 160, 160, 16, 16)
+        profile = {
+            "driver": "GTiff",
+            "dtype": "float32",
+            "width": 16,
+            "height": 16,
+            "transform": transform,
+            "nodata": -9999.0,
+        }
+        output = tmp_path / "nodata.stl"
+        result = to_stl(data, profile, output)
+        assert result.exists()
+        assert result.stat().st_size > 84  # more than just header

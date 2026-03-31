@@ -324,16 +324,34 @@ See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/AbovePy/tutorials/
 
 ## QGIS Plugin
 
-**AboveQGIS** is a QGIS Processing toolbox plugin with 4 tools:
+**AboveQGIS** is a QGIS Processing toolbox plugin with 6 tools:
 
 - **Search KyFromAbove Tiles** — county dropdown (all 120) or map extent, outputs tile footprint layer
-- **Download KyFromAbove Tiles** — concurrent downloads to a local folder
+- **Download KyFromAbove Tiles** — concurrent downloads, auto-loads with hillshade symbology
+- **Load County Ortho Mosaic** — stream a full-county 3-inch ortho directly from S3 (no download)
 - **Mosaic KyFromAbove Tiles** — build VRT or GeoTIFF from downloaded tiles
 - **Generate Hillshade Tile URL** — server-side hillshade via TiTiler (no download needed)
+- **STL Export** — convert DEM to 3D-printable mesh via `abovepy.export.to_stl()`
 
 Install via **Plugins > Manage and Install Plugins** or from the [QGIS Plugin Repository](https://plugins.qgis.org/plugins/aboveqgis/). The plugin auto-installs abovepy on first run.
 
 Tools appear under **Plugins > AboveQGIS — KyFromAbove** and in the Processing Toolbox.
+
+### County Ortho Mosaics
+
+KyFromAbove provides pre-built 3-inch ortho mosaics for all 120 counties. Stream them directly without downloading:
+
+```python
+import abovepy
+
+# Get the S3 URL for Franklin County's ortho mosaic
+url = abovepy.county_mosaic_url("Franklin")
+
+# Or for ArcGIS users
+url = abovepy.county_mosaic_url("Franklin", fmt="tpkx")
+```
+
+In QGIS, use **Plugins > AboveQGIS > Load County Ortho Mosaic** to stream directly into your project.
 
 ## Web Visualization
 

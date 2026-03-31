@@ -6,8 +6,8 @@ the QGIS Processing toolbox. No credentials required.
 
 Requirements
 ------------
-- QGIS >= 3.28
-- abovepy >= 2.0.1 (installed automatically on first run)
+- QGIS >= 3.22 (compatible through QGIS 4)
+- abovepy >= 2.1.1 (installed automatically on first run)
 
 Installation
 ------------
@@ -29,10 +29,19 @@ All tools are available from:
   - Processing Toolbox > AboveQGIS > KyFromAbove
 
 Tools:
-  - Search KyFromAbove Tiles — find tiles by county dropdown or map extent
-  - Download KyFromAbove Tiles — concurrent downloads to a local folder
-  - Mosaic KyFromAbove Tiles — build VRT or GeoTIFF from downloaded tiles
-  - Generate Hillshade Tile URL — server-side hillshade (no download needed)
+  - Search KyFromAbove Tiles — find tiles by county or map extent
+  - Download KyFromAbove Tiles — concurrent downloads, auto-loads
+    with hillshade symbology for DEM products
+  - Load County Ortho Mosaic — stream a full-county 3-inch ortho
+    directly from S3 (no download of 18-110 GB files needed)
+  - Mosaic KyFromAbove Tiles — build VRT or GeoTIFF from tiles
+  - Generate Hillshade Tile URL — server-side hillshade (no download)
+
+Export Formats (Python)
+-----------------------
+  - to_landxml() — DEM to TIN surface for Civil 3D, Carlson, OpenRoads
+  - to_stl() — DEM to 3D-printable mesh for Bambu Studio, Cura, Blender
+  - to_geotiff(), to_geopackage(), to_shapefile()
 
 Data Source
 -----------
@@ -47,5 +56,6 @@ GPL-3.0 — see LICENSE file.
 Links
 -----
 - Documentation: https://chrislyonsKY.github.io/AbovePy/
+- Wiki: https://github.com/chrislyonsKY/AbovePy/wiki
 - Source code: https://github.com/chrislyonsKY/AbovePy
 - Bug tracker: https://github.com/chrislyonsKY/AbovePy/issues

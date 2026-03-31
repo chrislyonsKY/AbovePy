@@ -11,7 +11,7 @@ from qgis.PyQt.QtWidgets import QAction, QMenu, QMessageBox
 from .provider import AboveQGISProvider
 
 REQUIRED_PACKAGE = "abovepy"
-MIN_VERSION = "2.0.1"
+MIN_VERSION = "2.1.1"
 
 
 def _find_python():
@@ -47,12 +47,20 @@ def _find_python():
 
 
 def _check_abovepy():
-    """Return True if abovepy is importable."""
+    """Return True if abovepy is importable and meets minimum version."""
     try:
-        import abovepy  # noqa: F401
-        return True
+        from abovepy._version import __version__
+        from packaging.version import Version
+        return Version(__version__) >= Version(MIN_VERSION)
     except ImportError:
         return False
+    except Exception:
+        # packaging not available — at least check import works
+        try:
+            import abovepy  # noqa: F401
+            return True
+        except ImportError:
+            return False
 
 
 def _install_abovepy(iface):
@@ -73,7 +81,7 @@ def _install_abovepy(iface):
 
     try:
         subprocess.check_call(
-            [python_exe, "-m", "pip", "install", REQUIRED_PACKAGE],
+            [python_exe, "-m", "pip", "install", f"{REQUIRED_PACKAGE}>={MIN_VERSION}"],
             timeout=300,
         )
         QMessageBox.information(
@@ -90,7 +98,7 @@ def _install_abovepy(iface):
             f"Failed to install abovepy:\n\n{e}\n\n"
             f"Python tried: {python_exe}\n\n"
             "Try manually from the OSGeo4W Shell:\n"
-            f"  pip install {REQUIRED_PACKAGE}",
+            f"  pip install {REQUIRED_PACKAGE}>={MIN_VERSION}",
         )
         return False
 
@@ -127,6 +135,7 @@ class AboveQGISPlugin:
         tools = [
             ("Search KyFromAbove Tiles", "aboveqgis:search_tiles"),
             ("Download KyFromAbove Tiles", "aboveqgis:download_tiles"),
+            ("Load County Ortho Mosaic", "aboveqgis:load_county_mosaic"),
             ("Mosaic KyFromAbove Tiles", "aboveqgis:mosaic_tiles"),
             ("Generate Hillshade Tile URL", "aboveqgis:hillshade_tile_url"),
         ]

@@ -4,6 +4,18 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.1.2] — 2026-03-31
+
+### Added
+
+- **STL export for 3D printing** — `to_stl(data, profile, output)` converts a DEM
+  into a watertight binary STL mesh with configurable vertical exaggeration, base
+  height, and decimation. Ready for Bambu Studio, Cura, PrusaSlicer, or Blender.
+  No external dependencies — pure numpy + struct.
+- **QGIS auto-load with hillshade** — Download tool now auto-adds rasters to the
+  QGIS project and applies hillshade symbology to DEM products. Controlled by
+  "Load downloaded tiles into project" and "Apply hillshade styling" checkboxes.
+
 ## [2.1.1] — 2026-03-31
 
 ### Added
