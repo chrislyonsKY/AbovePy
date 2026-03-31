@@ -4,6 +4,48 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.1.0] — 2026-03-31
+
+### Added
+
+- **QGIS plugin (AboveQGIS)** — Processing toolbox provider with 4 tools: Search
+  Tiles, Download Tiles, Mosaic Tiles, Generate Hillshade Tile URL. County dropdown
+  (all 120 counties), product selector, map extent support. Auto-installs abovepy
+  dependency on first run. Available under Plugins menu and Processing Toolbox.
+- **CLI `--buffer-feet` flag** on search, download, and estimate subcommands —
+  uses EPSG:3089 projection for accurate feet-based spatial queries
+- **CLI `--format provenance`** on search — outputs full provenance metadata as JSON
+- **CLI automatic validation** — table output now runs `validate()` and prints
+  warnings to stderr before results
+- **`buffer_feet()` and `corridor_buffer()` exported at top level** —
+  `import abovepy; abovepy.buffer_feet(point, 500)` works directly
+- **Security: path traversal protection** — `sanitize_filename()` and
+  `validate_path_segment()` prevent malicious filenames and collection IDs
+  from escaping the output directory during downloads
+- **Security: URL path injection prevention** — `validate_path_segment()` on
+  all `item_id`, `search_id` parameters in TiTiler URL builders;
+  `validate_image_format()` whitelists `fmt` to known image types
+- **Security: S3 bucket name validation** — `validate_s3_bucket()` enforces
+  AWS bucket naming rules in COPC reader and COG reader S3 URI conversion
+- **Security: `json.dumps()` for algorithm params** — replaces f-string
+  interpolation in TiTiler hillshade/slope/contour URL builders
+- Example scripts: `engineering_geometry.py` (State Plane Northing/Easting
+  workflows), `provenance_and_validation.py` (QA for deliverables),
+  `cli_workflows.sh` (common CLI patterns)
+
+### Changed
+
+- **Security: `validate_remote_url()` now raises `ValueError`** for untrusted
+  hosts instead of logging a warning. Pass `allow_untrusted=True` to opt in
+  to untrusted hosts (logs warning instead of raising).
+- Default concurrent download workers increased from 4 to 8
+- Download chunk size increased from 64 KB to 256 KB
+- CI: `github/codeql-action` pinned to commit SHA
+- CI: `actions/dependency-review-action` pinned to commit SHA (v4.9.0)
+- `search()` docstring updated to document `buffer_feet` parameter
+- README: new sections for feet-based search, corridor search, validation,
+  provenance, Kentucky Engineering Geometry, CLI usage, QGIS plugin badge
+
 ## [2.0.0] — 2026-03-30
 
 ### Breaking Changes
