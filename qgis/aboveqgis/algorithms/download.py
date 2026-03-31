@@ -48,16 +48,16 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.COUNTY,
-                "County (leave blank to use extent)",
+                "County",
                 options=COUNTIES,
                 defaultValue=0,
-                optional=True,
+                optional=False,
             )
         )
         self.addParameter(
             QgsProcessingParameterExtent(
                 self.EXTENT,
-                "Search extent (used if no county selected)",
+                "Search extent (only used when county is not selected)",
                 optional=True,
             )
         )
@@ -67,6 +67,7 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
                 "Product",
                 options=PRODUCTS,
                 defaultValue=0,
+                optional=False,
             )
         )
         self.addParameter(
@@ -99,38 +100,61 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         self.addOutput(QgsProcessingOutputString(self.RESULT_MSG, "Result"))
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802
-        import abovepy
+        try:
+            import abovepy
+        except ImportError:
+            feedback.reportError(
+                "abovepy is not installed. Run: pip install abovepy\n"
+                "in your QGIS Python environment."
+            )
+            return {}
 
         county_idx = self.parameterAsEnum(parameters, self.COUNTY, context)
-        county = COUNTIES[county_idx] if county_idx > 0 else None
         product = PRODUCTS[self.parameterAsEnum(parameters, self.PRODUCT, context)]
         output_dir = self.parameterAsFile(parameters, self.OUTPUT_DIR, context)
         max_items = self.parameterAsInt(parameters, self.MAX_ITEMS, context)
         workers = self.parameterAsInt(parameters, self.WORKERS, context)
 
         # Resolve search area
+        county = None
         bbox = None
-        if county:
+
+        if county_idx > 0:
+            county = COUNTIES[county_idx]
             feedback.pushInfo(f"Searching {county} County for {product}...")
         else:
-            extent = self.parameterAsExtent(
-                parameters, self.EXTENT, context,
-                crs=QgsCoordinateReferenceSystem("EPSG:4326"),
-            )
-            if extent.isNull():
-                feedback.reportError("Provide either a county or an extent.")
+            try:
+                extent = self.parameterAsExtent(
+                    parameters, self.EXTENT, context,
+                    crs=QgsCoordinateReferenceSystem("EPSG:4326"),
+                )
+                if extent is not None and not extent.isNull() and not extent.isEmpty():
+                    bbox = (extent.xMinimum(), extent.yMinimum(),
+                            extent.xMaximum(), extent.yMaximum())
+                else:
+                    feedback.reportError(
+                        "Select a county from the dropdown, or provide a map extent."
+                    )
+                    return {}
+            except Exception:
+                feedback.reportError(
+                    "Select a county from the dropdown, or provide a map extent."
+                )
                 return {}
-            bbox = (extent.xMinimum(), extent.yMinimum(),
-                    extent.xMaximum(), extent.yMaximum())
 
         # Search
-        result = abovepy.search(
-            county=county, bbox=bbox, product=product, max_items=max_items,
-        )
+        try:
+            result = abovepy.search(
+                county=county, bbox=bbox, product=product, max_items=max_items,
+            )
+        except Exception as e:
+            feedback.reportError(f"Search failed: {e}")
+            return {}
 
         if result.empty:
-            feedback.reportError("No tiles found.")
-            return {self.RESULT_MSG: "No tiles found."}
+            msg = "No tiles found."
+            feedback.reportError(msg)
+            return {self.RESULT_MSG: msg}
 
         est = result.estimate_size()
         feedback.pushInfo(
@@ -138,10 +162,14 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
         )
 
         # Download
-        paths = result.download(
-            output_dir=output_dir,
-            max_workers=workers,
-        )
+        try:
+            paths = result.download(
+                output_dir=output_dir,
+                max_workers=workers,
+            )
+        except Exception as e:
+            feedback.reportError(f"Download failed: {e}")
+            return {}
 
         msg = f"Downloaded {len(paths)} file(s) to {output_dir}"
         feedback.pushInfo(msg)

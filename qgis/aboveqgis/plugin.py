@@ -1,7 +1,6 @@
 """AboveQGIS plugin — Plugins menu + Processing provider."""
 
 from qgis.core import QgsApplication
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu
 
 from .provider import AboveQGISProvider
@@ -44,14 +43,8 @@ class AboveQGISPlugin:
     def _make_runner(self, algorithm_id):
         """Return a callback that opens the Processing dialog for an algorithm."""
         def run():
-            from processing.gui.AlgorithmDialog import AlgorithmDialog
-            from qgis.core import QgsApplication
-
-            alg = QgsApplication.processingRegistry().algorithmById(algorithm_id)
-            if alg is not None:
-                dlg = AlgorithmDialog(alg.create(), parent=self.iface.mainWindow())
-                dlg.show()
-
+            import processing
+            processing.execAlgorithmDialog(algorithm_id, {})
         return run
 
     def unload(self):

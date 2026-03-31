@@ -50,16 +50,16 @@ class HillshadeTileURLAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.COUNTY,
-                "County (leave blank to use extent)",
+                "County",
                 options=COUNTIES,
                 defaultValue=0,
-                optional=True,
+                optional=False,
             )
         )
         self.addParameter(
             QgsProcessingParameterExtent(
                 self.EXTENT,
-                "Extent (used if no county selected)",
+                "Extent (only used when county is not selected)",
                 optional=True,
             )
         )
@@ -69,6 +69,7 @@ class HillshadeTileURLAlgorithm(QgsProcessingAlgorithm):
                 "DEM product",
                 options=DEM_PRODUCTS,
                 defaultValue=0,
+                optional=False,
             )
         )
         self.addParameter(
@@ -94,35 +95,49 @@ class HillshadeTileURLAlgorithm(QgsProcessingAlgorithm):
         self.addOutput(QgsProcessingOutputString(self.TILE_URL, "Tile URL"))
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802
-        from abovepy.titiler import hillshade_tile_url
-        from abovepy.utils.bbox import get_county_bbox
+        try:
+            from abovepy.titiler import hillshade_tile_url
+            from abovepy.utils.bbox import get_county_bbox
+        except ImportError:
+            feedback.reportError(
+                "abovepy is not installed. Run: pip install abovepy\n"
+                "in your QGIS Python environment."
+            )
+            return {}
 
         county_idx = self.parameterAsEnum(parameters, self.COUNTY, context)
-        county = COUNTIES[county_idx] if county_idx > 0 else None
         product = DEM_PRODUCTS[self.parameterAsEnum(parameters, self.PRODUCT, context)]
         azimuth = self.parameterAsDouble(parameters, self.AZIMUTH, context)
         altitude = self.parameterAsDouble(parameters, self.ALTITUDE, context)
 
         # Resolve bbox
         bbox = None
-        if county:
+        if county_idx > 0:
+            county = COUNTIES[county_idx]
             bbox = get_county_bbox(county)
             feedback.pushInfo(f"Using {county} County extent")
         else:
-            extent = self.parameterAsExtent(
-                parameters, self.EXTENT, context,
-                crs=QgsCoordinateReferenceSystem("EPSG:4326"),
-            )
-            if not extent.isNull():
-                bbox = (extent.xMinimum(), extent.yMinimum(),
-                        extent.xMaximum(), extent.yMaximum())
+            try:
+                extent = self.parameterAsExtent(
+                    parameters, self.EXTENT, context,
+                    crs=QgsCoordinateReferenceSystem("EPSG:4326"),
+                )
+                if extent is not None and not extent.isNull() and not extent.isEmpty():
+                    bbox = (extent.xMinimum(), extent.yMinimum(),
+                            extent.xMaximum(), extent.yMaximum())
+            except Exception:
+                pass
 
-        url = hillshade_tile_url(
-            collection=product,
-            bbox=bbox,
-            azimuth=azimuth,
-            altitude=altitude,
-        )
+        try:
+            url = hillshade_tile_url(
+                collection=product,
+                bbox=bbox,
+                azimuth=azimuth,
+                altitude=altitude,
+            )
+        except Exception as e:
+            feedback.reportError(f"Failed to generate URL: {e}")
+            return {}
 
         feedback.pushInfo(f"Hillshade TileJSON URL:\n{url}")
         feedback.pushInfo(

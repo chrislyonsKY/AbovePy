@@ -2,7 +2,6 @@
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -18,9 +17,10 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 
-# Kentucky counties (sorted) for the dropdown
+# Kentucky counties (sorted) for the dropdown — index 0 is "use extent"
 COUNTIES = [
-    "", "Adair", "Allen", "Anderson", "Ballard", "Barren", "Bath", "Bell",
+    "(use map extent instead)",
+    "Adair", "Allen", "Anderson", "Ballard", "Barren", "Bath", "Bell",
     "Boone", "Bourbon", "Boyd", "Boyle", "Bracken", "Breathitt",
     "Breckinridge", "Bullitt", "Butler", "Caldwell", "Calloway", "Campbell",
     "Carlisle", "Carroll", "Carter", "Casey", "Christian", "Clark", "Clay",
@@ -83,16 +83,16 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.COUNTY,
-                "County (leave blank to use extent)",
+                "County",
                 options=COUNTIES,
                 defaultValue=0,
-                optional=True,
+                optional=False,
             )
         )
         self.addParameter(
             QgsProcessingParameterExtent(
                 self.EXTENT,
-                "Search extent (used if no county selected)",
+                "Search extent (only used when county is not selected)",
                 optional=True,
             )
         )
@@ -102,6 +102,7 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
                 "Product",
                 options=PRODUCTS,
                 defaultValue=0,
+                optional=False,
             )
         )
         self.addParameter(
@@ -123,42 +124,64 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
         )
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802
-        import abovepy
+        try:
+            import abovepy
+        except ImportError:
+            feedback.reportError(
+                "abovepy is not installed. Run: pip install abovepy\n"
+                "in your QGIS Python environment."
+            )
+            return {}
 
         county_idx = self.parameterAsEnum(parameters, self.COUNTY, context)
-        county = COUNTIES[county_idx] if county_idx > 0 else None
         product = PRODUCTS[self.parameterAsEnum(parameters, self.PRODUCT, context)]
         max_items = self.parameterAsInt(parameters, self.MAX_ITEMS, context)
 
-        # Resolve search area
+        # Resolve search area — county takes priority
+        county = None
         bbox = None
-        if county:
+
+        if county_idx > 0:
+            county = COUNTIES[county_idx]
             feedback.pushInfo(f"Searching {county} County for {product}...")
         else:
-            extent = self.parameterAsExtent(
-                parameters, self.EXTENT, context,
-                crs=QgsCoordinateReferenceSystem("EPSG:4326"),
-            )
-            if extent.isNull():
-                feedback.reportError("Provide either a county or an extent.")
+            try:
+                extent = self.parameterAsExtent(
+                    parameters, self.EXTENT, context,
+                    crs=QgsCoordinateReferenceSystem("EPSG:4326"),
+                )
+                if extent is not None and not extent.isNull() and not extent.isEmpty():
+                    bbox = (extent.xMinimum(), extent.yMinimum(),
+                            extent.xMaximum(), extent.yMaximum())
+                    feedback.pushInfo(f"Searching bbox {bbox} for {product}...")
+                else:
+                    feedback.reportError(
+                        "Select a county from the dropdown, or provide a map extent."
+                    )
+                    return {}
+            except Exception:
+                feedback.reportError(
+                    "Select a county from the dropdown, or provide a map extent."
+                )
                 return {}
-            bbox = (extent.xMinimum(), extent.yMinimum(),
-                    extent.xMaximum(), extent.yMaximum())
-            feedback.pushInfo(f"Searching bbox {bbox} for {product}...")
 
         # Run search
-        result = abovepy.search(
-            county=county,
-            bbox=bbox,
-            product=product,
-            max_items=max_items,
-        )
+        try:
+            result = abovepy.search(
+                county=county,
+                bbox=bbox,
+                product=product,
+                max_items=max_items,
+            )
+        except Exception as e:
+            feedback.reportError(f"Search failed: {e}")
+            return {}
 
-        feedback.pushInfo(f"Found {result.count} tile(s), ~{result.estimate_size()['total_mb']} MB")
+        est = result.estimate_size()
+        feedback.pushInfo(f"Found {result.count} tile(s), ~{est['total_mb']} MB")
 
         # Validate and report warnings
-        warnings = result.validate()
-        for w in warnings:
+        for w in result.validate():
             feedback.pushWarning(w)
 
         # Build output fields
@@ -176,10 +199,12 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
+            feedback.reportError("Could not create output layer.")
             return {}
 
         gdf = result.tiles
-        for idx, row in gdf.iterrows():
+        total = len(gdf)
+        for i, (idx, row) in enumerate(gdf.iterrows()):
             if feedback.isCanceled():
                 break
             feat = QgsFeature(fields)
@@ -193,5 +218,6 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
             if geom is not None:
                 feat.setGeometry(QgsGeometry.fromWkt(geom.wkt))
             sink.addFeature(feat)
+            feedback.setProgress(int((i + 1) / total * 100))
 
         return {self.OUTPUT: dest_id}
