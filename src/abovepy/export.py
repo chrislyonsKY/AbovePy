@@ -176,9 +176,8 @@ def to_landxml(
     crs_str = str(profile.get("crs", ""))
 
     # Build coordinate arrays for valid (non-nodata) pixels
-    grid = np.indices(arr.shape)
-    rows: np.ndarray = grid[0]  # type: ignore[assignment]
-    cols: np.ndarray = grid[1]  # type: ignore[assignment]
+    rows = np.arange(arr.shape[0]).reshape(-1, 1) * np.ones((1, arr.shape[1]), dtype=np.intp)
+    cols = np.ones((arr.shape[0], 1), dtype=np.intp) * np.arange(arr.shape[1]).reshape(1, -1)
 
     if decimate > 1:
         rows = rows[::decimate, ::decimate]
