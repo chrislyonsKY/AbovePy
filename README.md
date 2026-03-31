@@ -5,7 +5,8 @@
   <a href="https://github.com/chrislyonsKY/AbovePy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/chrislyonsKY/AbovePy/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
   <a href="https://github.com/chrislyonsKY/AbovePy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
   <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
-  
+  <a href="https://plugins.qgis.org/plugins/aboveqgis/"><img src="https://img.shields.io/badge/QGIS-AboveQGIS-93b023?style=flat-square&logo=qgis&logoColor=white" alt="QGIS Plugin"></a>
+
 </p>
 
 # abovepy
@@ -60,6 +61,27 @@ paths = abovepy.download(tiles, output_dir="./data")
 vrt = abovepy.mosaic(paths, output="frankfort.vrt")
 ```
 
+### Search by point with feet-based buffer
+
+```python
+# 500-foot radius around a point (uses EPSG:3089 for accurate measurement)
+tiles = abovepy.search(
+    point=(-84.87, 38.20),
+    buffer_feet=500,
+    product="dem_phase3"
+)
+```
+
+### Corridor search
+
+```python
+from shapely.geometry import LineString
+
+# Search along a road centerline with 200ft buffer on each side
+road = LineString([(-84.90, 38.20), (-84.85, 38.19), (-84.82, 38.21)])
+tiles = abovepy.search(geometry=road, buffer_feet=200, product="ortho_phase3")
+```
+
 ### Stream without downloading
 
 ```python
@@ -67,6 +89,30 @@ data, profile = abovepy.read(
     tiles.iloc[0].asset_url,
     bbox=(-84.85, 38.18, -84.82, 38.21)
 )
+```
+
+### Data quality validation
+
+```python
+result = abovepy.search(county="Pike", product="dem_phase3")
+
+# Check for data quality issues
+warnings = result.validate()
+for w in warnings:
+    print(f"Warning: {w}")
+# Warning: 3 tile(s) (12%) have no acquisition date metadata.
+```
+
+### Provenance metadata
+
+```python
+# Generate source documentation for deliverables
+prov = result.provenance()
+print(prov["source_program"])       # KyFromAbove
+print(prov["acquisition_period"])   # 2022-2025
+print(prov["native_crs"])           # EPSG:3089
+print(prov["tile_count"])           # 42
+print(prov["estimated_size_mb"])    # 210.0
 ```
 
 ### Explore available products
@@ -296,6 +342,48 @@ url = hillshade_tile_url(bbox=(-84.9, 38.15, -84.8, 38.25))
 ```
 
 KyFromAbove TiTiler endpoints are used by default. A `docker-compose.yml` for local TiTiler is in `examples/`.
+
+## Kentucky Engineering Geometry
+
+abovepy includes geometry utilities that work natively in Kentucky State Plane (EPSG:3089, Northing/Easting in US Survey Feet) — the coordinate system surveyors and engineers actually use:
+
+```python
+from abovepy import buffer_feet, corridor_buffer
+from shapely.geometry import Point, LineString
+
+# Buffer a survey point by 500 feet using State Plane coordinates
+site = Point(1_600_000, 312_000)  # Easting, Northing in feet
+area = buffer_feet(site, 500.0, input_crs="EPSG:3089")
+
+# Create a corridor polygon from a road centerline (200ft each side)
+road = LineString([(1_599_000, 312_000), (1_601_000, 312_500)])
+corridor = corridor_buffer(road, 400.0, input_crs="EPSG:3089")
+
+# Also works with WGS84 — reprojects to EPSG:3089 internally
+site_wgs84 = Point(-84.87, 38.20)
+area = buffer_feet(site_wgs84, 500.0)  # input_crs defaults to EPSG:4326
+```
+
+## Command-Line Interface
+
+abovepy includes a full CLI for terminal workflows:
+
+```bash
+# Search with feet-based buffer
+abovepy search --point=-84.87,38.20 --buffer-feet 500 -p dem_phase3
+
+# Get provenance metadata as JSON
+abovepy search --county Franklin -p dem_phase3 --format provenance
+
+# Estimate download size
+abovepy estimate --county Franklin -p ortho_phase3
+
+# Download tiles (concurrent, resumable)
+abovepy download --county Franklin -p dem_phase3 -o ./data --workers 8
+
+# Generate a hillshade tile URL
+abovepy tile-url --bbox=-84.9,38.15,-84.8,38.25 --algorithm hillshade
+```
 
 ## Advanced: Direct STAC Access
 

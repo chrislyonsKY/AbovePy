@@ -6,9 +6,11 @@ collection ID and optional bbox — no individual asset URLs required.
 
 from __future__ import annotations
 
+import json
 from urllib.parse import urlencode
 
 from abovepy._constants import TITILER_PGSTAC_ENDPOINT
+from abovepy._security import validate_image_format, validate_path_segment
 from abovepy.products import PRODUCTS
 
 DEFAULT_PGSTAC_ENDPOINT = TITILER_PGSTAC_ENDPOINT
@@ -176,9 +178,10 @@ def collection_bbox_url(
         Image URL.
     """
     cid = _resolve_collection_id(collection)
+    validate_image_format(fmt)
     bbox_str = ",".join(str(v) for v in bbox)
     qs = _pgstac_query_string(**kwargs)
-    base = f"{titiler_endpoint}/collections/{cid}/bbox/{bbox_str}/{width}x{height}.{fmt}"
+    base = f"{titiler_endpoint}/collections/{cid}/bbox/{bbox_str}/{int(width)}x{int(height)}.{fmt}"
     return f"{base}?{qs}" if qs else base
 
 
@@ -248,6 +251,7 @@ def item_tile_url(
         TileJSON URL for the item.
     """
     cid = _resolve_collection_id(collection)
+    validate_path_segment(item_id, "item_id")
     qs = _pgstac_query_string(**kwargs)
     base = f"{titiler_endpoint}/collections/{cid}/items/{item_id}/{tile_matrix_set}/tilejson.json"
     return f"{base}?{qs}" if qs else base
@@ -281,8 +285,9 @@ def item_preview_url(
         Preview PNG URL.
     """
     cid = _resolve_collection_id(collection)
+    validate_path_segment(item_id, "item_id")
     qs = _pgstac_query_string(**kwargs)
-    size_param = f"max_size={max_size}"
+    size_param = f"max_size={int(max_size)}"
     full_qs = f"{size_param}&{qs}" if qs else size_param
     return f"{titiler_endpoint}/collections/{cid}/items/{item_id}/preview?{full_qs}"
 
@@ -309,6 +314,7 @@ def item_info_url(
         JSON info URL (bounds, CRS, band info, assets).
     """
     cid = _resolve_collection_id(collection)
+    validate_path_segment(item_id, "item_id")
     return f"{titiler_endpoint}/collections/{cid}/items/{item_id}/info"
 
 
@@ -337,6 +343,7 @@ def item_statistics_url(
         Statistics JSON URL.
     """
     cid = _resolve_collection_id(collection)
+    validate_path_segment(item_id, "item_id")
     qs = _pgstac_query_string(**kwargs)
     base = f"{titiler_endpoint}/collections/{cid}/items/{item_id}/statistics"
     return f"{base}?{qs}" if qs else base
@@ -385,7 +392,9 @@ def hillshade_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "hillshade"
-    extra["algorithm_params"] = f'{{"azimuth":{azimuth},"altitude":{altitude},"buffer":{buffer}}}'
+    extra["algorithm_params"] = json.dumps(
+        {"azimuth": float(azimuth), "altitude": float(altitude), "buffer": int(buffer)}
+    )
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -430,7 +439,9 @@ def slope_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "slope"
-    extra["algorithm_params"] = f'{{"buffer":{buffer},"z_exaggeration":{z_exaggeration}}}'
+    extra["algorithm_params"] = json.dumps(
+        {"buffer": int(buffer), "z_exaggeration": float(z_exaggeration)}
+    )
     return collection_tile_url(
         collection,
         bbox=bbox,
@@ -481,8 +492,13 @@ def contour_tile_url(
     """
     extra = dict(kwargs)
     extra["algorithm"] = "contours"
-    extra["algorithm_params"] = (
-        f'{{"increment":{increment},"thickness":{thickness},"minz":{minz},"maxz":{maxz}}}'
+    extra["algorithm_params"] = json.dumps(
+        {
+            "increment": int(increment),
+            "thickness": int(thickness),
+            "minz": int(minz),
+            "maxz": int(maxz),
+        }
     )
     return collection_tile_url(
         collection,

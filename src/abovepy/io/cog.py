@@ -113,6 +113,10 @@ def _to_vsi_path(path: str) -> str:
         GDAL-compatible VSI path.
     """
     if path.startswith("s3://"):
+        from abovepy._security import validate_s3_bucket
+
+        parts = path.replace("s3://", "").split("/", 1)
+        validate_s3_bucket(parts[0])
         return path.replace("s3://", "/vsis3/")
     if path.startswith(("https://", "http://")):
         return "/vsicurl/" + path

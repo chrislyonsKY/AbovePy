@@ -184,8 +184,11 @@ def read_copc(
     # Resolve S3 URIs to HTTPS
     source_url = source_str
     if source_str.startswith("s3://"):
+        from abovepy._security import validate_s3_bucket
+
         parts = source_str.replace("s3://", "").split("/", 1)
         bucket, key = parts[0], parts[1]
+        validate_s3_bucket(bucket)
         source_url = f"https://{bucket}.s3.amazonaws.com/{key}"
 
     try:
@@ -291,8 +294,11 @@ def _read_remote(url: str) -> Any:
 
     if url.startswith("s3://"):
         # Convert to HTTPS for public bucket
+        from abovepy._security import validate_s3_bucket
+
         parts = url.replace("s3://", "").split("/", 1)
         bucket, key = parts[0], parts[1]
+        validate_s3_bucket(bucket)
         url = f"https://{bucket}.s3.amazonaws.com/{key}"
 
     check_remote_size(url)

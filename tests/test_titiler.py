@@ -1,5 +1,7 @@
 """Tests for TiTiler URL helpers."""
 
+import pytest
+
 from abovepy._constants import TITILER_ENDPOINT, TITILER_PGSTAC_ENDPOINT
 from abovepy.titiler import (
     cog_bounds_url,
@@ -290,12 +292,15 @@ def test_hillshade_tile_url_custom_params():
     assert "algorithm=hillshade" in url
     assert "algorithm_params=" in url
     # Params are JSON-encoded then URL-encoded
-    from urllib.parse import unquote
+    import json
+    from urllib.parse import parse_qs, urlparse
 
-    decoded = unquote(url)
-    assert '"azimuth":270' in decoded
-    assert '"altitude":30' in decoded
-    assert '"buffer":5' in decoded
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query)
+    params = json.loads(qs["algorithm_params"][0])
+    assert params["azimuth"] == 270
+    assert params["altitude"] == 30
+    assert params["buffer"] == 5
 
 
 def test_hillshade_tile_url_with_bbox():
@@ -357,3 +362,28 @@ def test_terrain_rgb_tile_url_with_bbox():
     )
     assert "algorithm=terrainrgb" in url
     assert "bbox=" in url
+
+
+# ---------------------------------------------------------------------------
+# Security: input validation
+# ---------------------------------------------------------------------------
+
+
+def test_item_id_path_traversal_rejected():
+    with pytest.raises(ValueError, match="path traversal"):
+        item_tile_url("dem_phase3", "../../../admin", titiler_endpoint=PGSTAC)
+
+
+def test_item_id_slash_rejected():
+    with pytest.raises(ValueError, match="path traversal"):
+        item_info_url("dem_phase3", "tile/../../etc", titiler_endpoint=PGSTAC)
+
+
+def test_invalid_image_format_rejected():
+    with pytest.raises(ValueError, match="Invalid image format"):
+        collection_bbox_url(
+            "dem_phase3",
+            bbox=(-84.9, 38.15, -84.8, 38.25),
+            fmt="exe",
+            titiler_endpoint=PGSTAC,
+        )

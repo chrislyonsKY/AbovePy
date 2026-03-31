@@ -44,6 +44,7 @@ from abovepy.result import SearchResult
 from abovepy.stac import clear_cache
 from abovepy.titiler import register_search
 from abovepy.utils.bbox import list_counties
+from abovepy.utils.crs import buffer_feet, corridor_buffer
 from abovepy.viz import preview_url, show, tile_url
 
 if TYPE_CHECKING:
@@ -109,9 +110,14 @@ def search(
     fields : list[str], optional
         Fields to include/exclude from the STAC response.
     point : tuple, optional
-        (longitude, latitude) point. Used with ``buffer_miles``.
+        (longitude, latitude) point. Used with ``buffer_miles`` or
+        ``buffer_feet``.
     buffer_miles : float, optional
         Buffer radius in miles around ``point`` or ``geometry``.
+    buffer_feet : float, optional
+        Buffer radius in US survey feet around ``point`` or ``geometry``.
+        Uses EPSG:3089 projection for accurate measurement. Takes
+        precedence over ``buffer_miles`` if both are provided.
     geometry : Shapely geometry, optional
         Any Shapely geometry for spatial search.
 
@@ -254,7 +260,9 @@ __all__ = [
     "SearchError",
     "SearchResult",
     "__version__",
+    "buffer_feet",
     "clear_cache",
+    "corridor_buffer",
     "download",
     "info",
     "list_counties",

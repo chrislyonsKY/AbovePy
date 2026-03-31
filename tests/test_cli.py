@@ -215,6 +215,31 @@ class TestCmdSearch:
         main(["search", "--bbox=-84.9,38.15,-84.8,38.25", "--sortby", "+datetime"])
         assert mock_search.call_args.kwargs["sortby"] == "+datetime"
 
+    @patch("abovepy.search")
+    def test_search_with_buffer_feet(self, mock_search, capsys):
+        mock_search.return_value = _mock_search_result()
+        main(["search", "--point=-84.85,38.19", "--buffer-feet", "500"])
+        mock_search.assert_called_once()
+        assert mock_search.call_args.kwargs["buffer_feet"] == 500.0
+
+    @patch("abovepy.search")
+    def test_search_provenance_format(self, mock_search, capsys):
+        mock_search.return_value = _mock_search_result()
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25", "-f", "provenance"])
+        out = capsys.readouterr().out
+        data = json.loads(out)
+        assert "product" in data
+        assert "source_program" in data
+        assert "tile_count" in data
+
+    @patch("abovepy.search")
+    def test_search_table_shows_validation_warnings(self, mock_search, capsys):
+        mock_search.return_value = _mock_search_result()
+        main(["search", "--bbox=-84.9,38.15,-84.8,38.25"])
+        err = capsys.readouterr().err
+        # Our fixture has None datetimes, so validate() should warn
+        assert "Warning:" in err
+
 
 # ---------------------------------------------------------------------------
 # download subcommand (mocked)
@@ -249,6 +274,13 @@ class TestCmdDownload:
         main(["download", "--county", "Franklin", "--workers", "8"])
         call_kwargs = mock_dl.call_args.kwargs
         assert call_kwargs["max_workers"] == 8
+
+    @patch("abovepy._download.download_tiles", return_value=["/tmp/a.tif"])
+    @patch("abovepy.search")
+    def test_download_with_buffer_feet(self, mock_search, mock_dl, capsys):
+        mock_search.return_value = _mock_search_result()
+        main(["download", "--point=-84.85,38.19", "--buffer-feet", "1000", "-o", "/tmp/out"])
+        assert mock_search.call_args.kwargs["buffer_feet"] == 1000.0
 
 
 # ---------------------------------------------------------------------------
@@ -352,6 +384,12 @@ class TestCmdEstimate:
         data = json.loads(out)
         assert "tile_count" in data
         assert "total_mb" in data
+
+    @patch("abovepy.search")
+    def test_estimate_with_buffer_feet(self, mock_search, capsys):
+        mock_search.return_value = _mock_search_result()
+        main(["estimate", "--point=-84.85,38.19", "--buffer-feet", "500"])
+        assert mock_search.call_args.kwargs["buffer_feet"] == 500.0
 
 
 # ---------------------------------------------------------------------------

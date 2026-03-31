@@ -50,7 +50,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--max-items", type=int, default=500, help="Max tiles (default: 500)")
     p_search.add_argument("--sortby", help="Sort field (e.g., +datetime)")
     p_search.add_argument("--ids", help="Comma-separated STAC item IDs")
-    _add_format_arg(p_search, choices=["table", "json", "geojson"])
+    _add_format_arg(p_search, choices=["table", "json", "geojson", "provenance"])
     p_search.set_defaults(func=_cmd_search)
 
     # --- download ---
@@ -143,12 +143,15 @@ def _cmd_search(args: argparse.Namespace) -> None:
     ids = args.ids.split(",") if args.ids else None
     sortby = args.sortby if args.sortby else None
 
+    buffer_feet = getattr(args, "buffer_feet", None)
+
     result = abovepy.search(
         product=args.product,
         bbox=bbox,
         county=args.county,
         point=point,
         buffer_miles=args.buffer,
+        buffer_feet=buffer_feet,
         ids=ids,
         sortby=sortby,
         datetime=args.datetime,
@@ -161,7 +164,14 @@ def _cmd_search(args: argparse.Namespace) -> None:
     elif fmt == "json":
         # Drop geometry for JSON
         print(result.tiles.drop(columns="geometry").to_json(orient="records", indent=2))
+    elif fmt == "provenance":
+        print(json.dumps(result.provenance(), indent=2, default=str))
     else:
+        # Run validation and print warnings before results
+        warnings = result.validate()
+        for w in warnings:
+            print(f"Warning: {w}", file=sys.stderr)
+
         _print_table(result.tiles)
         est = result.estimate_size()
         print(f"\nFound {est['tile_count']} tile(s), ~{est['total_mb']} MB estimated")
@@ -173,6 +183,7 @@ def _cmd_download(args: argparse.Namespace) -> None:
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
     point = _parse_point(args.point) if args.point else None
+    buffer_feet = getattr(args, "buffer_feet", None)
 
     result = abovepy.search(
         product=args.product,
@@ -180,6 +191,7 @@ def _cmd_download(args: argparse.Namespace) -> None:
         county=args.county,
         point=point,
         buffer_miles=args.buffer,
+        buffer_feet=buffer_feet,
     )
 
     if result.empty:
@@ -319,6 +331,7 @@ def _cmd_estimate(args: argparse.Namespace) -> None:
 
     bbox = _parse_bbox(args.bbox) if args.bbox else None
     point = _parse_point(args.point) if args.point else None
+    buffer_feet = getattr(args, "buffer_feet", None)
 
     result = abovepy.search(
         product=args.product,
@@ -326,6 +339,7 @@ def _cmd_estimate(args: argparse.Namespace) -> None:
         county=args.county,
         point=point,
         buffer_miles=args.buffer,
+        buffer_feet=buffer_feet,
     )
 
     est = result.estimate_size()
@@ -359,6 +373,11 @@ def _add_area_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--county", help="Kentucky county name")
     parser.add_argument("--point", help="Longitude,latitude (e.g., -84.85,38.19)")
     parser.add_argument("--buffer", type=float, help="Buffer in miles (used with --point)")
+    parser.add_argument(
+        "--buffer-feet",
+        type=float,
+        help="Buffer in US survey feet (used with --point; uses EPSG:3089)",
+    )
 
 
 def _add_format_arg(

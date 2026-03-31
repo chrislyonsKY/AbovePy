@@ -275,6 +275,54 @@ class TestValidate:
         warnings = result.validate()
         assert any("no acquisition date" in w for w in warnings)
 
+    def test_validate_mixed_products(self, sample_product):
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": ["T1", "T2"],
+                "product": ["dem_phase3", "dem_phase2"],
+                "datetime": ["2023-01-01", "2020-06-01"],
+                "asset_url": ["https://example.com/T1.tif", "https://example.com/T2.tif"],
+                "collection_id": ["dem-phase3", "dem-phase2"],
+            },
+            geometry=[box(0, 0, 1, 1), box(1, 1, 2, 2)],
+            crs="EPSG:4326",
+        )
+        result = SearchResult(gdf, sample_product, {})
+        warnings = result.validate()
+        assert any("Mixed" in w for w in warnings)
+
+    def test_validate_mixed_collections(self, sample_product):
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": ["T1", "T2"],
+                "product": ["dem_phase3", "dem_phase3"],
+                "datetime": ["2023-01-01", "2023-01-01"],
+                "asset_url": ["https://example.com/T1.tif", "https://example.com/T2.tif"],
+                "collection_id": ["dem-phase3", "dem-phase2"],
+            },
+            geometry=[box(0, 0, 1, 1), box(1, 1, 2, 2)],
+            crs="EPSG:4326",
+        )
+        result = SearchResult(gdf, sample_product, {})
+        warnings = result.validate()
+        assert any("Mixed collections" in w for w in warnings)
+
+
+class TestProvenanceEdgeCases:
+    def test_provenance_format_and_resolution(self, result):
+        prov = result.provenance()
+        assert prov["format"] == "COG"
+        assert prov["resolution"] == "2ft"
+        assert prov["display_name"] == "DEM Phase 3 (2ft)"
+
+    def test_provenance_bbox_matches_result(self, result):
+        prov = result.provenance()
+        assert prov["bbox"] == result.bbox
+
+    def test_provenance_query_params_preserved(self, result):
+        prov = result.provenance()
+        assert prov["query_params"] == {"county": "Franklin"}
+
 
 # ---------------------------------------------------------------------------
 # Subsetting

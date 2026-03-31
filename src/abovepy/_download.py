@@ -66,20 +66,27 @@ def download_tiles(
     downloaded: list[Path] = []
     failed: list[str] = []
 
+    from abovepy._security import sanitize_filename, validate_path_segment
+
     # Check if tiles have collection_id for subdirectory grouping
     has_collection = "collection_id" in tiles.columns
 
     # Build list of (url, dest) pairs, skipping existing files
     work_items: list[tuple[str, Path]] = []
     for url in urls:
-        filename = Path(url).name
+        filename = sanitize_filename(url)
         if has_collection:
             collection = str(tiles.loc[tiles["asset_url"] == url, "collection_id"].iloc[0])
+            collection = validate_path_segment(collection, "collection_id")
             product_dir = output_dir / collection
             product_dir.mkdir(parents=True, exist_ok=True)
             dest = product_dir / filename
         else:
             dest = output_dir / filename
+        # Verify dest hasn't escaped output_dir
+        if not dest.resolve().is_relative_to(output_dir.resolve()):
+            logger.warning("Path traversal blocked for %s", url)
+            continue
         if dest.exists() and not overwrite:
             logger.debug("Skipping existing file: %s", dest)
             downloaded.append(dest)

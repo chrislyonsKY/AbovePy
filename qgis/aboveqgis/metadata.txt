@@ -1,0 +1,26 @@
+[general]
+name=AboveQGIS
+qgisMinimumVersion=3.28
+description=KyFromAbove LiDAR, DEM, and orthoimagery data access for QGIS
+version=0.1.0
+author=Chris Lyons
+email=chris.lyons@ky.gov
+about=Access Kentucky's KyFromAbove geospatial data directly from QGIS.
+    Search by county or map extent, download tiles with concurrent transfers,
+    mosaic into VRT, and generate hillshade — all from the Processing toolbox.
+    Powered by abovepy. No credentials required.
+tracker=https://github.com/chrislyonsKY/AbovePy/issues
+repository=https://github.com/chrislyonsKY/AbovePy
+tags=kentucky,lidar,dem,elevation,kyfromabove,stac,cog,orthoimagery
+homepage=https://chrislyonsKY.github.io/AbovePy/
+category=Analysis
+icon=icon.png
+experimental=True
+deprecated=False
+hasProcessingProvider=yes
+changelog=
+    0.1.0 - Initial release
+    - Search tiles by county or map extent
+    - Download with concurrent transfers
+    - Mosaic tiles into VRT
+    - Server-side hillshade via TiTiler
