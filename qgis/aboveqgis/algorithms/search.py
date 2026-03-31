@@ -120,6 +120,7 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
                 self.OUTPUT,
                 "Search results",
                 type=QgsProcessing.TypeVectorPolygon,
+                defaultValue="TEMPORARY_OUTPUT",
             )
         )
 

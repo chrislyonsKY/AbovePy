@@ -1,5 +1,7 @@
 """AboveQGIS plugin — Plugins menu + Processing provider."""
 
+import glob
+import os
 import subprocess
 import sys
 
@@ -12,10 +14,42 @@ REQUIRED_PACKAGE = "abovepy"
 MIN_VERSION = "2.0.1"
 
 
+def _find_python():
+    """Find the Python executable in the QGIS environment.
+
+    sys.executable points to qgis-bin.exe on Windows, not Python.
+    This searches the QGIS installation for the real Python interpreter.
+    """
+    # 1. If sys.executable is actually Python, use it
+    if "python" in os.path.basename(sys.executable).lower():
+        return sys.executable
+
+    # 2. Try sys.prefix (common on Linux/Mac QGIS)
+    for name in ("python3.exe", "python.exe", "python3", "python"):
+        candidate = os.path.join(sys.prefix, name)
+        if os.path.exists(candidate):
+            return candidate
+
+    # 3. Search QGIS apps directory (Windows OSGeo4W)
+    qgis_root = os.path.dirname(os.path.dirname(sys.executable))
+    for pattern in ("apps/Python*/python.exe", "apps/Python*/python3.exe"):
+        matches = glob.glob(os.path.join(qgis_root, pattern))
+        if matches:
+            return sorted(matches)[-1]  # highest Python version
+
+    # 4. Try PATH
+    import shutil
+    found = shutil.which("python3") or shutil.which("python")
+    if found:
+        return found
+
+    return sys.executable
+
+
 def _check_abovepy():
-    """Return True if abovepy is importable and meets minimum version."""
+    """Return True if abovepy is importable."""
     try:
-        import abovepy
+        import abovepy  # noqa: F401
         return True
     except ImportError:
         return False
@@ -23,12 +57,14 @@ def _check_abovepy():
 
 def _install_abovepy(iface):
     """Prompt the user to install abovepy, then install via pip."""
+    python_exe = _find_python()
+
     reply = QMessageBox.question(
         iface.mainWindow(),
         "AboveQGIS — Missing Dependency",
         f"AboveQGIS requires the <b>abovepy</b> package (>= {MIN_VERSION}).\n\n"
-        "Would you like to install it now?\n\n"
-        f"This will run: pip install {REQUIRED_PACKAGE}",
+        f"Would you like to install it now?\n\n"
+        f"Python: {python_exe}",
         QMessageBox.Yes | QMessageBox.No,
         QMessageBox.Yes,
     )
@@ -37,8 +73,8 @@ def _install_abovepy(iface):
 
     try:
         subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", REQUIRED_PACKAGE],
-            timeout=120,
+            [python_exe, "-m", "pip", "install", REQUIRED_PACKAGE],
+            timeout=300,
         )
         QMessageBox.information(
             iface.mainWindow(),
@@ -52,7 +88,8 @@ def _install_abovepy(iface):
             iface.mainWindow(),
             "AboveQGIS — Install Failed",
             f"Failed to install abovepy:\n\n{e}\n\n"
-            "Try manually: open the OSGeo4W Shell and run:\n"
+            f"Python tried: {python_exe}\n\n"
+            "Try manually from the OSGeo4W Shell:\n"
             f"  pip install {REQUIRED_PACKAGE}",
         )
         return False
@@ -75,7 +112,6 @@ class AboveQGISPlugin:
         # Check dependency before registering anything
         if not _check_abovepy():
             _install_abovepy(self.iface)
-            # Re-check after install attempt
             if not _check_abovepy():
                 self.iface.messageBar().pushWarning(
                     "AboveQGIS",
