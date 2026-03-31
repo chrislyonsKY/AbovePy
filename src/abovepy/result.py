@@ -42,8 +42,6 @@ class SearchResult:
     'https://...'
     """
 
-    __slots__ = ("_gdf", "_product", "_query_params")
-
     def __init__(
         self,
         gdf: gpd.GeoDataFrame,
@@ -278,6 +276,114 @@ class SearchResult:
         left = self._gdf[["tile_id", "product", "geometry"]].copy()
         right = other._gdf[["tile_id", "product", "geometry"]].copy()
         return gpd.sjoin(left, right, how="inner", predicate="intersects")
+
+    # ------------------------------------------------------------------
+    # Provenance & validation
+    # ------------------------------------------------------------------
+
+    def provenance(self) -> dict[str, Any]:
+        """Generate provenance metadata for this search result.
+
+        Useful for survey/engineering deliverables that require source
+        documentation, acquisition dates, and data lineage.
+
+        Returns
+        -------
+        dict
+            Keys: product, collection_id, source_program, acquisition_period,
+            native_crs, tile_count, estimated_size_mb, bbox, query_params,
+            asset_urls, phases.
+        """
+        urls = self._gdf["asset_url"].dropna().tolist() if "asset_url" in self._gdf.columns else []
+        phases = set()
+        if "product" in self._gdf.columns:
+            phases = set(self._gdf["product"].unique())
+
+        return {
+            "product": self._product.key,
+            "display_name": self._product.display_name,
+            "collection_id": self._product.collection_id,
+            "source_program": self._product.source_program,
+            "acquisition_period": (
+                f"{self._product.acquisition_start}–{self._product.acquisition_end}"
+                if self._product.acquisition_start
+                else "unknown"
+            ),
+            "native_crs": self._product.native_crs,
+            "resolution": self._product.resolution,
+            "format": self._product.format,
+            "tile_count": len(self._gdf),
+            "estimated_size_mb": round(self._product.avg_tile_size_mb * len(self._gdf), 1),
+            "bbox": self.bbox,
+            "query_params": self._query_params,
+            "asset_urls": urls,
+            "phases": sorted(phases),
+        }
+
+    def validate(self) -> list[str]:
+        """Check for data quality issues in this search result.
+
+        Returns a list of human-readable warning strings. An empty list
+        means no issues were detected.
+
+        Returns
+        -------
+        list[str]
+            Warning messages. Empty if no issues found.
+        """
+        warnings: list[str] = []
+
+        if self._gdf.empty:
+            warnings.append("No tiles found — the search returned empty results.")
+            return warnings
+
+        # Mixed products
+        if "product" in self._gdf.columns:
+            products = self._gdf["product"].unique()
+            if len(products) > 1:
+                warnings.append(
+                    f"Mixed products in result: {', '.join(sorted(products))}. "
+                    "Consider filtering to a single product."
+                )
+
+        # Mixed collection IDs (could indicate mixed phases)
+        if "collection_id" in self._gdf.columns:
+            collections = self._gdf["collection_id"].unique()
+            if len(collections) > 1:
+                warnings.append(
+                    f"Mixed collections: {', '.join(sorted(collections))}. "
+                    "Tiles may come from different acquisition phases."
+                )
+
+        # Missing asset URLs
+        if "asset_url" in self._gdf.columns:
+            missing = self._gdf["asset_url"].isna().sum()
+            if missing > 0:
+                warnings.append(f"{missing} tile(s) have no asset URL and cannot be downloaded.")
+
+        # Coverage gap detection (simple: check if total bounds has large
+        # areas without tiles, based on tile count vs expected density)
+        if len(self._gdf) > 0:
+            bounds = self._gdf.total_bounds
+            width = bounds[2] - bounds[0]
+            height = bounds[3] - bounds[1]
+            area_deg = width * height
+            # Very rough: if area is large but tile count is low, warn
+            if area_deg > 0.1 and len(self._gdf) < 5:
+                warnings.append(
+                    "Low tile density for the covered area — there may be coverage gaps."
+                )
+
+        # Missing datetime metadata
+        if "datetime" in self._gdf.columns:
+            null_dates = self._gdf["datetime"].isna().sum()
+            if null_dates > 0:
+                pct = null_dates / len(self._gdf) * 100
+                warnings.append(
+                    f"{null_dates} tile(s) ({pct:.0f}%) have no acquisition date metadata."
+                )
+
+        return warnings
 
     # ------------------------------------------------------------------
     # Subsetting

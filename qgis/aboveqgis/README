@@ -1,0 +1,51 @@
+AboveQGIS — KyFromAbove Data Access for QGIS
+==============================================
+
+Access Kentucky's KyFromAbove LiDAR, DEM, and orthoimagery directly from
+the QGIS Processing toolbox. No credentials required.
+
+Requirements
+------------
+- QGIS >= 3.28
+- abovepy >= 2.0.1 (installed automatically on first run)
+
+Installation
+------------
+1. Install this plugin via Plugins > Manage and Install Plugins,
+   or install from ZIP.
+
+2. On first launch, the plugin checks for abovepy and offers to
+   install it automatically if missing. Just click "Yes" and
+   restart QGIS.
+
+   If automatic install fails (e.g., permissions), open the
+   OSGeo4W Shell and run:
+     pip install abovepy
+
+Processing Tools
+----------------
+All tools are available from:
+  - Plugins > AboveQGIS — KyFromAbove (menu bar)
+  - Processing Toolbox > AboveQGIS > KyFromAbove
+
+Tools:
+  - Search KyFromAbove Tiles — find tiles by county dropdown or map extent
+  - Download KyFromAbove Tiles — concurrent downloads to a local folder
+  - Mosaic KyFromAbove Tiles — build VRT or GeoTIFF from downloaded tiles
+  - Generate Hillshade Tile URL — server-side hillshade (no download needed)
+
+Data Source
+-----------
+KyFromAbove (https://kyfromabove.ky.gov/) — Kentucky's statewide
+LiDAR, DEM, orthoimagery, and oblique imagery program.
+All data is publicly available on AWS S3 with a STAC API.
+
+License
+-------
+GPL-3.0 — see LICENSE file.
+
+Links
+-----
+- Documentation: https://chrislyonsKY.github.io/AbovePy/
+- Source code: https://github.com/chrislyonsKY/AbovePy
+- Bug tracker: https://github.com/chrislyonsKY/AbovePy/issues

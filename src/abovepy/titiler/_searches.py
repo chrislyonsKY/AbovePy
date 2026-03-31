@@ -12,6 +12,7 @@ from __future__ import annotations
 from urllib.parse import urlencode
 
 from abovepy._constants import TITILER_PGSTAC_ENDPOINT
+from abovepy._security import validate_image_format, validate_path_segment
 from abovepy.titiler._pgstac import DEFAULT_TILE_MATRIX_SET, _resolve_collection_id
 
 DEFAULT_PGSTAC_ENDPOINT = TITILER_PGSTAC_ENDPOINT
@@ -119,6 +120,7 @@ def search_tile_url(
     str
         TileJSON URL for the registered search mosaic.
     """
+    validate_path_segment(search_id, "search_id")
     qs = _search_query_string(**kwargs)
     base = f"{titiler_endpoint}/searches/{search_id}/{tile_matrix_set}/tilejson.json"
     return f"{base}?{qs}" if qs else base
@@ -148,6 +150,7 @@ def search_map_url(
     str
         HTML map viewer URL.
     """
+    validate_path_segment(search_id, "search_id")
     qs = _search_query_string(**kwargs)
     base = f"{titiler_endpoint}/searches/{search_id}/{tile_matrix_set}/map.html"
     return f"{base}?{qs}" if qs else base
@@ -171,6 +174,7 @@ def search_info_url(
     str
         JSON info URL.
     """
+    validate_path_segment(search_id, "search_id")
     return f"{titiler_endpoint}/searches/{search_id}/info"
 
 
@@ -207,7 +211,10 @@ def search_bbox_url(
     str
         Image URL.
     """
+    validate_path_segment(search_id, "search_id")
+    validate_image_format(fmt)
     bbox_str = ",".join(str(v) for v in bbox)
     qs = _search_query_string(**kwargs)
-    base = f"{titiler_endpoint}/searches/{search_id}/bbox/{bbox_str}/{width}x{height}.{fmt}"
+    dims = f"{int(width)}x{int(height)}"
+    base = f"{titiler_endpoint}/searches/{search_id}/bbox/{bbox_str}/{dims}.{fmt}"
     return f"{base}?{qs}" if qs else base

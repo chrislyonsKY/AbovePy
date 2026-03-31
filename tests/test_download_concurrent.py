@@ -166,7 +166,144 @@ class TestFailedDownloadLeavesPartFile:
 
 
 class TestDefaultWorkers:
-    """DEFAULT_DOWNLOAD_WORKERS constant is 4."""
+    """DEFAULT_DOWNLOAD_WORKERS constant is 8."""
 
-    def test_default_is_four(self):
-        assert DEFAULT_DOWNLOAD_WORKERS == 4
+    def test_default_is_eight(self):
+        assert DEFAULT_DOWNLOAD_WORKERS == 8
+
+
+class TestContentLengthValidation:
+    """Content-Length header validation on completed downloads."""
+
+    def test_size_mismatch_logs_warning(self, tmp_path, caplog):
+        import logging
+
+        dest = tmp_path / "tile.tif"
+
+        client = MagicMock()
+        response = MagicMock()
+        response.status_code = 200
+        response.raise_for_status = MagicMock()
+        response.iter_bytes = MagicMock(return_value=iter([b"short"]))
+        # Report a content-length larger than what we actually wrote
+        response.headers = {"content-length": "9999"}
+        response.__enter__ = MagicMock(return_value=response)
+        response.__exit__ = MagicMock(return_value=False)
+        client.stream = MagicMock(return_value=response)
+
+        with caplog.at_level(logging.WARNING):
+            _download_file(client, "https://example.com/tile.tif", dest)
+
+        assert "Size mismatch" in caplog.text
+
+    def test_matching_size_no_warning(self, tmp_path, caplog):
+        import logging
+
+        dest = tmp_path / "tile.tif"
+        data = b"exact-data"
+
+        client = MagicMock()
+        response = MagicMock()
+        response.status_code = 200
+        response.raise_for_status = MagicMock()
+        response.iter_bytes = MagicMock(return_value=iter([data]))
+        response.headers = {"content-length": str(len(data))}
+        response.__enter__ = MagicMock(return_value=response)
+        response.__exit__ = MagicMock(return_value=False)
+        client.stream = MagicMock(return_value=response)
+
+        with caplog.at_level(logging.WARNING):
+            _download_file(client, "https://example.com/tile.tif", dest)
+
+        assert "Size mismatch" not in caplog.text
+        assert dest.read_bytes() == data
+
+    def test_no_content_length_header_skips_check(self, tmp_path, caplog):
+        import logging
+
+        dest = tmp_path / "tile.tif"
+
+        client = MagicMock()
+        response = MagicMock()
+        response.status_code = 200
+        response.raise_for_status = MagicMock()
+        response.iter_bytes = MagicMock(return_value=iter([b"data"]))
+        response.headers = {}
+        response.__enter__ = MagicMock(return_value=response)
+        response.__exit__ = MagicMock(return_value=False)
+        client.stream = MagicMock(return_value=response)
+
+        with caplog.at_level(logging.WARNING):
+            _download_file(client, "https://example.com/tile.tif", dest)
+
+        assert "Size mismatch" not in caplog.text
+        assert dest.exists()
+
+
+class TestHierarchicalFilenames:
+    """Downloads with collection_id get placed in product subdirectories."""
+
+    def test_collection_id_creates_subdirectory(self, tmp_path):
+        tiles = pd.DataFrame(
+            {
+                "asset_url": ["https://example.com/tile1.tif", "https://example.com/tile2.tif"],
+                "collection_id": ["dem-phase3", "dem-phase3"],
+            }
+        )
+
+        with patch("abovepy._download._download_file") as mock_dl:
+            download_tiles(tiles, output_dir=tmp_path)
+
+        # Verify subdirectory was created
+        assert (tmp_path / "dem-phase3").is_dir()
+        # Verify _download_file was called with paths inside the subdirectory
+        for call in mock_dl.call_args_list:
+            dest = call.args[2]  # third positional arg is dest
+            assert "dem-phase3" in str(dest)
+
+    def test_mixed_collections_create_separate_subdirs(self, tmp_path):
+        tiles = pd.DataFrame(
+            {
+                "asset_url": ["https://example.com/a.tif", "https://example.com/b.tif"],
+                "collection_id": ["dem-phase3", "orthos-phase3"],
+            }
+        )
+
+        with patch("abovepy._download._download_file"):
+            download_tiles(tiles, output_dir=tmp_path)
+
+        assert (tmp_path / "dem-phase3").is_dir()
+        assert (tmp_path / "orthos-phase3").is_dir()
+
+    def test_no_collection_id_uses_flat_dir(self, tmp_path):
+        tiles = pd.DataFrame(
+            {
+                "asset_url": ["https://example.com/tile.tif"],
+            }
+        )
+
+        with patch("abovepy._download._download_file") as mock_dl:
+            download_tiles(tiles, output_dir=tmp_path)
+
+        # Should be called with dest directly in output_dir, no subdirectory
+        dest = mock_dl.call_args.args[2]
+        assert dest.parent == tmp_path
+
+    def test_existing_file_in_subdirectory_skipped(self, tmp_path):
+        subdir = tmp_path / "dem-phase3"
+        subdir.mkdir()
+        (subdir / "tile.tif").write_bytes(b"existing")
+
+        tiles = pd.DataFrame(
+            {
+                "asset_url": ["https://example.com/tile.tif"],
+                "collection_id": ["dem-phase3"],
+            }
+        )
+
+        with patch("abovepy._download._download_file") as mock_dl:
+            result = download_tiles(tiles, output_dir=tmp_path, overwrite=False)
+
+        mock_dl.assert_not_called()
+        assert len(result) == 1
+        assert result[0] == subdir / "tile.tif"

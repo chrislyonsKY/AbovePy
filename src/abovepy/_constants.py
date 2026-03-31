@@ -24,5 +24,5 @@ REQUEST_TIMEOUT = 30  # seconds
 DOWNLOAD_TIMEOUT = 300  # seconds for large tile downloads
 
 # Download concurrency and chunking
-DEFAULT_DOWNLOAD_WORKERS = 4
-DOWNLOAD_CHUNK_SIZE = 65536
+DEFAULT_DOWNLOAD_WORKERS = 8
+DOWNLOAD_CHUNK_SIZE = 262144  # 256 KB
