@@ -4,6 +4,17 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.1.1] — 2026-03-31
+
+### Added
+
+- **LandXML surface export** — `to_landxml(data, profile, output)` triangulates a
+  DEM into a TIN surface and writes LandXML 1.2 XML. Importable by Civil 3D,
+  Carlson, and OpenRoads Designer. Supports decimation for file size control,
+  nodata masking, and automatic Imperial/Metric units based on CRS.
+  Requires `pip install abovepy[analysis]` (scipy).
+- Example script: `landxml_export.py` (DEM to LandXML for CAD import)
+
 ## [2.1.0] — 2026-03-31
 
 ### Added

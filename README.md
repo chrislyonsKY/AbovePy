@@ -322,6 +322,19 @@ An ArcGIS Pro Python Toolbox is included in `arcgis/AbovePro.pyt` with tools for
 
 See [ArcGIS Pro Toolbox Guide](https://chrislyonsKY.github.io/AbovePy/tutorials/arcgis-pro/) for installation and usage.
 
+## QGIS Plugin
+
+**AboveQGIS** is a QGIS Processing toolbox plugin with 4 tools:
+
+- **Search KyFromAbove Tiles** — county dropdown (all 120) or map extent, outputs tile footprint layer
+- **Download KyFromAbove Tiles** — concurrent downloads to a local folder
+- **Mosaic KyFromAbove Tiles** — build VRT or GeoTIFF from downloaded tiles
+- **Generate Hillshade Tile URL** — server-side hillshade via TiTiler (no download needed)
+
+Install via **Plugins > Manage and Install Plugins** or from the [QGIS Plugin Repository](https://plugins.qgis.org/plugins/aboveqgis/). The plugin auto-installs abovepy on first run.
+
+Tools appear under **Plugins > AboveQGIS — KyFromAbove** and in the Processing Toolbox.
+
 ## Web Visualization
 
 abovepy generates TiTiler-compatible URLs for web map integration:
