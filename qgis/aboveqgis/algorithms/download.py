@@ -61,42 +61,58 @@ class DownloadTilesAlgorithm(QgsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.PRODUCT,
-                "Product",
-                options=PRODUCTS,
-                defaultValue=0,
-                optional=False,
-            )
+        product_param = QgsProcessingParameterEnum(
+            self.PRODUCT,
+            "Product",
+            options=PRODUCTS,
+            defaultValue=0,
+            optional=False,
         )
-        self.addParameter(
-            QgsProcessingParameterFile(
-                self.OUTPUT_DIR,
-                "Output directory",
-                behavior=QgsProcessingParameterFile.Folder,
-            )
+        product_param.setHelp(
+            "KyFromAbove data product to download. DEM tiles are ~5 MB each, "
+            "ortho tiles are ~40-80 MB each, LiDAR tiles are ~100-150 MB each."
         )
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.MAX_ITEMS,
-                "Maximum tiles",
-                type=QgsProcessingParameterNumber.Integer,
-                defaultValue=500,
-                minValue=1,
-                maxValue=5000,
-            )
+        self.addParameter(product_param)
+
+        outdir_param = QgsProcessingParameterFile(
+            self.OUTPUT_DIR,
+            "Output directory",
+            behavior=QgsProcessingParameterFile.Folder,
         )
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.WORKERS,
-                "Concurrent downloads",
-                type=QgsProcessingParameterNumber.Integer,
-                defaultValue=4,
-                minValue=1,
-                maxValue=16,
-            )
+        outdir_param.setHelp(
+            "Folder to save downloaded tiles. Files are organized into "
+            "subdirectories by collection (e.g., dem-phase3/)."
         )
+        self.addParameter(outdir_param)
+
+        max_param = QgsProcessingParameterNumber(
+            self.MAX_ITEMS,
+            "Maximum tiles",
+            type=QgsProcessingParameterNumber.Integer,
+            defaultValue=500,
+            minValue=1,
+            maxValue=5000,
+        )
+        max_param.setHelp(
+            "Maximum number of tiles to download. Use the Search tool first "
+            "to check tile count and estimated size before downloading."
+        )
+        self.addParameter(max_param)
+
+        workers_param = QgsProcessingParameterNumber(
+            self.WORKERS,
+            "Concurrent downloads",
+            type=QgsProcessingParameterNumber.Integer,
+            defaultValue=8,
+            minValue=1,
+            maxValue=16,
+        )
+        workers_param.setHelp(
+            "Number of simultaneous download threads. Higher values download "
+            "faster but use more bandwidth. 8 is a good default for broadband."
+        )
+        self.addParameter(workers_param)
+
         self.addOutput(QgsProcessingOutputString(self.RESULT_MSG, "Result"))
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802

@@ -80,49 +80,75 @@ class SearchTilesAlgorithm(QgsProcessingAlgorithm):
         return SearchTilesAlgorithm()
 
     def initAlgorithm(self, config=None):  # noqa: N802
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.COUNTY,
-                "County",
-                options=COUNTIES,
-                defaultValue=0,
-                optional=False,
-            )
+        county_param = QgsProcessingParameterEnum(
+            self.COUNTY,
+            "County",
+            options=COUNTIES,
+            defaultValue=0,
+            optional=False,
         )
-        self.addParameter(
-            QgsProcessingParameterExtent(
-                self.EXTENT,
-                "Search extent (only used when county is not selected)",
-                optional=True,
-            )
+        county_param.setHelp(
+            "Select a Kentucky county to search. All 120 counties are available. "
+            "Choose '(use map extent instead)' to use the extent below."
         )
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.PRODUCT,
-                "Product",
-                options=PRODUCTS,
-                defaultValue=0,
-                optional=False,
-            )
+        self.addParameter(county_param)
+
+        extent_param = QgsProcessingParameterExtent(
+            self.EXTENT,
+            "Search extent (only used when county is not selected)",
+            optional=True,
         )
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.MAX_ITEMS,
-                "Maximum tiles",
-                type=QgsProcessingParameterNumber.Integer,
-                defaultValue=500,
-                minValue=1,
-                maxValue=5000,
-            )
+        extent_param.setHelp(
+            "Draw or enter a bounding box to search. Only used when no "
+            "county is selected. You can use 'Use Map Canvas Extent' for "
+            "the current map view."
         )
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                "Search results",
-                type=QgsProcessing.TypeVectorPolygon,
-                defaultValue="TEMPORARY_OUTPUT",
-            )
+        self.addParameter(extent_param)
+
+        product_param = QgsProcessingParameterEnum(
+            self.PRODUCT,
+            "Product",
+            options=PRODUCTS,
+            defaultValue=0,
+            optional=False,
         )
+        product_param.setHelp(
+            "KyFromAbove data product to search:\n"
+            "- dem_phase3: 2ft DEM (2022-2025, highest quality)\n"
+            "- dem_phase2: 2ft DEM (2018-2020)\n"
+            "- dem_phase1: 5ft DEM (2012-2014)\n"
+            "- ortho_phase3: 3-inch true-color imagery (2022-2025)\n"
+            "- ortho_phase2/1: 6-inch imagery (older)\n"
+            "- laz_phase3/2: COPC LiDAR point clouds"
+        )
+        self.addParameter(product_param)
+
+        max_param = QgsProcessingParameterNumber(
+            self.MAX_ITEMS,
+            "Maximum tiles",
+            type=QgsProcessingParameterNumber.Integer,
+            defaultValue=500,
+            minValue=1,
+            maxValue=5000,
+        )
+        max_param.setHelp(
+            "Maximum number of tiles to return. Increase for large counties "
+            "or wide extents. A typical county has 200-400 DEM tiles."
+        )
+        self.addParameter(max_param)
+
+        output_param = QgsProcessingParameterFeatureSink(
+            self.OUTPUT,
+            "Search results",
+            type=QgsProcessing.TypeVectorPolygon,
+            defaultValue="TEMPORARY_OUTPUT",
+        )
+        output_param.setHelp(
+            "Output vector layer with tile footprints. Each feature includes "
+            "tile_id, product, datetime, asset_url, and collection_id. "
+            "Defaults to a temporary memory layer."
+        )
+        self.addParameter(output_param)
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802
         try:

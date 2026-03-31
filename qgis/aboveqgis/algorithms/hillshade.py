@@ -56,42 +56,60 @@ class HillshadeTileURLAlgorithm(QgsProcessingAlgorithm):
                 optional=False,
             )
         )
-        self.addParameter(
-            QgsProcessingParameterExtent(
-                self.EXTENT,
-                "Extent (only used when county is not selected)",
-                optional=True,
-            )
+        extent_param = QgsProcessingParameterExtent(
+            self.EXTENT,
+            "Extent (only used when county is not selected)",
+            optional=True,
         )
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.PRODUCT,
-                "DEM product",
-                options=DEM_PRODUCTS,
-                defaultValue=0,
-                optional=False,
-            )
+        extent_param.setHelp(
+            "Bounding box for the hillshade. Use 'Use Map Canvas Extent' "
+            "to match your current map view. Only used when no county is selected."
         )
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.AZIMUTH,
-                "Sun azimuth (degrees)",
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=315.0,
-                minValue=0.0,
-                maxValue=360.0,
-            )
+        self.addParameter(extent_param)
+
+        product_param = QgsProcessingParameterEnum(
+            self.PRODUCT,
+            "DEM product",
+            options=DEM_PRODUCTS,
+            defaultValue=0,
+            optional=False,
         )
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ALTITUDE,
-                "Sun altitude (degrees)",
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=45.0,
-                minValue=0.0,
-                maxValue=90.0,
-            )
+        product_param.setHelp(
+            "DEM product for hillshade:\n"
+            "- dem_phase3: 2ft resolution (2022-2025, recommended)\n"
+            "- dem_phase2: 2ft resolution (2018-2020)\n"
+            "- dem_phase1: 5ft resolution (2012-2014)"
         )
+        self.addParameter(product_param)
+
+        azimuth_param = QgsProcessingParameterNumber(
+            self.AZIMUTH,
+            "Sun azimuth (degrees)",
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=315.0,
+            minValue=0.0,
+            maxValue=360.0,
+        )
+        azimuth_param.setHelp(
+            "Direction of the light source in degrees clockwise from north. "
+            "315 (northwest) is the cartographic standard."
+        )
+        self.addParameter(azimuth_param)
+
+        altitude_param = QgsProcessingParameterNumber(
+            self.ALTITUDE,
+            "Sun altitude (degrees)",
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=45.0,
+            minValue=0.0,
+            maxValue=90.0,
+        )
+        altitude_param.setHelp(
+            "Angle of the light source above the horizon. "
+            "45 is a good default. Lower values create more dramatic shadows."
+        )
+        self.addParameter(altitude_param)
+
         self.addOutput(QgsProcessingOutputString(self.TILE_URL, "Tile URL"))
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802

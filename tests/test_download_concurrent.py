@@ -166,10 +166,10 @@ class TestFailedDownloadLeavesPartFile:
 
 
 class TestDefaultWorkers:
-    """DEFAULT_DOWNLOAD_WORKERS constant is 4."""
+    """DEFAULT_DOWNLOAD_WORKERS constant is 8."""
 
-    def test_default_is_four(self):
-        assert DEFAULT_DOWNLOAD_WORKERS == 4
+    def test_default_is_eight(self):
+        assert DEFAULT_DOWNLOAD_WORKERS == 8
 
 
 class TestContentLengthValidation:
