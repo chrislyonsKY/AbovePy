@@ -113,6 +113,18 @@ class TestToShapefile:
 NS = "http://www.landxml.org/schema/LandXML-1.2"
 
 
+def _has_scipy() -> bool:
+    try:
+        import scipy  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+_skip_no_scipy = pytest.mark.skipif(not _has_scipy(), reason="scipy not installed")
+
+
 @pytest.fixture
 def dem_data():
     """A simple 32x32 DEM with known elevation values and EPSG:3089 profile."""
@@ -132,6 +144,7 @@ def dem_data():
     return data, profile
 
 
+@_skip_no_scipy
 class TestToLandXML:
     def test_creates_xml_file(self, dem_data, tmp_path):
         data, profile = dem_data
