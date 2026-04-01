@@ -138,6 +138,106 @@ class TestValidateCog:
         assert _open_rasterio_source("/local/file.tif") == "/local/file.tif"
 
 
+class TestCogDeepFallback:
+    """Test deep validation fallback when rio-cogeo is not installed."""
+
+    @patch("abovepy.validate._validate_cog")
+    @patch.dict("sys.modules", {"rio_cogeo": None})
+    def test_deep_falls_back_without_rio_cogeo(self, mock_cog):
+        from abovepy.validate import _validate_cog_deep
+
+        mock_cog.return_value = ValidationResult("f.tif", "COG", True)
+        result = _validate_cog_deep("f.tif")
+        mock_cog.assert_called_once_with("f.tif")
+        assert result.is_valid
+
+    @patch("rasterio.open")
+    def test_deep_with_rio_cogeo(self, mock_open):
+        """Test deep validation adds rio-cogeo check when available."""
+        ds = MagicMock()
+        ds.profile = {
+            "driver": "GTiff",
+            "tiled": True,
+            "blockxsize": 512,
+            "blockysize": 512,
+            "compress": "deflate",
+        }
+        ds.crs = MagicMock()
+        ds.overviews.return_value = [2, 4, 8]
+        ds.width = 5000
+        ds.height = 5000
+        ds.count = 1
+        ds.dtypes = ("float32",)
+        mock_open.return_value.__enter__ = MagicMock(return_value=ds)
+        mock_open.return_value.__exit__ = MagicMock(return_value=False)
+
+        mock_validate = MagicMock(return_value=(True, [], ["minor warning"]))
+        with patch.dict("sys.modules", {"rio_cogeo": MagicMock(cog_validate=mock_validate)}):
+            from abovepy.validate import _validate_cog_deep
+
+            result = _validate_cog_deep("/data/dem.tif")
+            assert result.is_valid
+            assert any(c.name == "rio_cogeo_validate" for c in result.checks)
+
+
+class TestLaspyNotInstalled:
+    """Test COPC/pointcloud fallback when laspy is not installed."""
+
+    def test_copc_without_laspy(self):
+        with patch.dict("sys.modules", {"laspy": None}):
+            from abovepy.validate import _validate_copc
+
+            result = _validate_copc("data/cloud.copc.laz")
+            assert not result.is_valid
+            assert any("laspy not installed" in c.message for c in result.checks)
+
+    def test_pointcloud_without_laspy(self):
+        with patch.dict("sys.modules", {"laspy": None}):
+            from abovepy.validate import _validate_pointcloud
+
+            result = _validate_pointcloud("data/old.laz")
+            assert not result.is_valid
+            assert any("laspy not installed" in c.message for c in result.checks)
+
+
+class TestValidateFormat:
+    """Test SearchResult.validate_format()."""
+
+    @patch("abovepy.validate.validate")
+    def test_validate_format_sample(self, mock_validate):
+        import geopandas as gpd
+        from shapely.geometry import box
+
+        from abovepy.products import Product, ProductType
+        from abovepy.result import SearchResult
+
+        mock_validate.return_value = ValidationResult("url.tif", "COG", True)
+        product = Product(
+            "dem_phase3",
+            "DEM Phase 3",
+            "dem-phase3",
+            ProductType.DEM,
+            "2ft",
+            "COG",
+            3,
+        )
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": [f"T{i}" for i in range(10)],
+                "product": ["dem_phase3"] * 10,
+                "datetime": [None] * 10,
+                "asset_url": [f"https://example.com/T{i}.tif" for i in range(10)],
+                "collection_id": ["dem-phase3"] * 10,
+            },
+            geometry=[box(i, i, i + 1, i + 1) for i in range(10)],
+            crs="EPSG:4326",
+        )
+        sr = SearchResult(gdf, product, {})
+        results = sr.validate_format(sample=3)
+        assert len(results) == 3
+        assert mock_validate.call_count == 3
+
+
 @pytest.mark.skipif(importlib.util.find_spec("laspy") is None, reason="laspy not installed")
 class TestValidateCopc:
     @patch("laspy.CopcReader.open")
