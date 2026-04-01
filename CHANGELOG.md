@@ -4,6 +4,41 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.1.3] — 2026-04-01
+
+### Added
+
+- **Codecov coverage reporting** — branch coverage uploaded to Codecov on every
+  CI run with 75% minimum threshold enforced. Coverage badge added to README.
+- **Cloud-native geospatial format references** — inline validation examples
+  (rio-cogeo, pdal) in each collection section of the docs, plus links to the
+  CNG Formats Guide, STAC Best Practices, COPC spec, and GeoParquet distribution guide.
+- **Pre-commit hooks** — ruff lint + format enforced locally via `.pre-commit-config.yaml`
+- **CODEOWNERS** — automatic PR review assignment
+- **Makefile** — `make lint`, `test`, `typecheck`, `coverage`, `docs`, `build`, `clean`
+
+### Changed
+
+- **PyPI publishing hardened** — switched to OIDC trusted publishing (removed
+  API token), added TestPyPI staging with smoke test before production publish,
+  gated publish workflow on lint + test passing, added wheel content verification
+  (py.typed, _version.py)
+- **Single-source versioning** — `pyproject.toml` now reads version dynamically
+  from `_version.py` via `[tool.hatch.version]`, eliminating version drift
+- **CI improvements** — pip caching across all workflows, Codecov upload with
+  branch coverage, integration tests now install all optional extras (`.[dev,all]`)
+- **Docs workflow** — path filter added so docs only rebuild when docs, source,
+  notebooks, or mkdocs config change
+- **Broader ruff rules** — added S (security/bandit), PT (pytest), RUF, C4
+  (comprehensions) rule sets with targeted per-file ignores for tests
+- **pytest defaults** — `addopts` with `--strict-markers -ra` and marker filtering
+  configured in `pyproject.toml`
+
+### Fixed
+
+- Operator precedence bug in `validate_s3_bucket()` — chained `and`/`or`
+  now parenthesized correctly (RUF021)
+
 ## [2.1.2] — 2026-03-31
 
 ### Added
