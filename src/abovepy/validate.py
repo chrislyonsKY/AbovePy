@@ -302,70 +302,69 @@ def _validate_copc(source: str) -> ValidationResult:
 
     try:
         reader = laspy.CopcReader.open(source)
+        header = reader.header
+
+        # Check: COPC format (if we get here, laspy confirmed it)
+        checks.append(Check("copc_format", True, "Valid COPC format (spatial index present)"))
+
+        # Check: has CRS
         try:
-            header = reader.header
-
-            # Check: COPC format (if we get here, laspy confirmed it)
-            checks.append(Check("copc_format", True, "Valid COPC format (spatial index present)"))
-
-            # Check: has CRS
-            try:
-                crs_wkt = header.parse_crs().to_wkt()
-                has_crs = bool(crs_wkt)
-            except Exception:
-                has_crs = False
-                crs_wkt = None
-            checks.append(
-                Check(
-                    "has_crs",
-                    has_crs,
-                    "CRS defined" if has_crs else "No CRS in VLR records",
-                    detail=crs_wkt[:80] + "..." if crs_wkt and len(crs_wkt) > 80 else crs_wkt,
-                )
+            crs_wkt = header.parse_crs().to_wkt()
+            has_crs = bool(crs_wkt)
+        except Exception:
+            has_crs = False
+            crs_wkt = None
+        checks.append(
+            Check(
+                "has_crs",
+                has_crs,
+                "CRS defined" if has_crs else "No CRS in VLR records",
+                detail=crs_wkt[:80] + "..." if crs_wkt and len(crs_wkt) > 80 else crs_wkt,
             )
+        )
 
-            # Check: point format
-            point_format = header.point_format.id
-            checks.append(
-                Check(
-                    "point_format",
-                    point_format in (6, 7, 8),
-                    f"Point format {point_format}"
-                    + (
-                        " (standard for COPC)"
-                        if point_format in (6, 7, 8)
-                        else " (unusual for COPC)"
-                    ),
-                    detail=point_format,
-                )
+        # Check: point format
+        point_format = header.point_format.id
+        checks.append(
+            Check(
+                "point_format",
+                point_format in (6, 7, 8),
+                f"Point format {point_format}"
+                + (
+                    " (standard for COPC)"
+                    if point_format in (6, 7, 8)
+                    else " (unusual for COPC)"
+                ),
+                detail=point_format,
             )
+        )
 
-            # Check: point count
-            point_count = header.point_count
-            checks.append(
-                Check(
-                    "point_count",
-                    point_count > 0,
-                    f"{point_count:,} points",
-                    detail=point_count,
-                )
+        # Check: point count
+        point_count = header.point_count
+        checks.append(
+            Check(
+                "point_count",
+                point_count > 0,
+                f"{point_count:,} points",
+                detail=point_count,
             )
+        )
 
-            # Info: spatial bounds
-            mins = header.mins
-            maxs = header.maxs
-            checks.append(
-                Check(
-                    "spatial_bounds",
-                    True,
-                    f"Bounds: X[{mins[0]:.1f}, {maxs[0]:.1f}] "
-                    f"Y[{mins[1]:.1f}, {maxs[1]:.1f}] "
-                    f"Z[{mins[2]:.1f}, {maxs[2]:.1f}]",
-                    detail={"mins": mins.tolist(), "maxs": maxs.tolist()},
-                )
+        # Info: spatial bounds
+        mins = header.mins
+        maxs = header.maxs
+        checks.append(
+            Check(
+                "spatial_bounds",
+                True,
+                f"Bounds: X[{mins[0]:.1f}, {maxs[0]:.1f}] "
+                f"Y[{mins[1]:.1f}, {maxs[1]:.1f}] "
+                f"Z[{mins[2]:.1f}, {maxs[2]:.1f}]",
+                detail={"mins": mins.tolist(), "maxs": maxs.tolist()},
             )
+        )
 
-        finally:
+        if hasattr(reader, "close"):
             reader.close()
 
     except Exception as exc:
