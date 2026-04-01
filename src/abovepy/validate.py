@@ -330,11 +330,7 @@ def _validate_copc(source: str) -> ValidationResult:
                 "point_format",
                 point_format in (6, 7, 8),
                 f"Point format {point_format}"
-                + (
-                    " (standard for COPC)"
-                    if point_format in (6, 7, 8)
-                    else " (unusual for COPC)"
-                ),
+                + (" (standard for COPC)" if point_format in (6, 7, 8) else " (unusual for COPC)"),
                 detail=point_format,
             )
         )
