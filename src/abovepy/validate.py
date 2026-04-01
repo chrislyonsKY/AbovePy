@@ -249,7 +249,7 @@ def _validate_cog_deep(source: str) -> ValidationResult:
     # Add rio-cogeo deep validation
     vsi_path = _open_rasterio_source(source)
     try:
-        is_valid, errors, warnings = cog_validate(vsi_path, quiet=True)  # type: ignore[no-untyped-call]
+        is_valid, errors, warnings = cog_validate(vsi_path, quiet=True)
     except Exception as exc:
         result.checks.append(
             Check(
