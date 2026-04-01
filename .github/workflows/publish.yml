@@ -67,6 +67,7 @@ jobs:
   publish-testpypi:
     needs: build
     runs-on: ubuntu-latest
+    environment: testpypi
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
@@ -98,6 +99,7 @@ jobs:
     needs: smoke-test
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    environment: pypi
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
