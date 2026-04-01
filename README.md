@@ -440,6 +440,14 @@ results = stac_client.search(
 - **[KyFromAbove](https://kyfromabove.ky.gov/)** — Official program site from the Kentucky Division of Geographic Information.
 - **[STAC Browser](https://kygeonet.ky.gov/stac/)** — Browse the KyFromAbove STAC catalog interactively.
 
+### Cloud-Native Geospatial Standards
+
+- **[Cloud-Optimized Geospatial Formats Guide](https://guide.cloudnativegeo.org/)** — Comprehensive reference for COG, COPC, GeoParquet, and other cloud-native formats from the Cloud-Native Geospatial Foundation.
+- **[STAC Best Practices](https://github.com/radiantearth/stac-best-practices/)** — Community conventions for SpatioTemporal Asset Catalogs.
+- **[rio-cogeo](https://cogeotiff.github.io/rio-cogeo/)** — Validate and create Cloud-Optimized GeoTIFFs. Use `rio cogeo validate` to check internal tiling, overviews, and compression.
+- **[COPC Specification](https://copc.io/)** — Cloud-Optimized Point Cloud format spec. Phase 2 and 3 LiDAR in KyFromAbove use this format.
+- **[Distributing GeoParquet](https://github.com/opengeospatial/geoparquet/blob/main/format-specs/distributing-geoparquet.md)** — OGC guidance on partitioning and distributing large geospatial datasets as GeoParquet.
+
 ## Data Source
 
 - **STAC API:** `https://spved5ihrl.execute-api.us-west-2.amazonaws.com/`

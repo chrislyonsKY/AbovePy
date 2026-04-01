@@ -53,6 +53,15 @@ tiles = abovepy.search(county="Fayette", product="ortho_phase3")
 
 Phase 1 files are classic LAZ. Phase 2 and 3 use [COPC](https://copc.io/) (Cloud-Optimized Point Cloud), which supports spatial indexing for efficient bbox reads without downloading full files.
 
+## Format Standards
+
+KyFromAbove data uses cloud-native geospatial formats designed for efficient HTTP range-request access:
+
+- **Cloud-Optimized GeoTIFF (COG)** — DEMs and orthoimagery are stored as COGs with internal tiling and overviews. Validate with [rio-cogeo](https://cogeotiff.github.io/rio-cogeo/): `rio cogeo validate <file.tif>`
+- **Cloud-Optimized Point Cloud (COPC)** — Phase 2/3 LiDAR uses the [COPC spec](https://copc.io/) for spatially indexed partial reads.
+
+For deeper background on these formats, see the [Cloud-Optimized Geospatial Formats Guide](https://guide.cloudnativegeo.org/) and the [STAC Best Practices](https://github.com/radiantearth/stac-best-practices/).
+
 ```python
 tiles = abovepy.search(county="Harlan", product="laz_phase2")
 ```
