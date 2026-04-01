@@ -437,6 +437,33 @@ class SearchResult:
         for _, row in self._gdf.iterrows():
             yield row.to_dict()
 
+    def validate_format(self, sample: int = 5, deep: bool = False) -> list[Any]:
+        """Validate tiles for cloud-native format compliance.
+
+        Spot-checks a sample of tiles from the result set using remote
+        range-request reads. Checks COGs for internal tiling, overviews,
+        CRS, and compression. Checks COPC for spatial index and CRS.
+
+        Parameters
+        ----------
+        sample : int
+            Maximum number of tiles to validate. Default 5.
+            Set to 0 to validate all tiles.
+        deep : bool
+            If True, use rio-cogeo for thorough COG validation.
+
+        Returns
+        -------
+        list[ValidationResult]
+            One result per tile checked.
+        """
+        from abovepy.validate import validate as _validate
+
+        urls = self._gdf["asset_url"].tolist()
+        if sample > 0:
+            urls = urls[:sample]
+        return [_validate(url, deep=deep) for url in urls]
+
     def __repr__(self) -> str:
         est = self.estimate_size()
         return f"SearchResult({self._product.key!r}, {self.count} tile(s), ~{est['total_mb']} MB)"

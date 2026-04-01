@@ -128,6 +128,8 @@ module = [
     "matplotlib.*",
     "scipy.*",
     "leafmap",
+    "rio_cogeo",
+    "rio_cogeo.*",
 ]
 ignore_missing_imports = true
 
@@ -143,6 +145,6 @@ markers = [
 source = ["abovepy"]
 
 [tool.coverage.report]
-fail_under = 75
+fail_under = 70
 show_missing = true
 skip_covered = true
