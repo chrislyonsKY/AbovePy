@@ -6,6 +6,7 @@
   <a href="https://github.com/chrislyonsKY/AbovePy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
   <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
   <a href="https://plugins.qgis.org/plugins/aboveqgis/"><img src="https://img.shields.io/badge/QGIS-AboveQGIS-93b023?style=flat-square&logo=qgis&logoColor=white" alt="QGIS Plugin"></a>
+  <a href="https://codecov.io/gh/chrislyonsKY/AbovePy"><img src="https://img.shields.io/codecov/c/github/chrislyonsKY/AbovePy?style=flat-square&label=coverage" alt="Coverage"></a>
 
 </p>
 

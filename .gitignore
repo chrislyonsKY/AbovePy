@@ -36,3 +36,7 @@ Thumbs.db
 # AI Development
 ai-dev/
 CLAUDE.md
+
+# Local-only planning
+VERSION_STRATEGY.local.md
+

@@ -216,6 +216,6 @@ def validate_s3_bucket(bucket: str) -> str:
     if not _S3_BUCKET_NAME.match(bucket):
         raise ValueError(f"Invalid S3 bucket name: {bucket!r}")
     # Reject IP-address-style names and consecutive dots
-    if ".." in bucket or bucket[0].isdigit() and bucket.count(".") == 3:
+    if ".." in bucket or (bucket[0].isdigit() and bucket.count(".") == 3):
         raise ValueError(f"Suspicious S3 bucket name: {bucket!r}")
     return bucket
