@@ -7,6 +7,7 @@
   <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
   <a href="https://plugins.qgis.org/plugins/aboveqgis/"><img src="https://img.shields.io/badge/QGIS-AboveQGIS-93b023?style=flat-square&logo=qgis&logoColor=white" alt="QGIS Plugin"></a>
   <a href="https://codecov.io/gh/chrislyonsKY/AbovePy"><img src="https://img.shields.io/codecov/c/github/chrislyonsKY/AbovePy?style=flat-square&label=coverage" alt="Coverage"></a>
+  <a href="https://app.codacy.com/gh/chrislyonsKY/AbovePy/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/a79be242ecde4371a7172f61f9ccf80d"/></a>
 
 </p>
 
