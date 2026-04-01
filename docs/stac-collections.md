@@ -12,6 +12,8 @@ All data comes from the [KyFromAbove](https://kyfromabove.ky.gov/) program, mana
 | **Tile Grid** | 5,000 x 5,000 ft, EPSG:3089 |
 | **Native CRS** | EPSG:3089 (Kentucky Single Zone, US feet) |
 
+See [STAC Best Practices](https://github.com/radiantearth/stac-best-practices/) for conventions on catalog structure and item metadata.
+
 ## Digital Elevation Models (DEM)
 
 | Product Key | Collection ID | Resolution | Format | Phase |
@@ -20,10 +22,16 @@ All data comes from the [KyFromAbove](https://kyfromabove.ky.gov/) program, mana
 | `dem_phase2` | `dem-phase2` | 2 ft | Cloud-Optimized GeoTIFF | 2 |
 | `dem_phase3` | `dem-phase3` | 2 ft | Cloud-Optimized GeoTIFF | 3 |
 
-DEMs are bare-earth elevation models derived from LiDAR point clouds. Phase 2 and 3 provide 2-foot resolution across the state.
+DEMs are bare-earth elevation models derived from LiDAR point clouds. Phase 2 and 3 provide 2-foot resolution across the state. All DEM tiles are [Cloud-Optimized GeoTIFFs](https://guide.cloudnativegeo.org/cloud-optimized-geotiffs/intro.html) with internal tiling and overviews for efficient range-request access.
 
 ```python
 tiles = abovepy.search(county="Pike", product="dem_phase3")
+```
+
+Validate a downloaded DEM with [rio-cogeo](https://cogeotiff.github.io/rio-cogeo/):
+
+```bash
+rio cogeo validate data/dem_tile.tif
 ```
 
 ## Orthoimagery
@@ -34,10 +42,16 @@ tiles = abovepy.search(county="Pike", product="dem_phase3")
 | `ortho_phase2` | `orthos-phase2` | 6 in | Cloud-Optimized GeoTIFF | 2 |
 | `ortho_phase3` | `orthos-phase3` | 3 in | Cloud-Optimized GeoTIFF | 3 |
 
-RGB aerial photography. Phase 3 provides 3-inch resolution — enough to see individual cars and sidewalks.
+RGB aerial photography. Phase 3 provides 3-inch resolution — enough to see individual cars and sidewalks. Ortho tiles are [Cloud-Optimized GeoTIFFs](https://guide.cloudnativegeo.org/cloud-optimized-geotiffs/intro.html) with internal tiling and overviews.
 
 ```python
 tiles = abovepy.search(county="Fayette", product="ortho_phase3")
+```
+
+Validate a downloaded ortho with [rio-cogeo](https://cogeotiff.github.io/rio-cogeo/):
+
+```bash
+rio cogeo validate data/ortho_tile.tif
 ```
 
 ## LiDAR Point Clouds
@@ -51,10 +65,16 @@ tiles = abovepy.search(county="Fayette", product="ortho_phase3")
 !!! note
     LiDAR support requires the `lidar` extra: `pip install abovepy[lidar]`
 
-Phase 1 files are classic LAZ. Phase 2 and 3 use [COPC](https://copc.io/) (Cloud-Optimized Point Cloud), which supports spatial indexing for efficient bbox reads without downloading full files.
+Phase 1 files are classic LAZ. Phase 2 and 3 use [COPC](https://copc.io/) (Cloud-Optimized Point Cloud), which supports spatial indexing for efficient bbox reads without downloading full files. See the [CNG guide on COPC](https://guide.cloudnativegeo.org/cloud-optimized-point-clouds/intro.html) for background on the format.
 
 ```python
 tiles = abovepy.search(county="Harlan", product="laz_phase2")
+```
+
+Validate a downloaded COPC file with `pdal`:
+
+```bash
+pdal info data/lidar_tile.copc.laz --metadata
 ```
 
 ## CRS Details

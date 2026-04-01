@@ -6,6 +6,7 @@
   <a href="https://github.com/chrislyonsKY/AbovePy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="License"></a>
   <a href="https://chrislyonsKY.github.io/AbovePy/"><img src="https://img.shields.io/badge/docs-mkdocs-8B5CF6?style=flat-square" alt="Docs"></a>
   <a href="https://plugins.qgis.org/plugins/aboveqgis/"><img src="https://img.shields.io/badge/QGIS-AboveQGIS-93b023?style=flat-square&logo=qgis&logoColor=white" alt="QGIS Plugin"></a>
+  <a href="https://codecov.io/gh/chrislyonsKY/AbovePy"><img src="https://img.shields.io/codecov/c/github/chrislyonsKY/AbovePy?style=flat-square&label=coverage" alt="Coverage"></a>
 
 </p>
 
@@ -438,6 +439,14 @@ results = stac_client.search(
 - **[kyfromabove-gisconference2025-workshop](https://github.com/ianhorn/kyfromabove-gisconference2025-workshop)** — 2025 KY GIS Conference workshop covering STAC API access from Python, ArcGIS Pro, and QGIS. Includes building height estimation from COPC LiDAR, DEM change detection, and MosaicJSON workflows.
 - **[KyFromAbove](https://kyfromabove.ky.gov/)** — Official program site from the Kentucky Division of Geographic Information.
 - **[STAC Browser](https://kygeonet.ky.gov/stac/)** — Browse the KyFromAbove STAC catalog interactively.
+
+### Cloud-Native Geospatial Standards
+
+- **[Cloud-Optimized Geospatial Formats Guide](https://guide.cloudnativegeo.org/)** — Comprehensive reference for COG, COPC, GeoParquet, and other cloud-native formats from the Cloud-Native Geospatial Foundation.
+- **[STAC Best Practices](https://github.com/radiantearth/stac-best-practices/)** — Community conventions for SpatioTemporal Asset Catalogs.
+- **[rio-cogeo](https://cogeotiff.github.io/rio-cogeo/)** — Validate and create Cloud-Optimized GeoTIFFs. Use `rio cogeo validate` to check internal tiling, overviews, and compression.
+- **[COPC Specification](https://copc.io/)** — Cloud-Optimized Point Cloud format spec. Phase 2 and 3 LiDAR in KyFromAbove use this format.
+- **[Distributing GeoParquet](https://github.com/opengeospatial/geoparquet/blob/main/format-specs/distributing-geoparquet.md)** — OGC guidance on partitioning and distributing large geospatial datasets as GeoParquet.
 
 ## Data Source
 

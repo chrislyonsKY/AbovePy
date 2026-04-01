@@ -8,7 +8,7 @@ from abovepy.mosaics import county_mosaic_url, list_county_mosaics
 class TestCountyMosaicUrl:
     def test_mrsid_url_structure(self):
         url = county_mosaic_url("Franklin")
-        assert "kyfromabove.s3.us-west-2.amazonaws.com" in url
+        assert url.startswith("https://kyfromabove.s3.us-west-2.amazonaws.com/")
         assert "MrSIDs" in url
         assert "Franklin" in url
         assert url.endswith(".sid")

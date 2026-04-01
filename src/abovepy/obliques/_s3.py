@@ -62,7 +62,7 @@ def list_oblique_seasons() -> list[str]:
     )
     resp.raise_for_status()
 
-    tree = ET.fromstring(resp.text)
+    tree = ET.fromstring(resp.text)  # noqa: S314 — trusted AWS S3 ListObjects response
     seasons = []
     for prefix_el in tree.findall(".//s3:CommonPrefixes/s3:Prefix", _S3_NS):
         text = prefix_el.text or ""
@@ -129,7 +129,7 @@ def search_obliques(
     )
     resp.raise_for_status()
 
-    tree = ET.fromstring(resp.text)
+    tree = ET.fromstring(resp.text)  # noqa: S314 — trusted AWS S3 ListObjects response
     results: list[dict[str, str]] = []
 
     for key_el in tree.findall(".//s3:Contents/s3:Key", _S3_NS):

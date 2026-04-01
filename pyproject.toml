@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "abovepy"
-version = "2.1.2"
+dynamic = ["version"]
 description = "KyFromAbove LiDAR, DEM, and orthoimagery data access for Python"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -69,6 +69,9 @@ Repository = "https://github.com/chrislyonsKY/abovepy"
 Issues = "https://github.com/chrislyonsKY/abovepy/issues"
 Changelog = "https://github.com/chrislyonsKY/abovepy/blob/main/CHANGELOG.md"
 
+[tool.hatch.version]
+path = "src/abovepy/_version.py"
+
 [tool.hatch.build.targets.sdist]
 include = ["src/abovepy"]
 
@@ -80,7 +83,22 @@ target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "S", "PT", "RUF", "C4"]
+ignore = [
+    "RUF001",  # ambiguous unicode in strings (intentional: en dash in ranges)
+    "RUF003",  # ambiguous unicode in comments (intentional: × in dimensions)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101",   # assert is expected in tests
+    "S108",   # hardcoded /tmp paths in mocks are fine
+    "S301",   # pickle roundtrip in exception tests is intentional
+    "S314",   # XML parsing in export tests uses locally generated data
+    "S603",   # subprocess with hardcoded args in CLI tests
+    "PT011",  # overly strict pytest.raises match requirements
+    "RUF059", # unused unpack vars common in (data, profile) test patterns
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["abovepy"]
@@ -115,7 +133,16 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not integration and not slow' --strict-markers -ra"
 markers = [
     "integration: tests requiring network access",
     "slow: full workflow tests",
 ]
+
+[tool.coverage.run]
+source = ["abovepy"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
+skip_covered = true
