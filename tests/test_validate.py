@@ -1,6 +1,9 @@
 """Tests for cloud-native format validation."""
 
+import importlib
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from abovepy.validate import (
     Check,
@@ -135,6 +138,9 @@ class TestValidateCog:
         assert _open_rasterio_source("/local/file.tif") == "/local/file.tif"
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("laspy") is None, reason="laspy not installed"
+)
 class TestValidateCopc:
     @patch("laspy.CopcReader.open")
     def test_valid_copc(self, mock_open):
@@ -166,6 +172,9 @@ class TestValidateCopc:
         assert result.format == "LAZ"
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("laspy") is None, reason="laspy not installed"
+)
 class TestValidatePointcloud:
     @patch("laspy.open")
     def test_plain_laz(self, mock_open):
