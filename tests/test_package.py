@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import pytest
+import geopandas as gpd
+from shapely.geometry import box
 from unittest.mock import MagicMock, patch
 
 from abovepy._exceptions import AbovepyError, PackageError
@@ -210,3 +213,98 @@ class TestPreview:
             result = _generate_preview(mock_result, output)
 
         assert result is None
+
+
+class TestBuildPackage:
+    def _make_search_result(self, tmp_path):
+        """Create a mock SearchResult with pre-downloaded tiles."""
+        from abovepy.products import get_product
+
+        product = get_product("dem_phase3")
+
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": ["N123", "N124"],
+                "product": ["dem_phase3", "dem_phase3"],
+                "datetime": ["2023-01-01", "2023-01-02"],
+                "asset_url": [
+                    "https://example.com/N123.tif",
+                    "https://example.com/N124.tif",
+                ],
+                "collection_id": ["dem-phase3", "dem-phase3"],
+            },
+            geometry=[
+                box(-85.0, 38.0, -84.9, 38.1),
+                box(-84.9, 38.0, -84.8, 38.1),
+            ],
+            crs="EPSG:4326",
+        )
+
+        result = MagicMock()
+        result.tiles = gdf
+        result.product = product
+        result.query_params = {"county": "Franklin", "product": "dem_phase3"}
+        result.bbox = (-85.0, 38.0, -84.8, 38.1)
+        result.empty = False
+        result.provenance.return_value = {"product": "dem_phase3", "tile_count": 2}
+        return result
+
+    @patch("abovepy.package._generate_preview", return_value=None)
+    @patch("abovepy.package.download_tiles")
+    def test_build_package_structure(self, mock_download, mock_preview, tmp_path):
+        from abovepy.package import build_package
+
+        data_dir = tmp_path / "output" / "data"
+        data_dir.mkdir(parents=True)
+        tile1 = data_dir / "N123.tif"
+        tile2 = data_dir / "N124.tif"
+        tile1.write_bytes(b"raster1")
+        tile2.write_bytes(b"raster2")
+        mock_download.return_value = [tile1, tile2]
+
+        result = self._make_search_result(tmp_path)
+        output_dir = tmp_path / "output"
+
+        pkg = build_package(result, output_dir, include_preview=False, qgis_project=False)
+
+        assert pkg.tile_count == 2
+        assert (output_dir / "manifest.json").exists()
+        assert (output_dir / "provenance.json").exists()
+        assert (output_dir / "DISCLAIMER.txt").exists()
+        assert (output_dir / "data" / "footprints.gpkg").exists()
+
+        manifest = json.loads((output_dir / "manifest.json").read_text())
+        assert manifest["tile_count"] == 2
+        assert manifest["product"] == "dem_phase3"
+        assert len(manifest["files"]) == 2
+
+    @patch("abovepy.package._generate_preview", return_value=None)
+    @patch("abovepy.package.download_tiles")
+    def test_build_package_no_checksums(self, mock_download, mock_preview, tmp_path):
+        from abovepy.package import build_package
+
+        data_dir = tmp_path / "output" / "data"
+        data_dir.mkdir(parents=True)
+        tile = data_dir / "N123.tif"
+        tile.write_bytes(b"raster1")
+        mock_download.return_value = [tile]
+
+        result = self._make_search_result(tmp_path)
+        output_dir = tmp_path / "output"
+
+        pkg = build_package(result, output_dir, checksums=False, include_preview=False, qgis_project=False)
+
+        manifest = json.loads((output_dir / "manifest.json").read_text())
+        assert manifest["files"][0]["sha256"] is None
+
+    @patch("abovepy.package._generate_preview", return_value=None)
+    @patch("abovepy.package.download_tiles")
+    def test_empty_result_raises(self, mock_download, mock_preview, tmp_path):
+        from abovepy._exceptions import PackageError
+        from abovepy.package import build_package
+
+        result = MagicMock()
+        result.empty = True
+
+        with pytest.raises(PackageError, match="No tiles"):
+            build_package(result, tmp_path / "out")

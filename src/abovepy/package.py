@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import hashlib
 import httpx
+import json
 import logging
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -192,3 +194,150 @@ def _generate_preview(
     except Exception:
         logger.warning("Preview generation failed (both TiTiler and matplotlib)")
         return None
+
+
+# Module-level import so tests can patch abovepy.package.download_tiles
+from abovepy._download import download_tiles  # noqa: E402
+
+
+def build_package(
+    search_result: object,
+    output_dir: str | Path,
+    clip_bbox: tuple[float, float, float, float] | None = None,
+    include_preview: bool = True,
+    qgis_project: bool = True,
+    checksums: bool = True,
+    overwrite: bool = False,
+    max_workers: int = 4,
+) -> Package:
+    """Build a deliverable package from a SearchResult."""
+    from abovepy._exceptions import PackageError
+
+    output_dir = Path(output_dir)
+
+    if search_result.empty:  # type: ignore[attr-defined]
+        raise PackageError("No tiles to package")
+
+    if output_dir.exists() and not overwrite:
+        if (output_dir / "manifest.json").exists():
+            raise PackageError(
+                f"Output directory already contains a package: {output_dir}. "
+                "Use overwrite=True to replace."
+            )
+
+    data_dir = output_dir / "data"
+    styles_dir = output_dir / "styles"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    styles_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Download tiles
+    tiles_gdf = search_result.tiles  # type: ignore[attr-defined]
+    downloaded = download_tiles(
+        tiles_gdf,
+        output_dir=data_dir,
+        overwrite=overwrite,
+        max_workers=max_workers,
+    )
+
+    # 2. Build footprints GeoPackage
+    from abovepy.qgis import _build_footprints_gpkg
+
+    footprints_path = data_dir / "footprints.gpkg"
+    _build_footprints_gpkg(tiles_gdf, footprints_path)
+
+    # 3. Compute checksums
+    file_checksums: dict[str, str] = {}
+    if checksums and downloaded:
+        file_checksums = _compute_checksums(downloaded, base_dir=output_dir, max_workers=max_workers)
+
+    # 4. Generate preview
+    preview_path = output_dir / "preview.png"
+    if include_preview:
+        _generate_preview(search_result, preview_path)
+
+    # 5. Build and write manifest
+    product = search_result.product  # type: ignore[attr-defined]
+    query_params = search_result.query_params  # type: ignore[attr-defined]
+    bbox = search_result.bbox  # type: ignore[attr-defined]
+
+    from shapely.ops import unary_union
+
+    aoi_geom = unary_union(tiles_gdf.geometry)
+    aoi_wkt = aoi_geom.wkt
+
+    acquisition_period = (
+        f"{product.acquisition_start}-{product.acquisition_end}"
+        if product.acquisition_start
+        else "unknown"
+    )
+
+    manifest = _build_manifest(
+        output_dir=output_dir,
+        data_files=downloaded,
+        checksums=file_checksums,
+        product_key=product.key,
+        display_name=product.display_name,
+        crs=product.native_crs or "EPSG:3089",
+        aoi_bbox=bbox,
+        aoi_wkt=aoi_wkt,
+        query_params=query_params,
+        acquisition_period=acquisition_period,
+    )
+    (output_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, default=str), encoding="utf-8"
+    )
+
+    # 6. Write provenance
+    provenance = search_result.provenance()  # type: ignore[attr-defined]
+    (output_dir / "provenance.json").write_text(
+        json.dumps(provenance, indent=2, default=str), encoding="utf-8"
+    )
+
+    # 7. Write DISCLAIMER
+    disclaimer = _render_disclaimer(
+        product_display_name=product.display_name,
+        tile_count=len(downloaded),
+    )
+    (output_dir / "DISCLAIMER.txt").write_text(disclaimer, encoding="utf-8")
+
+    # 8. Copy style files
+    templates_dir = resources.files("abovepy.templates")
+    for qml_name in ["dem_hillshade.qml", "ortho_rgb.qml", "footprints_outline.qml"]:
+        qml_source = templates_dir.joinpath(qml_name)
+        if qml_source.is_file():  # type: ignore[union-attr]
+            (styles_dir / qml_name).write_text(
+                qml_source.read_text(encoding="utf-8"), encoding="utf-8"  # type: ignore[union-attr]
+            )
+
+    # 9. Generate QGIS project
+    has_qgis = False
+    if qgis_project:
+        try:
+            from abovepy.qgis import generate_project
+            from abovepy.utils.crs import transform_bbox
+
+            extent_3089 = transform_bbox(bbox, "EPSG:4326", "EPSG:3089")
+
+            generate_project(
+                package_dir=output_dir,
+                tiles=downloaded,
+                footprints_path=footprints_path,
+                product=product,
+                extent=extent_3089,
+                styles_dir=styles_dir,
+            )
+            has_qgis = True
+        except Exception:
+            logger.warning("QGIS project generation failed")
+
+    all_files = sorted(f for f in output_dir.rglob("*") if f.is_file())
+    total_bytes = sum(f.stat().st_size for f in downloaded) if downloaded else 0
+
+    return Package(
+        output_dir=output_dir,
+        files=all_files,
+        manifest=manifest,
+        tile_count=len(downloaded),
+        total_size_mb=round(total_bytes / (1024 * 1024), 1),
+        has_qgis_project=has_qgis,
+    )
