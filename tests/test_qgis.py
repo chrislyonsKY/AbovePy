@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import geopandas as gpd
@@ -79,3 +80,92 @@ class TestFootprintsGpkg:
 
         layers = _list_layers(out)
         assert "tiles" in layers
+
+
+class TestGenerateProject:
+    def test_xml_fallback_creates_file(self, tmp_path):
+        from abovepy.qgis import generate_project
+        from abovepy.products import get_product
+
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        tile = data_dir / "N123_dem_phase3.tif"
+        tile.write_bytes(b"fake")
+
+        footprints = data_dir / "footprints.gpkg"
+        footprints.write_bytes(b"fake")
+
+        styles_dir = tmp_path / "styles"
+        styles_dir.mkdir()
+
+        product = get_product("dem_phase3")
+        result = generate_project(
+            package_dir=tmp_path,
+            tiles=[tile],
+            footprints_path=footprints,
+            product=product,
+            extent=(1600000.0, 200000.0, 1700000.0, 300000.0),
+            styles_dir=styles_dir,
+        )
+
+        assert result.exists()
+        assert result.suffix == ".qgs"
+
+    def test_xml_is_well_formed(self, tmp_path):
+        from abovepy.qgis import generate_project
+        from abovepy.products import get_product
+
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        tile = data_dir / "tile.tif"
+        tile.write_bytes(b"fake")
+
+        footprints = data_dir / "footprints.gpkg"
+        footprints.write_bytes(b"fake")
+
+        styles_dir = tmp_path / "styles"
+        styles_dir.mkdir()
+
+        product = get_product("dem_phase3")
+        result = generate_project(
+            package_dir=tmp_path,
+            tiles=[tile],
+            footprints_path=footprints,
+            product=product,
+            extent=(1600000.0, 200000.0, 1700000.0, 300000.0),
+            styles_dir=styles_dir,
+        )
+
+        tree = ET.parse(result)
+        root = tree.getroot()
+        assert root.tag == "qgis"
+
+    def test_xml_contains_layers(self, tmp_path):
+        from abovepy.qgis import generate_project
+        from abovepy.products import get_product
+
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        for name in ["a.tif", "b.tif"]:
+            (data_dir / name).write_bytes(b"fake")
+
+        footprints = data_dir / "footprints.gpkg"
+        footprints.write_bytes(b"fake")
+
+        styles_dir = tmp_path / "styles"
+        styles_dir.mkdir()
+
+        product = get_product("dem_phase3")
+        result = generate_project(
+            package_dir=tmp_path,
+            tiles=[data_dir / "a.tif", data_dir / "b.tif"],
+            footprints_path=footprints,
+            product=product,
+            extent=(1600000.0, 200000.0, 1700000.0, 300000.0),
+            styles_dir=styles_dir,
+        )
+
+        content = result.read_text()
+        assert "a.tif" in content
+        assert "b.tif" in content
+        assert "footprints.gpkg" in content
