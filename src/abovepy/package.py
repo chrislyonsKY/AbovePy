@@ -7,6 +7,7 @@ checksums, provenance metadata, preview image, and optional QGIS project.
 from __future__ import annotations
 
 import hashlib
+import httpx
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -134,3 +135,60 @@ def _build_manifest(
         "source_program": "KyFromAbove",
         "files": files,
     }
+
+
+def _generate_preview(
+    search_result: object,
+    output_path: Path,
+    width: int = 1024,
+    height: int = 1024,
+) -> Path | None:
+    """Generate a preview image. TiTiler first, then matplotlib fallback.
+
+    Returns path to written file, or None if preview could not be generated.
+    """
+    # Try TiTiler
+    try:
+        from abovepy.viz import preview_url
+
+        url = preview_url(
+            product=search_result.product.key,  # type: ignore[attr-defined]
+            bbox=search_result.bbox,  # type: ignore[attr-defined]
+            width=width,
+            height=height,
+        )
+        resp = httpx.get(url, timeout=30, follow_redirects=True)
+        if resp.status_code == 200 and len(resp.content) > 0:
+            output_path.write_bytes(resp.content)
+            return output_path
+    except Exception:
+        logger.debug("TiTiler preview failed, trying matplotlib fallback")
+
+    # Matplotlib fallback
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import rasterio
+
+        tiles_gdf = search_result.tiles  # type: ignore[attr-defined]
+        first_url = tiles_gdf.iloc[0]["asset_url"]
+
+        with rasterio.open(first_url) as src:
+            data = src.read()
+            profile = dict(src.profile)
+
+        product_type = search_result.product.product_type.value  # type: ignore[attr-defined]
+        if product_type == "dem":
+            from abovepy.terrain import hillshade
+            hs, _ = hillshade(data, profile)
+            plt.imsave(str(output_path), hs[0], cmap="gray")
+        else:
+            rgb = np.moveaxis(data[:3], 0, -1)
+            plt.imsave(str(output_path), rgb)
+
+        return output_path
+    except Exception:
+        logger.warning("Preview generation failed (both TiTiler and matplotlib)")
+        return None

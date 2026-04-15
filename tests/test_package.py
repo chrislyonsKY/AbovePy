@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from unittest.mock import MagicMock, patch
 
 from abovepy._exceptions import AbovepyError, PackageError
 
@@ -164,3 +165,48 @@ class TestManifest:
         )
 
         assert manifest["files"][0]["sha256"] is None
+
+
+class TestPreview:
+    def test_preview_titiler_success(self, tmp_path):
+        from abovepy.package import _generate_preview
+
+        mock_result = MagicMock()
+        mock_result.product = MagicMock()
+        mock_result.product.key = "dem_phase3"
+        mock_result.product.product_type = MagicMock()
+        mock_result.product.product_type.value = "dem"
+        mock_result.bbox = (-85.0, 38.0, -84.0, 39.0)
+
+        fake_png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
+        output = tmp_path / "preview.png"
+
+        with patch("abovepy.package.httpx") as mock_httpx:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.content = fake_png
+            mock_httpx.get.return_value = mock_resp
+
+            result = _generate_preview(mock_result, output)
+
+        assert result == output
+        assert output.exists()
+
+    def test_preview_titiler_failure_skips(self, tmp_path):
+        from abovepy.package import _generate_preview
+
+        mock_result = MagicMock()
+        mock_result.product = MagicMock()
+        mock_result.product.key = "dem_phase3"
+        mock_result.product.product_type = MagicMock()
+        mock_result.product.product_type.value = "dem"
+        mock_result.bbox = (-85.0, 38.0, -84.0, 39.0)
+
+        output = tmp_path / "preview.png"
+
+        with patch("abovepy.package.httpx") as mock_httpx:
+            mock_httpx.get.side_effect = Exception("connection failed")
+
+            result = _generate_preview(mock_result, output)
+
+        assert result is None
