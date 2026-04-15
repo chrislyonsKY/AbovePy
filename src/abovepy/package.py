@@ -7,15 +7,15 @@ checksums, provenance metadata, preview image, and optional QGIS project.
 from __future__ import annotations
 
 import hashlib
-import httpx
 import json
 import logging
-import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib import resources
 from pathlib import Path
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +65,7 @@ def _compute_checksums(
 
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = {
-            pool.submit(_sha256_file, f): f.relative_to(base_dir).as_posix()
-            for f in files
-        }
+        futures = {pool.submit(_sha256_file, f): f.relative_to(base_dir).as_posix() for f in files}
         for future in as_completed(futures):
             rel_path = futures[future]
             try:
@@ -85,12 +82,10 @@ def _render_disclaimer(
 ) -> str:
     """Render the DISCLAIMER.txt template with package metadata."""
     template_text = (
-        resources.files("abovepy.templates")
-        .joinpath("DISCLAIMER.txt")
-        .read_text(encoding="utf-8")
+        resources.files("abovepy.templates").joinpath("DISCLAIMER.txt").read_text(encoding="utf-8")
     )
     return template_text.format(
-        timestamp=datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        timestamp=datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         product_display_name=product_display_name,
         tile_count=tile_count,
     )
@@ -114,17 +109,19 @@ def _build_manifest(
     files = []
     for f in data_files:
         rel = f.relative_to(output_dir).as_posix()
-        files.append({
-            "path": rel,
-            "sha256": checksums.get(rel) or None,
-            "size_bytes": f.stat().st_size,
-        })
+        files.append(
+            {
+                "path": rel,
+                "sha256": checksums.get(rel) or None,
+                "size_bytes": f.stat().st_size,
+            }
+        )
 
     total_bytes = sum(entry["size_bytes"] for entry in files)
 
     return {
         "abovepy_version": __version__,
-        "created_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "created_at": datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "product": product_key,
         "display_name": display_name,
         "crs": crs,
@@ -169,6 +166,7 @@ def _generate_preview(
     # Matplotlib fallback
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         import numpy as np
@@ -184,6 +182,7 @@ def _generate_preview(
         product_type = search_result.product.product_type.value  # type: ignore[attr-defined]
         if product_type == "dem":
             from abovepy.terrain import hillshade
+
             hs, _ = hillshade(data, profile)
             plt.imsave(str(output_path), hs[0], cmap="gray")
         else:
@@ -218,12 +217,11 @@ def build_package(
     if search_result.empty:  # type: ignore[attr-defined]
         raise PackageError("No tiles to package")
 
-    if output_dir.exists() and not overwrite:
-        if (output_dir / "manifest.json").exists():
-            raise PackageError(
-                f"Output directory already contains a package: {output_dir}. "
-                "Use overwrite=True to replace."
-            )
+    if output_dir.exists() and not overwrite and (output_dir / "manifest.json").exists():
+        raise PackageError(
+            f"Output directory already contains a package: {output_dir}. "
+            "Use overwrite=True to replace."
+        )
 
     data_dir = output_dir / "data"
     styles_dir = output_dir / "styles"
@@ -248,7 +246,9 @@ def build_package(
     # 3. Compute checksums
     file_checksums: dict[str, str] = {}
     if checksums and downloaded:
-        file_checksums = _compute_checksums(downloaded, base_dir=output_dir, max_workers=max_workers)
+        file_checksums = _compute_checksums(
+            downloaded, base_dir=output_dir, max_workers=max_workers
+        )
 
     # 4. Generate preview
     preview_path = output_dir / "preview.png"
@@ -306,7 +306,8 @@ def build_package(
         qml_source = templates_dir.joinpath(qml_name)
         if qml_source.is_file():  # type: ignore[union-attr]
             (styles_dir / qml_name).write_text(
-                qml_source.read_text(encoding="utf-8"), encoding="utf-8"  # type: ignore[union-attr]
+                qml_source.read_text(encoding="utf-8"),
+                encoding="utf-8",  # type: ignore[union-attr]
             )
 
     # 9. Generate QGIS project

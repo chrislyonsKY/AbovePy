@@ -41,7 +41,8 @@ def _build_footprints_gpkg(
     Path
         Path to written .gpkg file.
     """
-    cols = [c for c in ["tile_id", "product", "datetime", "asset_url", "geometry"] if c in gdf.columns]
+    keep = ["tile_id", "product", "datetime", "asset_url", "geometry"]
+    cols = [c for c in keep if c in gdf.columns]
     out_gdf = gdf[cols].copy()
     out_gdf = out_gdf.to_crs(target_crs)
     out_gdf.to_file(output_path, driver="GPKG", layer="tiles")
@@ -101,7 +102,8 @@ def _generate_pyqgis(
         if layer.isValid():
             project.addMapLayer(layer, False)
             data_group.addLayer(layer)
-            style_name = "dem_hillshade.qml" if product.product_type.value == "dem" else "ortho_rgb.qml"
+            is_dem = product.product_type.value == "dem"
+            style_name = "dem_hillshade.qml" if is_dem else "ortho_rgb.qml"
             style_path = styles_dir / style_name
             if style_path.exists():
                 layer.loadNamedStyle(str(style_path))
@@ -133,9 +135,7 @@ def _generate_xml(
 ) -> Path:
     """Generate project using XML template substitution."""
     template_text = (
-        resources.files("abovepy.templates")
-        .joinpath("project.qgs")
-        .read_text(encoding="utf-8")
+        resources.files("abovepy.templates").joinpath("project.qgs").read_text(encoding="utf-8")
     )
 
     crs = product.native_crs or "EPSG:3089"
@@ -147,11 +147,11 @@ def _generate_xml(
         rel_path = f"./data/{tile_path.name}"
         raster_layers.append(
             f'    <maplayer type="raster" name="{tile_path.stem}">\n'
-            f'      <id>{layer_id}</id>\n'
-            f'      <datasource>{rel_path}</datasource>\n'
-            f'      <provider>gdal</provider>\n'
-            f'      <srs><spatialrefsys><authid>{crs}</authid></spatialrefsys></srs>\n'
-            f'    </maplayer>'
+            f"      <id>{layer_id}</id>\n"
+            f"      <datasource>{rel_path}</datasource>\n"
+            f"      <provider>gdal</provider>\n"
+            f"      <srs><spatialrefsys><authid>{crs}</authid></spatialrefsys></srs>\n"
+            f"    </maplayer>"
         )
         raster_tree.append(
             f'      <layer-tree-layer id="{layer_id}" name="{tile_path.stem}" '
@@ -162,11 +162,11 @@ def _generate_xml(
     fp_rel = f"./data/{footprints_path.name}"
     vector_layers = (
         f'    <maplayer type="vector" name="footprints">\n'
-        f'      <id>{fp_id}</id>\n'
-        f'      <datasource>{fp_rel}|layername=tiles</datasource>\n'
-        f'      <provider>ogr</provider>\n'
-        f'      <srs><spatialrefsys><authid>{crs}</authid></spatialrefsys></srs>\n'
-        f'    </maplayer>'
+        f"      <id>{fp_id}</id>\n"
+        f"      <datasource>{fp_rel}|layername=tiles</datasource>\n"
+        f"      <provider>ogr</provider>\n"
+        f"      <srs><spatialrefsys><authid>{crs}</authid></spatialrefsys></srs>\n"
+        f"    </maplayer>"
     )
     vector_tree = (
         f'      <layer-tree-layer id="{fp_id}" name="footprints" '
