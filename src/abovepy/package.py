@@ -10,6 +10,8 @@ import hashlib
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from importlib import resources
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -72,3 +74,20 @@ def _compute_checksums(
                 logger.warning("Failed to checksum %s", rel_path)
                 results[rel_path] = ""
     return results
+
+
+def _render_disclaimer(
+    product_display_name: str,
+    tile_count: int,
+) -> str:
+    """Render the DISCLAIMER.txt template with package metadata."""
+    template_text = (
+        resources.files("abovepy.templates")
+        .joinpath("DISCLAIMER.txt")
+        .read_text(encoding="utf-8")
+    )
+    return template_text.format(
+        timestamp=datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        product_display_name=product_display_name,
+        tile_count=tile_count,
+    )

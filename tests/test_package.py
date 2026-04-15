@@ -82,3 +82,29 @@ class TestChecksums:
 
         result = _compute_checksums([], base_dir=tmp_path)
         assert result == {}
+
+
+class TestDisclaimer:
+    def test_render_disclaimer(self):
+        from abovepy.package import _render_disclaimer
+
+        text = _render_disclaimer(
+            product_display_name="DEM Phase 3 (2ft)",
+            tile_count=42,
+        )
+        assert "KyFromAbove" in text
+        assert "DEM Phase 3 (2ft)" in text
+        assert "42" in text
+        assert "Generated:" in text
+
+    def test_write_disclaimer(self, tmp_path):
+        from abovepy.package import _render_disclaimer
+
+        text = _render_disclaimer(
+            product_display_name="Ortho Phase 3 (1ft)",
+            tile_count=10,
+        )
+        out = tmp_path / "DISCLAIMER.txt"
+        out.write_text(text)
+        assert out.exists()
+        assert "Ortho Phase 3 (1ft)" in out.read_text()
