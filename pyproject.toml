@@ -78,6 +78,9 @@ include = ["src/abovepy"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/abovepy"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/abovepy/templates" = "abovepy/templates"
+
 [tool.ruff]
 target-version = "py311"
 line-length = 100
@@ -109,7 +112,7 @@ strict = true
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
-module = ["abovepy.terrain", "abovepy.titiler._pgstac", "abovepy.viz._urls"]
+module = ["abovepy.terrain", "abovepy.titiler._pgstac", "abovepy.viz._urls", "abovepy.package", "abovepy.qgis"]
 disable_error_code = ["no-any-return", "arg-type", "operator", "attr-defined", "var-annotated"]
 
 [[tool.mypy.overrides]]
@@ -130,6 +133,7 @@ module = [
     "leafmap",
     "rio_cogeo",
     "rio_cogeo.*",
+    "qgis.*",
 ]
 ignore_missing_imports = true
 

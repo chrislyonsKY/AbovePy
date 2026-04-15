@@ -53,3 +53,7 @@ class BboxError(AbovepyError, ValueError):
 
 class AnalysisError(AbovepyError):
     """Raised when a terrain/analysis computation fails."""
+
+
+class PackageError(AbovepyError):
+    """Raised when deliverable packaging fails."""

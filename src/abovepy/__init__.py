@@ -32,6 +32,7 @@ from abovepy._exceptions import (
     CountyError,
     DownloadError,
     MosaicError,
+    PackageError,
     ProductError,
     ReadError,
     SearchError,
@@ -40,6 +41,7 @@ from abovepy._version import __version__
 from abovepy.client import KyFromAboveClient
 from abovepy.mosaics import county_mosaic_url
 from abovepy.obliques import list_oblique_seasons, search_obliques
+from abovepy.package import Package
 from abovepy.products import Product, ProductType, list_products
 from abovepy.result import SearchResult
 from abovepy.stac import clear_cache
@@ -255,6 +257,8 @@ __all__ = [
     "DownloadError",
     "KyFromAboveClient",
     "MosaicError",
+    "Package",
+    "PackageError",
     "Product",
     "ProductError",
     "ProductType",

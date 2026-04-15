@@ -1,6 +1,6 @@
 """CLI for abovepy — ``abovepy <subcommand>`` or ``python -m abovepy <subcommand>``.
 
-Subcommands: search, download, mosaic, info, products, tile-url, preview, estimate.
+Subcommands: search, download, mosaic, info, products, tile-url, preview, estimate, package.
 """
 
 from __future__ import annotations
@@ -125,6 +125,25 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_area_args(p_estimate)
     _add_format_arg(p_estimate, choices=["table", "json"])
     p_estimate.set_defaults(func=_cmd_estimate)
+
+    # --- package ---
+    p_package = subparsers.add_parser("package", help="Package tiles into a delivery folder")
+    _add_product_arg(p_package)
+    _add_area_args(p_package)
+    p_package.add_argument("--max-items", type=int, default=500, help="Max tiles (default: 500)")
+    p_package.add_argument("--output-dir", "-o", required=True, help="Output directory")
+    p_package.add_argument(
+        "--no-preview", action="store_true", default=False, help="Skip preview image"
+    )
+    p_package.add_argument(
+        "--no-qgis", action="store_true", default=False, help="Skip QGIS project"
+    )
+    p_package.add_argument(
+        "--no-checksums", action="store_true", default=False, help="Skip checksums"
+    )
+    p_package.add_argument("--overwrite", action="store_true", help="Overwrite existing output")
+    p_package.add_argument("--workers", type=int, default=4, help="Concurrent workers (default: 4)")
+    p_package.set_defaults(func=_cmd_package)
 
     return parser
 
@@ -352,6 +371,52 @@ def _cmd_estimate(args: argparse.Namespace) -> None:
         print(f"Tiles:      {est['tile_count']}")
         print(f"Avg size:   {est['avg_tile_mb']} MB/tile")
         print(f"Total est:  {est['total_mb']} MB")
+
+
+def _cmd_package(args: argparse.Namespace) -> None:
+    """Execute the 'package' subcommand."""
+    import abovepy
+
+    bbox = _parse_bbox(args.bbox) if args.bbox else None
+    point = _parse_point(args.point) if args.point else None
+    buffer_feet = getattr(args, "buffer_feet", None)
+
+    print("Searching for tiles...", file=sys.stderr)
+    result = abovepy.search(
+        product=args.product,
+        bbox=bbox,
+        county=args.county,
+        point=point,
+        buffer_miles=args.buffer,
+        buffer_feet=buffer_feet,
+        max_items=args.max_items,
+    )
+
+    if result.empty:
+        print("No tiles found.", file=sys.stderr)
+        sys.exit(1)
+
+    est = result.estimate_size()
+    print(
+        f"Found {est['tile_count']} tile(s), ~{est['total_mb']} MB. Packaging...",
+        file=sys.stderr,
+    )
+
+    pkg = result.package(
+        output_dir=args.output_dir,
+        include_preview=not args.no_preview,
+        qgis_project=not args.no_qgis,
+        checksums=not args.no_checksums,
+        overwrite=args.overwrite,
+        max_workers=args.workers,
+    )
+
+    print(f"Package complete: {pkg.output_dir}")
+    print(f"  Tiles: {pkg.tile_count}")
+    print(f"  Size:  {pkg.total_size_mb} MB")
+    print(f"  Files: {len(pkg.files)}")
+    if pkg.has_qgis_project:
+        print(f"  QGIS:  {pkg.output_dir.name}.qgs")
 
 
 # ---------------------------------------------------------------------------

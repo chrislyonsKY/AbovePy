@@ -1,0 +1,34 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="3.28.0" projectname="{{PROJECT_NAME}}">
+  <projectCrs>
+    <spatialrefsys>
+      <authid>{{CRS_AUTHID}}</authid>
+    </spatialrefsys>
+  </projectCrs>
+  <mapcanvas name="theMapCanvas">
+    <extent>
+      <xmin>{{EXTENT_XMIN}}</xmin>
+      <ymin>{{EXTENT_YMIN}}</ymin>
+      <xmax>{{EXTENT_XMAX}}</xmax>
+      <ymax>{{EXTENT_YMAX}}</ymax>
+    </extent>
+    <destinationsrs>
+      <spatialrefsys>
+        <authid>{{CRS_AUTHID}}</authid>
+      </spatialrefsys>
+    </destinationsrs>
+  </mapcanvas>
+  <projectlayers>
+{{RASTER_LAYERS}}
+{{VECTOR_LAYERS}}
+  </projectlayers>
+  <layer-tree-group>
+    <customproperties/>
+    <layer-tree-group name="Data" expanded="1">
+{{LAYER_TREE_RASTERS}}
+    </layer-tree-group>
+    <layer-tree-group name="Index" expanded="1">
+{{LAYER_TREE_VECTORS}}
+    </layer-tree-group>
+  </layer-tree-group>
+</qgis>

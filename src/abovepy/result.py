@@ -210,6 +210,57 @@ class SearchResult:
 
         return mosaic_tiles(self._gdf, bbox=bbox, output=output, crs=crs)
 
+    def package(
+        self,
+        output_dir: str | Path,
+        clip_bbox: tuple[float, float, float, float] | None = None,
+        include_preview: bool = True,
+        qgis_project: bool = True,
+        checksums: bool = True,
+        overwrite: bool = False,
+        max_workers: int = 4,
+    ) -> Any:
+        """Package this search result into a deliverable folder.
+
+        Produces a self-contained directory with data tiles, footprint
+        index (GeoPackage), checksums, provenance metadata, preview
+        image, and optional QGIS project file.
+
+        Parameters
+        ----------
+        output_dir : str or Path
+            Output directory for the package.
+        clip_bbox : tuple, optional
+            Clip tiles to this bounding box.
+        include_preview : bool
+            Generate preview image. Default True.
+        qgis_project : bool
+            Generate QGIS project file. Default True.
+        checksums : bool
+            Compute SHA-256 checksums. Default True.
+        overwrite : bool
+            Overwrite existing output. Default False.
+        max_workers : int
+            Concurrent workers. Default 4.
+
+        Returns
+        -------
+        Package
+            The completed deliverable package.
+        """
+        from abovepy.package import build_package
+
+        return build_package(
+            self,
+            output_dir=output_dir,
+            clip_bbox=clip_bbox,
+            include_preview=include_preview,
+            qgis_project=qgis_project,
+            checksums=checksums,
+            overwrite=overwrite,
+            max_workers=max_workers,
+        )
+
     # ------------------------------------------------------------------
     # Export
     # ------------------------------------------------------------------
