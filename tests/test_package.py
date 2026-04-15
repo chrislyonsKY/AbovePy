@@ -108,3 +108,59 @@ class TestDisclaimer:
         out.write_text(text)
         assert out.exists()
         assert "Ortho Phase 3 (1ft)" in out.read_text()
+
+
+class TestManifest:
+    def test_build_manifest_structure(self, tmp_path):
+        from abovepy.package import _build_manifest
+
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        tile = data_dir / "N123_dem_phase3.tif"
+        tile.write_bytes(b"fake raster data")
+
+        manifest = _build_manifest(
+            output_dir=tmp_path,
+            data_files=[tile],
+            checksums={"data/N123_dem_phase3.tif": "abc123"},
+            product_key="dem_phase3",
+            display_name="DEM Phase 3 (2ft)",
+            crs="EPSG:3089",
+            aoi_bbox=(-85.06, 38.11, -84.73, 38.40),
+            aoi_wkt="POLYGON((-85.06 38.11, -84.73 38.11, -84.73 38.40, -85.06 38.40, -85.06 38.11))",
+            query_params={"county": "Franklin", "product": "dem_phase3"},
+            acquisition_period="2022-2024",
+        )
+
+        assert manifest["product"] == "dem_phase3"
+        assert manifest["crs"] == "EPSG:3089"
+        assert manifest["tile_count"] == 1
+        assert len(manifest["files"]) == 1
+        assert manifest["files"][0]["sha256"] == "abc123"
+        assert manifest["query"] == {"county": "Franklin", "product": "dem_phase3"}
+        assert "abovepy_version" in manifest
+        assert "created_at" in manifest
+        assert manifest["aoi_wkt"].startswith("POLYGON")
+
+    def test_manifest_no_checksums(self, tmp_path):
+        from abovepy.package import _build_manifest
+
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        tile = data_dir / "N123.tif"
+        tile.write_bytes(b"data")
+
+        manifest = _build_manifest(
+            output_dir=tmp_path,
+            data_files=[tile],
+            checksums={},
+            product_key="dem_phase3",
+            display_name="DEM Phase 3 (2ft)",
+            crs="EPSG:3089",
+            aoi_bbox=(-85.0, 38.0, -84.0, 39.0),
+            aoi_wkt="POLYGON((-85 38, -84 38, -84 39, -85 39, -85 38))",
+            query_params={},
+            acquisition_period="2022-2024",
+        )
+
+        assert manifest["files"][0]["sha256"] is None

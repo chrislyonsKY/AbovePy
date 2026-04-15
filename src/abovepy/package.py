@@ -91,3 +91,46 @@ def _render_disclaimer(
         product_display_name=product_display_name,
         tile_count=tile_count,
     )
+
+
+def _build_manifest(
+    output_dir: Path,
+    data_files: list[Path],
+    checksums: dict[str, str],
+    product_key: str,
+    display_name: str,
+    crs: str,
+    aoi_bbox: tuple[float, float, float, float],
+    aoi_wkt: str,
+    query_params: dict,
+    acquisition_period: str,
+) -> dict:
+    """Build the manifest.json contents."""
+    from abovepy._version import __version__
+
+    files = []
+    for f in data_files:
+        rel = f.relative_to(output_dir).as_posix()
+        files.append({
+            "path": rel,
+            "sha256": checksums.get(rel) or None,
+            "size_bytes": f.stat().st_size,
+        })
+
+    total_bytes = sum(entry["size_bytes"] for entry in files)
+
+    return {
+        "abovepy_version": __version__,
+        "created_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "product": product_key,
+        "display_name": display_name,
+        "crs": crs,
+        "tile_count": len(data_files),
+        "total_size_mb": round(total_bytes / (1024 * 1024), 1),
+        "aoi_bbox": list(aoi_bbox),
+        "aoi_wkt": aoi_wkt,
+        "query": query_params,
+        "acquisition_period": acquisition_period,
+        "source_program": "KyFromAbove",
+        "files": files,
+    }
