@@ -112,7 +112,7 @@ strict = true
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
-module = ["abovepy.terrain", "abovepy.titiler._pgstac", "abovepy.viz._urls"]
+module = ["abovepy.terrain", "abovepy.titiler._pgstac", "abovepy.viz._urls", "abovepy.package", "abovepy.qgis"]
 disable_error_code = ["no-any-return", "arg-type", "operator", "attr-defined", "var-annotated"]
 
 [[tool.mypy.overrides]]

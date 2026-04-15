@@ -235,7 +235,7 @@ def _validate_cog(source: str) -> ValidationResult:
 def _validate_cog_deep(source: str) -> ValidationResult:
     """Deep COG validation using rio-cogeo."""
     try:
-        from rio_cogeo import cog_validate
+        from rio_cogeo import cog_validate  # type: ignore[attr-defined]
     except ImportError:
         logger.warning(
             "rio-cogeo not installed, falling back to built-in checks. "

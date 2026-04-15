@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib import resources
 from pathlib import Path
+from typing import Any
 
 import httpx
 
@@ -28,7 +29,7 @@ class Package:
 
     output_dir: Path
     files: list[Path]
-    manifest: dict
+    manifest: dict[str, Any]
     tile_count: int
     total_size_mb: float
     has_qgis_project: bool
@@ -100,13 +101,13 @@ def _build_manifest(
     crs: str,
     aoi_bbox: tuple[float, float, float, float],
     aoi_wkt: str,
-    query_params: dict,
+    query_params: dict[str, Any],
     acquisition_period: str,
-) -> dict:
+) -> dict[str, Any]:
     """Build the manifest.json contents."""
     from abovepy._version import __version__
 
-    files = []
+    files: list[dict[str, Any]] = []
     for f in data_files:
         rel = f.relative_to(output_dir).as_posix()
         files.append(

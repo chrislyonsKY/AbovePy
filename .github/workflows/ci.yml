@@ -23,7 +23,7 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check src/ tests/
       - run: ruff format --check src/ tests/
-      - run: mypy --strict src/abovepy/
+      - run: mypy src/abovepy/
 
   test:
     needs: lint

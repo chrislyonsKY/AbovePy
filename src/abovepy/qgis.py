@@ -80,7 +80,7 @@ def _generate_pyqgis(
     styles_dir: Path,
 ) -> Path:
     """Generate project using PyQGIS API."""
-    from qgis.core import (
+    from qgis.core import (  # type: ignore[import-not-found]
         QgsCoordinateReferenceSystem,
         QgsProject,
         QgsRasterLayer,
