@@ -308,3 +308,90 @@ class TestBuildPackage:
 
         with pytest.raises(PackageError, match="No tiles"):
             build_package(result, tmp_path / "out")
+
+
+class TestSearchResultPackage:
+    @patch("abovepy.package._generate_preview", return_value=None)
+    @patch("abovepy.package.download_tiles")
+    def test_package_method_exists(self, mock_download, mock_preview, tmp_path):
+        from abovepy.products import get_product
+        from abovepy.result import SearchResult
+
+        product = get_product("dem_phase3")
+        gdf = gpd.GeoDataFrame(
+            {
+                "tile_id": ["N123"],
+                "product": ["dem_phase3"],
+                "datetime": ["2023-01-01"],
+                "asset_url": ["https://example.com/N123.tif"],
+                "collection_id": ["dem-phase3"],
+            },
+            geometry=[box(-85.0, 38.0, -84.9, 38.1)],
+            crs="EPSG:4326",
+        )
+        result = SearchResult(gdf, product, {"county": "Franklin"})
+
+        data_dir = tmp_path / "pkg" / "data"
+        data_dir.mkdir(parents=True)
+        tile = data_dir / "N123.tif"
+        tile.write_bytes(b"raster")
+        mock_download.return_value = [tile]
+
+        pkg = result.package(tmp_path / "pkg", include_preview=False, qgis_project=False)
+
+        assert pkg.tile_count == 1
+        assert (tmp_path / "pkg" / "manifest.json").exists()
+
+
+class TestCLIPackage:
+    def test_parser_accepts_package_command(self):
+        from abovepy.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args([
+            "package",
+            "--product", "dem_phase3",
+            "--county", "Franklin",
+            "-o", "./delivery",
+        ])
+        assert args.command == "package"
+        assert args.product == "dem_phase3"
+        assert args.county == "Franklin"
+        assert args.output_dir == "./delivery"
+
+    def test_parser_flag_defaults(self):
+        from abovepy.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args([
+            "package",
+            "--product", "dem_phase3",
+            "--county", "Franklin",
+            "-o", "./out",
+        ])
+        assert args.no_preview is False
+        assert args.no_qgis is False
+        assert args.no_checksums is False
+        assert args.overwrite is False
+        assert args.workers == 4
+
+    def test_parser_escape_hatches(self):
+        from abovepy.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args([
+            "package",
+            "-p", "ortho_phase3",
+            "--bbox", "-85,38,-84,39",
+            "-o", "./out",
+            "--no-preview",
+            "--no-qgis",
+            "--no-checksums",
+            "--overwrite",
+            "--workers", "8",
+        ])
+        assert args.no_preview is True
+        assert args.no_qgis is True
+        assert args.no_checksums is True
+        assert args.overwrite is True
+        assert args.workers == 8
