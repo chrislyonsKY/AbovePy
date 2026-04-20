@@ -103,7 +103,17 @@ def _build_vrt(
     Path
         Path to the created VRT file.
     """
-    from osgeo import gdal
+    try:
+        from osgeo import gdal
+    except ImportError as exc:
+        from abovepy._exceptions import MosaicError
+
+        raise MosaicError(
+            "VRT construction requires the GDAL Python bindings, which are not "
+            "installed by default. Install with `conda install -c conda-forge gdal` "
+            "(recommended) or `pip install gdal` (requires matching system GDAL headers). "
+            "Alternatively, pass an output path ending in `.tif` to merge via rasterio."
+        ) from exc
 
     gdal.UseExceptions()
 
