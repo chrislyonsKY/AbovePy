@@ -42,10 +42,8 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 - Manifest schema: file paths, checksums (SHA-256), CRS, acquisition dates, tile count, AOI WKT
 - CLI: `abovepy package --county Franklin -o ./delivery`
 
-### CAD/Survey Export Formats
-- **LandXML surface export** — TIN triangulation from DEM via rasterio + scipy, output as LandXML 1.2. This is the universal format Civil 3D, Carlson, and OpenRoads all import natively.
-- **Contour DXF export** — contour lines as DXF polylines via ezdxf library. Consumable by every CAD platform.
-- **LAS point cloud export** — non-COPC LAS 1.4 for older tools that can't read COPC (laspy)
+### Export Formats
+- **LAS point cloud export** — non-COPC LAS 1.4 for tools that can't read COPC (laspy)
 - **GeoTIFF DEM packaging** — survey-grade metadata: EPSG:3089, NAVD88 vertical datum, US survey feet units
 
 ### Oblique Intelligence
@@ -60,12 +58,11 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 - Richer STAC asset handling — expose all assets, runtime conformance checks, graceful CQL2 fallback
 
 **Surfaces:** Python, CLI, ArcGIS Pro, QGIS
-**New dependencies:** `ezdxf` (DXF export), `scipy` (TIN triangulation)
 **Tests:** ~60 new tests
 
 ## v2.3 (Mid Term)
 
-**Theme: Analysis APIs and Civil 3D prototype**
+**Theme: Analysis APIs**
 
 ### Analysis APIs
 - `abovepy.sample(point, product)` — elevation at a point
@@ -75,64 +72,29 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 - `abovepy.change_detection(bbox, product_before, product_after)` — difference map
 - Phase comparison workflows (Phase 2 vs Phase 3 elevation change)
 
-### Civil 3D Plugin Prototype
-- .NET 8.0 C# plugin for AutoCAD Civil 3D 2025+
-- Ribbon button: "Get KyFromAbove Data"
-- AOI from drawing extent or user-picked polygon/polyline
-- Product selector dropdown matching abovepy products
-- Calls abovepy CLI via subprocess → generates LandXML + LAS package
-- Auto-imports TIN Surface and point cloud into active drawing
-- Targets Autodesk App Store distribution
-
 ### Other
 - Optional `SearchResult.to_xarray()` via `stackstac` or `odc-stac`
 - Shareable MapLibre GL JS web viewer templates
 
-**Surfaces:** Python, CLI, ArcGIS Pro, QGIS, Civil 3D (prototype)
+**Surfaces:** Python, CLI, ArcGIS Pro, QGIS
 
 ## v3.0 (Long Term)
 
-**Theme: Native design-tool integration**
+**Theme: TBD — scope set after v2.2 / v2.3 feedback.**
 
-All CAD plugins use a shared file-based architecture: abovepy generates LandXML, LAS, GeoTIFF, and DXF outputs → thin platform wrappers import them into each host application.
+Candidate directions:
+- Deeper analysis: corridor-aware workflows, multi-temporal change detection, volumetric pipelines
+- Offline / cached data support for field use
+- Server-side processing surfaces (TiTiler extensions, STAC-aware services)
 
-### Civil 3D Plugin v1 (.NET C#)
-- "AboveC3D" ribbon tab: Get Data, Package Site, Import Surface
-- AOI from drawing extent or user-picked polyline/polygon
-- Product picker dropdown
-- Auto-creates Civil 3D TIN Surface from LandXML, loads point cloud from LAS
-- Corridor-aware data retrieval
-- Distribution: Autodesk App Store
-
-### Carlson Plugin v1 (AutoLISP + batch)
-- "AboveKY" menu in Carlson Survey / Civil / Mining
-- Commands: ABOVEKY_SEARCH, ABOVEKY_DOWNLOAD, ABOVEKY_SURFACE
-- LISP calls abovepy CLI via shell → imports LandXML DTM
-- Distribution: installer package, Carlson reseller channel
-- Target: Kentucky's large surveyor user base
-
-### OpenRoads Designer / MicroStation Addin (Python)
-- Uses MicroStation 2024+ native Python API
-- "KyFromAbove" script category: Get Terrain, Get Imagery, Get Point Cloud
-- Calls abovepy directly (pip-installed in MicroStation Python) or via subprocess
-- Imports LandXML as terrain model
-- Distribution: Bentley Developer Network or manual install
-
-### Cross-Platform Architecture
-```
-abovepy package CLI
-  └── Outputs: LandXML, LAS, GeoTIFF, DXF, manifest.json
-       ├── Civil 3D plugin reads LandXML → creates TIN Surface
-       ├── Carlson command reads LandXML → creates DTM
-       └── ORD script reads LandXML → creates terrain model
-```
+Breaking API cleanup lands here. `to_landxml()` (deprecated in v2.2) is scheduled for removal in v3.0.
 
 ## Target Users
 
 | Persona | Primary tools | Primary needs |
 |---------|---------------|---------------|
-| **Surveyor** | Civil 3D, Carlson | EPSG:3089, feet buffers, LandXML surfaces, provenance, clean deliverables |
-| **Civil engineer** | Civil 3D, ORD, Carlson | Corridor search, cut/fill, phase comparison, DEM surfaces, LAS import |
+| **Surveyor** | Python, QGIS, ArcGIS Pro | EPSG:3089, feet buffers, provenance, clean deliverables |
+| **Civil engineer** | Python, ArcGIS Pro, QGIS | Corridor search, cut/fill, phase comparison, DEM surfaces, LAS import |
 | **GIS analyst** | ArcGIS Pro, QGIS, Python | Broad search, QGIS interop, phase comparison, lazy loading |
 | **Planner** | ArcGIS Pro, QGIS, web | County/area search, ortho access, flood screening |
 | **Emergency management** | ArcGIS Pro, web, mobile | Rapid site assessment, oblique inspection, flood analysis |
@@ -145,13 +107,10 @@ abovepy package CLI
 | **CLI** | Full | +package | +analysis | Full |
 | **ArcGIS Pro** | Toolbox (5 tools) | +packaging | +analysis | maintained |
 | **QGIS** | Plugin v1 (4 tools) | +packaging | +analysis | maintained |
-| **Civil 3D** | — | File import (LandXML) | Plugin prototype | Plugin v1 |
-| **Carlson** | — | File import (LandXML) | — | Plugin v1 |
-| **ORD / MicroStation** | — | File import (LandXML, LAS) | — | Python scripts |
 
 ## Non-Goals
 
 - Generic STAC client functionality (use pystac-client directly)
 - Non-Kentucky data sources
 - Reimplementing PDAL, stackstac, or TiTiler
-- Building CAD/BIM editing features (abovepy delivers data, not design tools)
+- Native plugins or add-ins for CAD platforms (Civil 3D, Carlson, OpenRoads Designer, MicroStation). Generic file-format interop (GeoTIFF, LAS, GeoPackage) is in scope; design-tool-specific integration is not.

@@ -31,44 +31,46 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 
 ## v2.2 (Mid Term)
 
-**Theme: Deliverables, oblique intelligence, design-tool formats**
+**Theme: Deliverables, oblique intelligence**
 
 - `SearchResult.package()` — clipped DEMs, orthos, point clouds bundled with footprints, previews, manifest, provenance, and disclaimer
-- **CAD/survey export formats** — LandXML surfaces (Civil 3D / Carlson), contour DXF, LAS point clouds (non-COPC for older tools), GeoTIFF DEMs with survey-grade metadata
-- Package outputs consumable by Python, ArcGIS Pro, QGIS, Civil 3D, Carlson, and ORD
+- **Export formats** — LAS point clouds (non-COPC for tools that can't read COPC), GeoTIFF DEMs with survey-grade metadata (EPSG:3089, NAVD88, US survey feet)
+- Package outputs consumable by Python, ArcGIS Pro, and QGIS
 - Oblique spatial search by point/AOI with nearest-frame selection
 - 4-direction oblique bundles for site inspection
 - JSON sidecar parsing for camera metadata, footprints, and timestamps
 - QGIS interoperability — GeoPackage outputs, GeoParquet indexes, QGIS-friendly layer packaging
 - Richer STAC asset handling — expose all assets, runtime conformance checks, graceful CQL2 fallback
 - ArcGIS Pro toolbox — packaging tool, oblique inspection tool
+- `to_landxml()` deprecation notice (removal scheduled for v3.0)
 
 ## v2.3 (Long Term)
 
-**Theme: Analysis APIs, Civil 3D plugin, advanced workflows**
+**Theme: Analysis APIs, advanced workflows**
 
 - Stable analysis APIs: `sample`, `profile`, `zonal_stats`, `cut_fill`, `change_detection`, `flood_fill`
 - Phase comparison workflows (Phase 2 vs Phase 3 elevation change)
-- **Civil 3D plugin prototype** — ribbon button / tool palette for "Get KyFromAbove data for this drawing extent." Delivers DEM surface and point cloud directly into the active drawing. Targets AutoCAD App Store distribution.
 - Optional xarray/dask bridge for lazy array loading (`pip install abovepy[xarray]`)
 - Shareable web viewer templates (MapLibre GL JS)
 - Parcel-based and route/corridor-based search (if validated)
 
 ## v3.0 (Future)
 
-**Theme: Native design-tool integration**
+**Theme: TBD — scope set after v2.2 / v2.3 feedback.**
 
-- **Carlson Software plugin** — menu command for KyFromAbove surface/point cloud import. Targets Carlson's large Kentucky surveyor user base.
-- **OpenRoads Designer / MicroStation addin** — .NET addin for terrain import, corridor-aware data retrieval. Targets KYTC and Bentley-shop engineers.
-- Unified plugin architecture — shared AOI extraction, product selection dialog, and format negotiation across all platforms
-- Offline/cached data support for field use
+Candidate directions:
+- Deeper analysis: corridor-aware workflows, multi-temporal change detection, volumetric pipelines
+- Offline / cached data support for field use
+- Server-side processing surfaces (TiTiler extensions, STAC-aware services)
+
+Breaking API cleanup lands here. `to_landxml()` is scheduled for removal in v3.0.
 
 ## Target Users
 
 | Persona | Primary tools | Primary needs |
 |---------|---------------|---------------|
-| **Surveyor** | Civil 3D, Carlson | EPSG:3089, feet buffers, LandXML surfaces, provenance, clean deliverables |
-| **Civil engineer** | Civil 3D, ORD, Carlson | Corridor search, cut/fill, phase comparison, DEM surfaces, LAS import |
+| **Surveyor** | Python, QGIS, ArcGIS Pro | EPSG:3089, feet buffers, provenance, clean deliverables |
+| **Civil engineer** | Python, ArcGIS Pro, QGIS | Corridor search, cut/fill, phase comparison, DEM surfaces, LAS import |
 | **GIS analyst** | ArcGIS Pro, QGIS, Python | Broad search, QGIS interop, phase comparison, lazy loading |
 | **Planner** | ArcGIS Pro, QGIS, web | County/area search, ortho access, flood screening |
 | **Emergency management** | ArcGIS Pro, web, mobile | Rapid site assessment, oblique inspection, flood analysis |
@@ -81,13 +83,10 @@ Priorities can shift based on community feedback and KyFromAbove program updates
 | **CLI** | Full | Full | Full | Full | Full |
 | **ArcGIS Pro** | Toolbox (5 tools) | +provenance | +packaging, +oblique | +analysis | maintained |
 | **QGIS** | File interop | Plugin v1 (Processing tools) | +packaging, +oblique | +analysis | maintained |
-| **Civil 3D** | — | — | File import (LandXML, DXF) | Plugin prototype | Plugin v1 |
-| **Carlson** | — | — | File import (LandXML, DXF) | — | Plugin v1 |
-| **ORD / MicroStation** | — | — | File import (GeoTIFF, LAS) | — | Addin v1 |
 
 ## Non-Goals
 
 - Generic STAC client functionality (use pystac-client directly)
 - Non-Kentucky data sources
 - Reimplementing PDAL, stackstac, or TiTiler
-- Building CAD/BIM editing features (abovepy delivers data, not design tools)
+- Native plugins or add-ins for CAD platforms (Civil 3D, Carlson, OpenRoads Designer, MicroStation). Generic file-format interop (GeoTIFF, LAS, GeoPackage) is in scope; design-tool-specific integration is not.
