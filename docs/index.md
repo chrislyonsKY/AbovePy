@@ -13,7 +13,7 @@ hide:
   <div class="feature-card">
     <div class="card-icon">&#x2B07;</div>
     <h3>Download &amp; Export</h3>
-    <p>Concurrent downloads with resume. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, GeoParquet, or LandXML.</p>
+    <p>Concurrent downloads with resume. Estimate size before committing. Export to GeoTIFF, GeoPackage, Shapefile, or GeoParquet.</p>
   </div>
   <div class="feature-card">
     <div class="card-icon">&#x1F30E;</div>
