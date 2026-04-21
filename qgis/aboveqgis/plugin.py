@@ -73,10 +73,10 @@ def _install_abovepy(iface):
         f"AboveQGIS requires the <b>abovepy</b> package (>= {MIN_VERSION}).\n\n"
         f"Would you like to install it now?\n\n"
         f"Python: {python_exe}",
-        QMessageBox.Yes | QMessageBox.No,
-        QMessageBox.Yes,
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        QMessageBox.StandardButton.Yes,
     )
-    if reply != QMessageBox.Yes:
+    if reply != QMessageBox.StandardButton.Yes:
         return False
 
     try:

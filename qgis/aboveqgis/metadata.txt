@@ -3,7 +3,7 @@ name=AboveQGIS
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=KyFromAbove LiDAR, DEM, and orthoimagery data access for QGIS
-version=1.1.0
+version=1.1.1
 author=Chris Lyons
 email=chris.lyons@ky.gov
 about=Access Kentucky's KyFromAbove geospatial data directly from QGIS.
@@ -20,6 +20,9 @@ experimental=False
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    1.1.1 - QGIS 4 / PyQt6 compatibility fix
+    - Fix initGui() AttributeError on QGIS 4: use QMessageBox.StandardButton.Yes/No
+      instead of PyQt5-only shorthand (QMessageBox.Yes/No)
     1.1.0 - County mosaics, auto-load, QGIS 4 ready
     - New: Load County Ortho Mosaic tool (stream from S3)
     - New: Auto-load downloaded tiles with hillshade symbology
