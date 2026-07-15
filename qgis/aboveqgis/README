@@ -41,7 +41,6 @@ Export Formats (Python)
 -----------------------
   - to_stl() — DEM to 3D-printable mesh for Bambu Studio, Cura, Blender
   - to_geotiff(), to_geopackage(), to_shapefile()
-  - to_landxml() — DEM to TIN surface (deprecated, scheduled for removal in v3.0)
 
 Data Source
 -----------
