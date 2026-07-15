@@ -4,6 +4,71 @@ All notable changes to abovepy will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.2.0] — 2026-07-15
+
+**Theme: Oblique intelligence, analysis APIs, richer STAC assets, shareable
+web maps.** The engineering-deliverables scope (LandXML/CAD interchange,
+LAS export, survey-grade packaging) has been removed from the project
+roadmap — see Removed below.
+
+### Removed (breaking)
+
+- **`to_landxml()` LandXML export removed** along with the retracted
+  engineering-deliverables scope. This is a breaking change shipped in a
+  minor release given the feature's short lifetime (added 2.1.1), its
+  optional-extra install base, and that it was never exported from the
+  top-level namespace. Accessing `abovepy.export.to_landxml` now raises a
+  self-explaining error for one release. Pin `abovepy==2.1.3` if you
+  depend on LandXML export. The `[analysis]` scipy extra remains — the
+  terrain module still uses it.
+
+### Added
+
+- **Oblique intelligence** — `ObliqueFrame` dataclass with tolerant JSON
+  sidecar parsing (camera params, ground footprint, timestamp, exposure
+  center; the raw payload is always preserved). `search_obliques()` gains
+  spatial search: `point=(lon, lat)` + `radius_feet=` returns frames
+  nearest-first, using a per-season bulk exposure-center index when one
+  exists on S3 and bounded concurrent sidecar fetches otherwise (hard
+  cap with a loud, actionable error — never silent partial results).
+  `abovepy.oblique_bundle(point)` returns the best Backward/Forward/
+  Left/Right frame set for site inspection.
+- **Analysis APIs** (pulled forward from the v2.3 roadmap) —
+  `abovepy.sample()` (elevation at points), `abovepy.profile()`
+  (transect DataFrame with true-feet distances), `abovepy.zonal_stats()`
+  (polygon statistics), and `abovepy.change_detection()` (cross-phase
+  difference maps with automatic grid alignment). All stream windowed
+  reads from the cloud — no downloads.
+- **All STAC assets exposed** — search results now carry an `assets`
+  column mapping every asset key (thumbnails, metadata, alternates) to
+  its href, alongside the existing primary `asset_url`.
+- **Runtime CQL2 conformance check** — `filter=` requests are validated
+  against the endpoint's conformance document (cached, 1-hour TTL) and
+  fail with an actionable `SearchError` when CQL2 is not supported,
+  instead of an opaque server error.
+- **`SearchResult.to_xarray()`** — lazy loading via odc-stac with the new
+  `pip install abovepy[xarray]` extra. Search results now carry their
+  STAC items (`SearchResult.items`).
+- **Shareable web maps** — `abovepy.export_map_html()` writes a
+  self-contained MapLibre GL JS viewer for any product, with optional
+  server-side hillshade/slope/contours/terrainrgb.
+- **CLI subcommands** — `abovepy sample`, `abovepy profile`, and
+  `abovepy export-map`.
+
+### Changed
+
+- `search_obliques()` returns `list[ObliqueFrame]` instead of
+  `list[dict]`. `ObliqueFrame` implements the `Mapping` protocol, so
+  dict-style access (`frame["tif_url"]`, `dict(frame)`, `.get()`)
+  keeps working unchanged.
+- Oblique S3 listing and sidecar requests now validate URLs against the
+  trusted KyFromAbove host allowlist.
+- GeoPackage/Shapefile/GeoParquet writers JSON-encode dict-valued
+  columns (such as `assets`) instead of failing.
+- The static `STAC_SUPPORTS_CQL2` constant was replaced by the runtime
+  conformance check (`CQL2_CONFORMANCE_FALLBACK` applies only when the
+  conformance document cannot be fetched).
+
 ## [2.1.3] — 2026-04-01
 
 ### Added

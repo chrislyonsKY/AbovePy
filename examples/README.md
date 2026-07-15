@@ -21,6 +21,9 @@ Working examples for abovepy - KyFromAbove data access for Python.
 | `scripts/export_search_results.py` | Export search results to GeoJSON/GPKG/CSV |
 | `scripts/explore_obliques.py` | List oblique seasons, products, and sample frames from S3 |
 | `scripts/oblique_site_inspection.py` | Build a 4-direction oblique site-inspection summary image |
+| `scripts/oblique_spatial_search.py` | Point/radius oblique search + 4-direction bundles (v2.2) |
+| `scripts/elevation_analysis.py` | sample/profile/zonal_stats/change_detection one-liners (v2.2) |
+| `scripts/export_web_map.py` | Shareable self-contained MapLibre viewer HTML (v2.2) |
 | `scripts/kentucky_river_rem.py` | Relative Elevation Model of the Kentucky River |
 | `scripts/mine_volume_estimate.py` | Surface mine cut/fill volume estimation |
 

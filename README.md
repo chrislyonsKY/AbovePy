@@ -176,6 +176,89 @@ frames = search_obliques(direction="bwd", season=seasons[-1], max_items=10)
 # Each frame has: frame_id, tif_url, json_url, season, direction
 ```
 
+### Oblique spatial search & bundles
+
+Find the oblique frames that actually cover a location — and get the best
+frame from each camera direction for site inspection:
+
+```python
+import abovepy
+
+# Frames within 500 ft of a point, nearest first (all four directions)
+frames = abovepy.search_obliques(point=(-84.85, 38.19), radius_feet=500, direction=None)
+
+# Best Backward/Forward/Left/Right frame set for a site
+bundle = abovepy.oblique_bundle((-84.85, 38.19))
+print(bundle["bwd"].tif_url)
+
+# Parsed sidecar metadata (footprint, camera, timestamp) on every frame
+frame = frames[0]
+frame.fetch_metadata()
+print(frame.footprint)   # shapely geometry
+print(frame.timestamp)   # acquisition datetime
+print(frame.raw)         # full sidecar payload
+```
+
+### Elevation analysis
+
+Answer terrain questions in one line — abovepy streams just the pixels it
+needs from the cloud (no downloads):
+
+```python
+import abovepy
+from shapely.geometry import box
+
+# Elevation at a point (US survey feet)
+elev = abovepy.sample((-84.87, 38.20))
+
+# Elevation profile along a transect — distances in true feet (EPSG:3089)
+df = abovepy.profile([(-84.9, 38.15), (-84.8, 38.25)], n_points=200)
+
+# Statistics within a polygon
+stats = abovepy.zonal_stats(box(-84.88, 38.16, -84.82, 38.24))
+print(stats["mean"], stats["min"], stats["max"])
+
+# Phase 2 → Phase 3 elevation change (grids aligned automatically)
+diff, profile = abovepy.change_detection(
+    (-84.9, 38.15, -84.8, 38.25),
+    product_before="dem_phase2",
+    product_after="dem_phase3",
+    output="change.tif",
+)
+```
+
+Or from the terminal:
+
+```bash
+abovepy sample --point=-84.87,38.20
+abovepy profile --line "-84.9,38.15 -84.8,38.25" --format csv
+```
+
+### Shareable web maps
+
+Write a self-contained MapLibre GL JS viewer — open it in a browser, embed
+it in a report, host it anywhere static:
+
+```python
+import abovepy
+
+abovepy.export_map_html("franklin_hillshade.html", county="Franklin", algorithm="hillshade")
+```
+
+```bash
+abovepy export-map -o map.html --county Franklin --algorithm hillshade
+```
+
+### Lazy loading with xarray
+
+Load search results as a lazy xarray Dataset via odc-stac
+(`pip install abovepy[xarray]`):
+
+```python
+result = abovepy.search(county="Franklin", product="dem_phase3")
+ds = result.to_xarray(chunks={"x": 2048, "y": 2048})
+```
+
 ## Examples
 
 ### DEM Phase Comparison

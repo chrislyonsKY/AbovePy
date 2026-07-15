@@ -71,6 +71,8 @@ nav:
     - Client: api/client.md
     - Products: api/products.md
     - SearchResult: api/result.md
+    - Analysis: api/analysis.md
+    - Obliques: api/obliques.md
     - I/O (Raster & Point Cloud): api/io.md
     - TiTiler URL Helpers: api/titiler.md
     - Utilities: api/utils.md
