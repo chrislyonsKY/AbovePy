@@ -22,6 +22,9 @@ STAC_SUPPORTS_CQL2 = True
 STAC_SUPPORTS_SEARCH = True
 STAC_SUPPORTS_COLLECTION_SEARCH = True
 
+# Oblique sidecar metadata cache TTL (seconds)
+SIDECAR_CACHE_TTL = 3600
+
 # HTTP retry configuration
 MAX_RETRIES = 3
 RETRY_BACKOFF_FACTOR = 0.5
