@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from pystac_client import Client
 
 from abovepy._constants import (
+    CQL2_CONFORMANCE_FALLBACK,
     MAX_RETRIES,
     RETRY_BACKOFF_FACTOR,
     STAC_URL,
@@ -25,6 +26,12 @@ logger = logging.getLogger(__name__)
 
 # Module-level cache shared across all client instances
 _stac_cache = TTLCache()
+
+# Cached conformance documents, keyed by API root URL (1-hour TTL)
+_conformance_cache = TTLCache(maxsize=8, ttl=3600)
+
+# Conformance URI markers that advertise CQL2 filter support
+_CQL2_CONFORMANCE_MARKERS = ("#filter", "/conf/filter", "cql2")
 
 
 def create_client(stac_url: str = STAC_URL) -> Client:
@@ -42,6 +49,62 @@ def create_client(stac_url: str = STAC_URL) -> Client:
     from pystac_client import Client
 
     return Client.open(stac_url)
+
+
+def get_conformance(client: Client) -> tuple[str, ...]:
+    """Fetch (and cache) the conformance classes advertised by a STAC API.
+
+    Parameters
+    ----------
+    client : pystac_client.Client
+        STAC client instance.
+
+    Returns
+    -------
+    tuple[str, ...]
+        Conformance class URIs. Empty when the document can't be read.
+    """
+    key = str(getattr(client, "self_href", None) or id(client))
+    cached = _conformance_cache.get(key)
+    if cached is not None:
+        return tuple(cached)
+
+    try:
+        conforms = tuple(str(uri) for uri in client.get_conforms_to())
+    except Exception as exc:  # pystac-client raises library-specific errors
+        logger.warning("Could not fetch STAC conformance document: %s", exc)
+        return ()
+
+    _conformance_cache.set(key, conforms)
+    return conforms
+
+
+def supports_cql2(client: Client) -> bool:
+    """Check whether a STAC API advertises CQL2 filter support.
+
+    Reads the endpoint's conformance document (cached per endpoint,
+    1-hour TTL). When the document cannot be fetched — offline test
+    runs, transient API failures — falls back to
+    ``CQL2_CONFORMANCE_FALLBACK`` so a working endpoint is never
+    blocked by a conformance hiccup.
+
+    Parameters
+    ----------
+    client : pystac_client.Client
+        STAC client instance.
+
+    Returns
+    -------
+    bool
+    """
+    conforms = get_conformance(client)
+    if not conforms:
+        logger.debug(
+            "No conformance document available; assuming CQL2 support = %s",
+            CQL2_CONFORMANCE_FALLBACK,
+        )
+        return CQL2_CONFORMANCE_FALLBACK
+    return any(marker in uri.lower() for uri in conforms for marker in _CQL2_CONFORMANCE_MARKERS)
 
 
 def search_stac(
@@ -89,7 +152,22 @@ def search_stac(
     -------
     list[pystac.Item]
         Matching STAC items.
+
+    Raises
+    ------
+    SearchError
+        If a CQL2 ``filter`` is requested but the endpoint does not
+        advertise CQL2 support, or all retry attempts fail.
     """
+    if filter is not None and not supports_cql2(client):
+        from abovepy._exceptions import SearchError
+
+        raise SearchError(
+            "The STAC endpoint does not advertise CQL2 filter support in its "
+            "conformance document. Remove filter= or filter the returned "
+            "GeoDataFrame client-side, e.g. result.tiles[result.tiles.datetime > ...]."
+        )
+
     cache_key = make_cache_key(
         collection_id,
         bbox,
@@ -239,14 +317,24 @@ def items_to_geodataframe(
     -------
     geopandas.GeoDataFrame
         Columns: tile_id, product, datetime, geometry, asset_url,
-        collection_id.
+        collection_id, assets. ``asset_url`` is the primary data asset;
+        ``assets`` maps every asset key on the item to its href
+        (thumbnails, metadata, alternate formats).
     """
     import geopandas as gpd
     from shapely.geometry import shape
 
     if not items:
         return gpd.GeoDataFrame(
-            columns=["tile_id", "product", "datetime", "geometry", "asset_url", "collection_id"],
+            columns=[
+                "tile_id",
+                "product",
+                "datetime",
+                "geometry",
+                "asset_url",
+                "collection_id",
+                "assets",
+            ],
             geometry="geometry",
             crs="EPSG:4326",
         )
@@ -263,10 +351,29 @@ def items_to_geodataframe(
                 "geometry": shape(item.geometry),
                 "asset_url": asset_url,
                 "collection_id": item.collection_id,
+                "assets": _extract_assets(item),
             }
         )
 
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
+
+
+def _extract_assets(item: Any) -> dict[str, str]:
+    """Map every asset key on a STAC item to its href.
+
+    Parameters
+    ----------
+    item : pystac.Item
+
+    Returns
+    -------
+    dict[str, str]
+        ``{asset_key: href}`` for all assets, including thumbnails and
+        alternate formats.
+    """
+    if not item.assets:
+        return {}
+    return {key: str(asset.href) for key, asset in item.assets.items()}
 
 
 def _extract_primary_asset_url(item: Any) -> str | None:

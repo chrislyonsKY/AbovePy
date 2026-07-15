@@ -249,3 +249,39 @@ class TestToSTL:
         result = to_stl(data, profile, output)
         assert result.exists()
         assert result.stat().st_size > 84  # more than just header
+
+
+# ---------------------------------------------------------------------------
+# Dict-column sanitization for GIS writers (v2.2 assets column)
+# ---------------------------------------------------------------------------
+
+
+class TestObjectColumnSanitization:
+    @pytest.fixture
+    def gdf_with_assets(self):
+        return gpd.GeoDataFrame(
+            {
+                "tile_id": ["A", "B"],
+                "assets": [
+                    {"data": "https://x/a.tif", "thumbnail": "https://x/a.png"},
+                    {"data": "https://x/b.tif"},
+                ],
+            },
+            geometry=[box(0, 0, 1, 1), box(1, 1, 2, 2)],
+            crs="EPSG:4326",
+        )
+
+    def test_geopackage_roundtrip_with_assets(self, gdf_with_assets, tmp_path):
+        import json
+
+        output = to_geopackage(gdf_with_assets, tmp_path / "assets.gpkg")
+        read_back = gpd.read_file(output)
+        assert json.loads(read_back.iloc[0]["assets"])["data"] == "https://x/a.tif"
+
+    def test_shapefile_write_with_assets(self, gdf_with_assets, tmp_path):
+        output = to_shapefile(gdf_with_assets, tmp_path / "assets.shp")
+        assert output.exists()
+
+    def test_original_gdf_not_mutated(self, gdf_with_assets, tmp_path):
+        to_geopackage(gdf_with_assets, tmp_path / "assets.gpkg")
+        assert isinstance(gdf_with_assets.iloc[0]["assets"], dict)

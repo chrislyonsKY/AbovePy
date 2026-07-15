@@ -19,8 +19,10 @@ NATIVE_CRS = "EPSG:3089"  # Kentucky Single Zone, US Survey Feet
 DEFAULT_INPUT_CRS = "EPSG:4326"  # What users typically provide
 TILE_SIZE_FT = 5000  # 5000×5000 foot tile grid
 
-# STAC API capabilities (confirmed from live API 2026-03)
-STAC_SUPPORTS_CQL2 = True
+# STAC API capabilities. CQL2 support is checked at runtime against the
+# endpoint's conformance document; this fallback applies only when that
+# document cannot be fetched (confirmed True on the live API 2026-03).
+CQL2_CONFORMANCE_FALLBACK = True
 STAC_SUPPORTS_SEARCH = True
 STAC_SUPPORTS_COLLECTION_SEARCH = True
 

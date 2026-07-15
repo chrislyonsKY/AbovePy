@@ -235,9 +235,11 @@ class SearchResult:
         -------
         Path
         """
+        from abovepy.export import _stringify_object_columns
+
         output = Path(output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        self._gdf.to_parquet(output)
+        _stringify_object_columns(self._gdf).to_parquet(output)
         return output
 
     def to_geojson(self) -> str:

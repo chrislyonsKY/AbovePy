@@ -67,12 +67,34 @@ def to_geotiff(
     return output
 
 
+def _stringify_object_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """JSON-encode dict/list columns so OGR/parquet writers accept them.
+
+    The ``assets`` column added in v2.2 holds a dict per tile, which
+    GeoPackage, Shapefile, and (reliably) GeoParquet cannot store natively.
+    """
+    import json
+
+    out = gdf.copy()
+    geometry_col = out.geometry.name if out.geometry is not None else None
+    for col in out.columns:
+        if col == geometry_col:
+            continue
+        if out[col].map(lambda v: isinstance(v, dict | list)).any():
+            out[col] = out[col].map(
+                lambda v: json.dumps(v, default=str) if isinstance(v, dict | list) else v
+            )
+    return out
+
+
 def to_geopackage(
     gdf: gpd.GeoDataFrame,
     output: str | Path,
     layer: str = "tiles",
 ) -> Path:
     """Write a GeoDataFrame to GeoPackage.
+
+    Dict-valued columns (e.g. ``assets``) are JSON-encoded to strings.
 
     Parameters
     ----------
@@ -90,7 +112,7 @@ def to_geopackage(
     """
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    gdf.to_file(output, layer=layer, driver="GPKG")
+    _stringify_object_columns(gdf).to_file(output, layer=layer, driver="GPKG")
     return output
 
 
@@ -99,6 +121,8 @@ def to_shapefile(
     output: str | Path,
 ) -> Path:
     """Write a GeoDataFrame to Shapefile.
+
+    Dict-valued columns (e.g. ``assets``) are JSON-encoded to strings.
 
     Parameters
     ----------
@@ -114,7 +138,7 @@ def to_shapefile(
     """
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    gdf.to_file(output, driver="ESRI Shapefile")
+    _stringify_object_columns(gdf).to_file(output, driver="ESRI Shapefile")
     return output
 
 
