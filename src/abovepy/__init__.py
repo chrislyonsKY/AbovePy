@@ -53,7 +53,7 @@ from abovepy.titiler import register_search
 from abovepy.utils.bbox import list_counties
 from abovepy.utils.crs import buffer_feet, corridor_buffer
 from abovepy.validate import ValidationResult, validate
-from abovepy.viz import preview_url, show, tile_url
+from abovepy.viz import export_map_html, preview_url, show, tile_url
 
 if TYPE_CHECKING:
     import geopandas as gpd
@@ -276,6 +276,7 @@ __all__ = [
     "corridor_buffer",
     "county_mosaic_url",
     "download",
+    "export_map_html",
     "info",
     "list_counties",
     "list_oblique_seasons",

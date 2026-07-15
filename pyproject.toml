@@ -43,7 +43,8 @@ lidar = ["laspy>=2.5", "requests>=2.28"]
 viz = ["leafmap>=0.30", "matplotlib>=3.8"]
 s3 = ["boto3>=1.28"]
 analysis = ["scipy>=1.11"]
-all = ["abovepy[lidar,viz,s3,analysis]"]
+xarray = ["odc-stac>=0.3.10", "xarray>=2024.1"]
+all = ["abovepy[lidar,viz,s3,analysis,xarray]"]
 dev = [
     "pytest>=7.4",
     "pytest-asyncio>=0.23",
@@ -131,6 +132,8 @@ module = [
     "leafmap",
     "rio_cogeo",
     "rio_cogeo.*",
+    "odc.*",
+    "xarray",
 ]
 ignore_missing_imports = true
 

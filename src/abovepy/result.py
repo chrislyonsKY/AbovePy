@@ -24,11 +24,15 @@ class SearchResult:
     ----------
     gdf : geopandas.GeoDataFrame
         Tile index with columns: tile_id, product, datetime, geometry,
-        asset_url, collection_id.
+        asset_url, collection_id, assets.
     product : Product
         The product definition used for this search.
     query_params : dict
         Original search parameters (for regenerating URLs and repr).
+    items : list[pystac.Item], optional
+        The raw STAC items behind the tile index. Enables
+        :meth:`to_xarray`. Results built from a bare GeoDataFrame
+        (``items=None``) work everywhere else.
 
     Examples
     --------
@@ -47,10 +51,24 @@ class SearchResult:
         gdf: gpd.GeoDataFrame,
         product: Product,
         query_params: dict[str, Any],
+        items: list[Any] | None = None,
     ) -> None:
         self._gdf = gdf
         self._product = product
         self._query_params = query_params
+        self._items = items
+
+    @property
+    def items(self) -> list[Any] | None:
+        """The raw STAC items behind this result (None if not carried)."""
+        return self._items
+
+    def _subset_items(self, gdf: gpd.GeoDataFrame) -> list[Any] | None:
+        """Filter carried STAC items down to the tiles remaining in gdf."""
+        if self._items is None or "tile_id" not in gdf.columns:
+            return None
+        keep = set(gdf["tile_id"])
+        return [item for item in self._items if getattr(item, "id", None) in keep]
 
     # ------------------------------------------------------------------
     # Properties
@@ -252,6 +270,50 @@ class SearchResult:
         """
         return str(self._gdf.to_json(indent=2))
 
+    def to_xarray(self, **kwargs: Any) -> Any:
+        """Load this result lazily as an xarray Dataset via odc-stac.
+
+        Requires the ``xarray`` extra (``pip install abovepy[xarray]``)
+        and a result that carries STAC items (any result returned by
+        ``abovepy.search()`` does).
+
+        Parameters
+        ----------
+        **kwargs
+            Passed through to ``odc.stac.load()`` — e.g.
+            ``chunks={"x": 2048, "y": 2048}``, ``resolution=2.0``,
+            ``bands=...``. ``crs`` defaults to the product's native
+            CRS (EPSG:3089).
+
+        Returns
+        -------
+        xarray.Dataset
+
+        Raises
+        ------
+        ImportError
+            If odc-stac is not installed.
+        AnalysisError
+            If this result carries no STAC items.
+        """
+        try:
+            from odc import stac as odc_stac
+        except ImportError:
+            raise ImportError(
+                "xarray support requires odc-stac. Install with: pip install abovepy[xarray]"
+            ) from None
+
+        if not self._items:
+            from abovepy._exceptions import AnalysisError
+
+            raise AnalysisError(
+                "This SearchResult carries no STAC items (it was built from a "
+                "bare GeoDataFrame). Re-run abovepy.search() to enable to_xarray()."
+            )
+
+        kwargs.setdefault("crs", self._product.native_crs)
+        return odc_stac.load(self._items, **kwargs)
+
     # ------------------------------------------------------------------
     # Comparison
     # ------------------------------------------------------------------
@@ -408,7 +470,8 @@ class SearchResult:
 
         clip = box(*bbox)
         mask = self._gdf.intersects(clip)
-        return SearchResult(self._gdf[mask].copy(), self._product, self._query_params)
+        subset = self._gdf[mask].copy()
+        return SearchResult(subset, self._product, self._query_params, self._subset_items(subset))
 
     def head(self, n: int = 5) -> SearchResult:
         """Return the first *n* tiles.
@@ -422,7 +485,8 @@ class SearchResult:
         -------
         SearchResult
         """
-        return SearchResult(self._gdf.head(n).copy(), self._product, self._query_params)
+        subset = self._gdf.head(n).copy()
+        return SearchResult(subset, self._product, self._query_params, self._subset_items(subset))
 
     # ------------------------------------------------------------------
     # Container protocol

@@ -379,3 +379,76 @@ class TestContainerProtocol:
         html = result._repr_html_()
         assert "<strong>SearchResult</strong>" in html
         assert "DEM Phase 3" in html
+
+
+# ---------------------------------------------------------------------------
+# STAC items + to_xarray (v2.2)
+# ---------------------------------------------------------------------------
+
+
+class TestItemsAndXarray:
+    def _items(self):
+        from unittest.mock import MagicMock
+
+        items = []
+        for tile_id in ("T1", "T2", "T3"):
+            item = MagicMock()
+            item.id = tile_id
+            items.append(item)
+        return items
+
+    def test_items_default_none(self, result):
+        assert result.items is None
+
+    def test_items_carried(self, sample_gdf, sample_product):
+        items = self._items()
+        result = SearchResult(sample_gdf, sample_product, {}, items=items)
+        assert result.items == items
+
+    def test_head_subsets_items(self, sample_gdf, sample_product):
+        items = self._items()
+        result = SearchResult(sample_gdf, sample_product, {}, items=items)
+        sub = result.head(2)
+        assert [i.id for i in sub.items] == ["T1", "T2"]
+
+    def test_to_xarray_without_odc_raises_import_error(self, sample_gdf, sample_product):
+        import sys
+        from unittest.mock import patch as mock_patch
+
+        result = SearchResult(sample_gdf, sample_product, {}, items=self._items())
+        with (
+            mock_patch.dict(sys.modules, {"odc": None, "odc.stac": None}),
+            pytest.raises(ImportError, match=r"abovepy\[xarray\]"),
+        ):
+            result.to_xarray()
+
+    def test_to_xarray_without_items_raises(self, result):
+        import sys
+        from unittest.mock import MagicMock
+        from unittest.mock import patch as mock_patch
+
+        from abovepy._exceptions import AnalysisError
+
+        fake_stac = MagicMock()
+        fake_odc = MagicMock(stac=fake_stac)
+        with (
+            mock_patch.dict(sys.modules, {"odc": fake_odc, "odc.stac": fake_stac}),
+            pytest.raises(AnalysisError, match="no STAC items"),
+        ):
+            result.to_xarray()
+
+    def test_to_xarray_calls_odc_load(self, sample_gdf, sample_product):
+        import sys
+        from unittest.mock import MagicMock
+        from unittest.mock import patch as mock_patch
+
+        items = self._items()
+        result = SearchResult(sample_gdf, sample_product, {}, items=items)
+        fake_stac = MagicMock()
+        fake_odc = MagicMock(stac=fake_stac)
+        with mock_patch.dict(sys.modules, {"odc": fake_odc, "odc.stac": fake_stac}):
+            result.to_xarray(chunks={"x": 1024, "y": 1024})
+
+        fake_stac.load.assert_called_once_with(
+            items, chunks={"x": 1024, "y": 1024}, crs="EPSG:3089"
+        )

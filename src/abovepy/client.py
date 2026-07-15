@@ -213,7 +213,7 @@ class KyFromAboveClient:
         if gdf.empty:
             logger.warning("No %s tiles found in the specified area.", prod.display_name)
 
-        return SearchResult(gdf, prod, query_params)
+        return SearchResult(gdf, prod, query_params, items=items)
 
     def download(
         self,
