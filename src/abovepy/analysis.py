@@ -18,7 +18,7 @@ no tiles cover the area of interest.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -187,7 +187,11 @@ def sample(
         and len(point) == 2
         and all(isinstance(v, int | float) for v in point)
     )
-    points: list[tuple[float, float]] = [point] if single else [tuple(p) for p in point]  # type: ignore[arg-type, list-item]
+    if single:
+        points = [cast("tuple[float, float]", point)]
+    else:
+        multi = cast("list[tuple[float, float]]", point)
+        points = [(float(p[0]), float(p[1])) for p in multi]
     if not points:
         raise AnalysisError("No points provided.")
 

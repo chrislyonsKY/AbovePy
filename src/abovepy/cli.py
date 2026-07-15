@@ -404,9 +404,8 @@ def _cmd_sample(args: argparse.Namespace) -> None:
 
     points = [_parse_point(p) for p in args.point]
     single = len(points) == 1
-    values = abovepy.sample(points[0] if single else points, product=args.product)
-    if single:
-        values = [values]
+    raw = abovepy.sample(points[0] if single else points, product=args.product)
+    values: list[float] = [raw] if isinstance(raw, int | float) else list(raw)
 
     fmt = args.format or "table"
     if fmt == "json":

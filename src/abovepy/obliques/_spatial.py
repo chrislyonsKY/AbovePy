@@ -292,7 +292,7 @@ def search_obliques_near(
     index = _load_season_index(season)
     if index:
         center = Point(point)
-        slack = buffer_feet(center, radius_feet + OBLIQUE_CENTER_SLACK_FEET)
+        slack: Any = buffer_feet(center, radius_feet + OBLIQUE_CENTER_SLACK_FEET)
         prefiltered = [
             f
             for f in candidates

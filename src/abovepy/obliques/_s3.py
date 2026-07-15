@@ -177,6 +177,7 @@ def search_obliques(
         ``point``, or a spatial search would exceed
         ``max_sidecar_fetches``.
     """
+    direction_lower: str | None = None
     if direction is not None:
         direction_lower = direction.lower()
         if direction_lower not in DIRECTIONS:
@@ -184,8 +185,6 @@ def search_obliques(
             raise ValueError(f"Invalid direction '{direction}'. Valid directions: {valid}")
     elif point is None:
         raise ValueError("direction=None searches all four directions and requires point=.")
-    else:
-        direction_lower = None  # type: ignore[assignment]
 
     if point is not None:
         from abovepy.obliques._spatial import search_obliques_near
@@ -200,7 +199,7 @@ def search_obliques(
         )
 
     season = _resolve_season(season)
-    if season is None:
+    if season is None or direction_lower is None:
         return []
 
     frames = _list_frames(direction_lower, season, max_items=max_items)
