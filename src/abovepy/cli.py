@@ -1,6 +1,7 @@
 """CLI for abovepy — ``abovepy <subcommand>`` or ``python -m abovepy <subcommand>``.
 
-Subcommands: search, download, mosaic, info, products, tile-url, preview, estimate.
+Subcommands: search, download, mosaic, info, products, tile-url, preview,
+estimate, sample, profile, export-map.
 """
 
 from __future__ import annotations
@@ -125,6 +126,49 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_area_args(p_estimate)
     _add_format_arg(p_estimate, choices=["table", "json"])
     p_estimate.set_defaults(func=_cmd_estimate)
+
+    # --- sample ---
+    p_sample = subparsers.add_parser("sample", help="Elevation at one or more points")
+    _add_product_arg(p_sample)
+    p_sample.add_argument(
+        "--point",
+        action="append",
+        required=True,
+        help="Longitude,latitude (repeat for multiple points)",
+    )
+    _add_format_arg(p_sample, choices=["table", "json"])
+    p_sample.set_defaults(func=_cmd_sample)
+
+    # --- profile ---
+    p_profile = subparsers.add_parser("profile", help="Elevation profile along a line")
+    _add_product_arg(p_profile)
+    p_profile.add_argument(
+        "--line",
+        required=True,
+        help='Transect vertices: "lon,lat lon,lat [lon,lat ...]"',
+    )
+    p_profile.add_argument(
+        "--n-points",
+        type=int,
+        default=100,
+        help="Number of sample points (default: 100)",
+    )
+    _add_format_arg(p_profile, choices=["table", "json", "csv"])
+    p_profile.set_defaults(func=_cmd_profile)
+
+    # --- export-map ---
+    p_map = subparsers.add_parser("export-map", help="Write a shareable MapLibre HTML map")
+    _add_product_arg(p_map)
+    p_map.add_argument("--output", "-o", required=True, help="Output .html path")
+    p_map.add_argument("--bbox", help="Bounding box: xmin,ymin,xmax,ymax")
+    p_map.add_argument("--county", help="Kentucky county name")
+    p_map.add_argument(
+        "--algorithm",
+        choices=["hillshade", "slope", "contours", "terrainrgb"],
+        help="Server-side terrain algorithm",
+    )
+    p_map.add_argument("--title", default="KyFromAbove Viewer", help="Page title")
+    p_map.set_defaults(func=_cmd_export_map)
 
     return parser
 
@@ -352,6 +396,63 @@ def _cmd_estimate(args: argparse.Namespace) -> None:
         print(f"Tiles:      {est['tile_count']}")
         print(f"Avg size:   {est['avg_tile_mb']} MB/tile")
         print(f"Total est:  {est['total_mb']} MB")
+
+
+def _cmd_sample(args: argparse.Namespace) -> None:
+    """Execute the 'sample' subcommand."""
+    import abovepy
+
+    points = [_parse_point(p) for p in args.point]
+    single = len(points) == 1
+    values = abovepy.sample(points[0] if single else points, product=args.product)
+    if single:
+        values = [values]
+
+    fmt = args.format or "table"
+    if fmt == "json":
+        records = [
+            {"lon": p[0], "lat": p[1], "elevation": v} for p, v in zip(points, values, strict=True)
+        ]
+        print(json.dumps(records[0] if single else records, indent=2, default=str))
+    else:
+        for p, v in zip(points, values, strict=True):
+            print(f"{p[0]:.6f}, {p[1]:.6f}  ->  {v:.2f} ft")
+
+
+def _cmd_profile(args: argparse.Namespace) -> None:
+    """Execute the 'profile' subcommand."""
+    import abovepy
+
+    coords = [_parse_point(pair) for pair in args.line.split()]
+    if len(coords) < 2:
+        print("Error: --line needs at least two lon,lat vertices.", file=sys.stderr)
+        sys.exit(1)
+
+    df = abovepy.profile(coords, product=args.product, n_points=args.n_points)
+
+    fmt = args.format or "table"
+    if fmt == "json":
+        print(df.to_json(orient="records", indent=2))
+    elif fmt == "csv":
+        print(df.to_csv(index=False), end="")
+    else:
+        _print_table(df)
+
+
+def _cmd_export_map(args: argparse.Namespace) -> None:
+    """Execute the 'export-map' subcommand."""
+    from abovepy.viz import export_map_html
+
+    bbox = _parse_bbox(args.bbox) if args.bbox else None
+    path = export_map_html(
+        args.output,
+        product=args.product,
+        bbox=bbox,
+        county=args.county,
+        algorithm=args.algorithm,
+        title=args.title,
+    )
+    print(f"Map written to {path}")
 
 
 # ---------------------------------------------------------------------------

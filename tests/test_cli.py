@@ -407,3 +407,115 @@ class TestSubprocess:
         )
         assert result.returncode == 0
         assert "dem_phase3" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# sample / profile / export-map (v2.2)
+# ---------------------------------------------------------------------------
+
+
+class TestCmdSample:
+    @patch("abovepy.sample", return_value=812.5)
+    def test_single_point_table(self, mock_sample, capsys):
+        main(["sample", "--point", "-84.85,38.20"])
+        out = capsys.readouterr().out
+        assert "812.50 ft" in out
+        mock_sample.assert_called_once_with((-84.85, 38.20), product="dem_phase3")
+
+    @patch("abovepy.sample", return_value=812.5)
+    def test_single_point_json(self, mock_sample, capsys):
+        main(["sample", "--point", "-84.85,38.20", "--format", "json"])
+        payload = json.loads(capsys.readouterr().out)
+        assert payload["elevation"] == 812.5
+        assert payload["lon"] == -84.85
+
+    @patch("abovepy.sample", return_value=[810.0, 815.0])
+    def test_multiple_points(self, mock_sample, capsys):
+        main(["sample", "--point", "-84.85,38.20", "--point", "-84.86,38.21"])
+        out = capsys.readouterr().out
+        assert "810.00 ft" in out
+        assert "815.00 ft" in out
+        mock_sample.assert_called_once_with(
+            [(-84.85, 38.20), (-84.86, 38.21)], product="dem_phase3"
+        )
+
+    def test_bad_point_exits_1(self, capsys):
+        with pytest.raises(SystemExit) as excinfo:
+            main(["sample", "--point", "not-a-point"])
+        assert excinfo.value.code == 1
+
+
+class TestCmdProfile:
+    def _fake_df(self):
+        import pandas as pd
+
+        return pd.DataFrame(
+            {
+                "distance_ft": [0.0, 100.0],
+                "elevation": [800.0, 810.0],
+                "lon": [-84.85, -84.85],
+                "lat": [38.16, 38.17],
+            }
+        )
+
+    @patch("abovepy.profile")
+    def test_profile_table(self, mock_profile, capsys):
+        mock_profile.return_value = self._fake_df()
+        main(["profile", "--line", "-84.85,38.16 -84.85,38.24"])
+        out = capsys.readouterr().out
+        assert "distance_ft" in out
+        mock_profile.assert_called_once_with(
+            [(-84.85, 38.16), (-84.85, 38.24)], product="dem_phase3", n_points=100
+        )
+
+    @patch("abovepy.profile")
+    def test_profile_csv(self, mock_profile, capsys):
+        mock_profile.return_value = self._fake_df()
+        main(["profile", "--line", "-84.85,38.16 -84.85,38.24", "--format", "csv"])
+        out = capsys.readouterr().out
+        assert out.startswith("distance_ft,elevation,lon,lat")
+
+    @patch("abovepy.profile")
+    def test_profile_json(self, mock_profile, capsys):
+        mock_profile.return_value = self._fake_df()
+        main(["profile", "--line", "-84.85,38.16 -84.85,38.24", "--format", "json"])
+        records = json.loads(capsys.readouterr().out)
+        assert records[0]["elevation"] == 800.0
+
+    @patch("abovepy.profile")
+    def test_profile_n_points_forwarded(self, mock_profile, capsys):
+        mock_profile.return_value = self._fake_df()
+        main(["profile", "--line", "-84.85,38.16 -84.85,38.24", "--n-points", "25"])
+        assert mock_profile.call_args.kwargs["n_points"] == 25
+
+    def test_single_vertex_exits_1(self, capsys):
+        with pytest.raises(SystemExit) as excinfo:
+            main(["profile", "--line", "-84.85,38.16"])
+        assert excinfo.value.code == 1
+
+
+class TestCmdExportMap:
+    def test_export_map_writes_html(self, capsys, tmp_path):
+        output = tmp_path / "map.html"
+        main(["export-map", "-o", str(output), "--bbox", "-84.9,38.15,-84.8,38.25"])
+        assert output.exists()
+        assert "Map written to" in capsys.readouterr().out
+
+    def test_export_map_with_algorithm(self, tmp_path):
+        output = tmp_path / "hillshade.html"
+        main(
+            [
+                "export-map",
+                "-o",
+                str(output),
+                "--bbox",
+                "-84.9,38.15,-84.8,38.25",
+                "--algorithm",
+                "hillshade",
+            ]
+        )
+        assert "hillshade" in output.read_text()
+
+    def test_export_map_requires_output(self):
+        with pytest.raises(SystemExit):
+            main(["export-map", "--bbox", "-84.9,38.15,-84.8,38.25"])
