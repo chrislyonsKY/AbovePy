@@ -37,6 +37,7 @@ from abovepy._exceptions import (
     SearchError,
 )
 from abovepy._version import __version__
+from abovepy.analysis import change_detection, profile, sample, zonal_stats
 from abovepy.client import KyFromAboveClient
 from abovepy.mosaics import county_mosaic_url
 from abovepy.obliques import (
@@ -270,6 +271,7 @@ __all__ = [
     "ValidationResult",
     "__version__",
     "buffer_feet",
+    "change_detection",
     "clear_cache",
     "corridor_buffer",
     "county_mosaic_url",
@@ -281,11 +283,14 @@ __all__ = [
     "mosaic",
     "oblique_bundle",
     "preview_url",
+    "profile",
     "read",
     "register_search",
+    "sample",
     "search",
     "search_obliques",
     "show",
     "tile_url",
     "validate",
+    "zonal_stats",
 ]
