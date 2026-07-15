@@ -16,7 +16,7 @@ so code written against the pre-2.2 ``list[dict]`` return type of
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -318,3 +318,42 @@ class ObliqueFrame(Mapping[str, Any]):
                     except (ValueError, TypeError):
                         continue
         return None
+
+
+def fetch_all_metadata(
+    frames: Iterable[ObliqueFrame],
+    *,
+    max_workers: int = 8,
+    timeout: float = REQUEST_TIMEOUT,
+) -> None:
+    """Concurrently fetch sidecar metadata for many frames.
+
+    Frames whose sidecar fetch fails (HTTP error) are left with
+    ``metadata=None`` and logged as warnings — the batch never raises
+    for a single bad frame.
+
+    Parameters
+    ----------
+    frames : iterable of ObliqueFrame
+        Frames to enrich in place.
+    max_workers : int
+        Concurrent fetch threads. Default 8.
+    timeout : float
+        Per-request timeout in seconds.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    pending = [f for f in frames if f.metadata is None]
+    if not pending:
+        return
+
+    def _fetch(frame: ObliqueFrame) -> None:
+        frame.fetch_metadata(timeout=timeout)
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_fetch, frame): frame for frame in pending}
+        for future in as_completed(futures):
+            exc = future.exception()
+            if exc is not None:
+                frame = futures[future]
+                logger.warning("Failed to fetch sidecar for frame %s: %s", frame.frame_id, exc)

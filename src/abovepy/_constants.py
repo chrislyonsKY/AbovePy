@@ -4,6 +4,8 @@ STAC_URL = "https://spved5ihrl.execute-api.us-west-2.amazonaws.com/"
 S3_BUCKET = "kyfromabove"
 S3_REGION = "us-west-2"
 S3_OBLIQUES_PREFIX = "imagery/obliques/Phase3/"
+S3_OBLIQUES_EO_PREFIX = "imagery/obliques/Phase3/ExteriorOrientationFiles/"
+S3_OBLIQUES_METADATA_PREFIX = "imagery/obliques/Phase3/Metadata/"
 
 # KyFromAbove TiTiler endpoints (hosted by Ian Horn / COT-GIS)
 TITILER_ENDPOINT = "https://6hp4guqpwe.execute-api.us-west-2.amazonaws.com"
